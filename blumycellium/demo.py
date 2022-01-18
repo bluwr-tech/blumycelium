@@ -40,8 +40,8 @@ class ElfkNotFoundError(MycelliumError):
 class TaskNotFoundError(MycelliumError):
     pass
 
-class MissingReturnAnnotation(MycelliumError):
-    pass
+# class MissingReturnAnnotation(MycelliumError):
+#     pass
 
 class TaskWithoutSourceCode(MycelliumError):
     pass
@@ -353,25 +353,25 @@ class ABC_Elf(object):
         signature = inspect.signature(method)
 
         return_annotation = signature.return_annotation
-        if return_annotation is signature.empty:
-            raise MissingReturnAnnotation(f"Method {task_name} is missing a return annotations")
+        # if return_annotation is signature.empty:
+            # raise MissingReturnAnnotation(f"Method {task_name} is missing a return annotations")
 
         parameters = {}
 
-        none_if_signature_empty = lambda x: None if x is signature.empty else x
+        none_if_signature_empty = lambda x: None if x is signature.empty else str(x)
         
         documentation = _none_if_exception_or_empty(method, inspect.getdoc)
         source = _none_if_exception_or_empty(method, inspect.getsource)
 
         if source is None:
-            raise TaskWithoutSourceCode(f"Task {task_name} has no retreivable source code")
+            raise TaskWithoutSourceCode(f"Task {task_name} has no retrievable source code")
 
         version = str( hashlib.sha1(source.encode("utf-8")).hexdigest() )
 
         for param_name, param in signature.parameters.items():
             parameters[param_name] = {
                 "declaration": str(param),
-                "type": str(param.annotation),
+                "type": none_if_signature_empty(param.annotation),
                 "default": none_if_signature_empty(param.default)
             }
 
@@ -390,17 +390,15 @@ class ABC_Elf(object):
 
         for name, member in inspect.getmembers(self):
             if name.startswith("task_") and inspect.ismethod(member):
-                ic(name, member)
                 self._add_task(name, member)
-
-        ic(self.tasks)
 
     def register(self, update):
         self.mycellium.register_elf(name=self.name, documentation="the first dummy elf", update=update)
 
     def register_tasks(self, update):
         """find all function begining by 'task_' """
-        raise NotImplemented("Abstract function")
+        for task in self.tasks:
+            self.mycellium.register_task(elf=self, name=task["name"], documentation=task["documentation"], parameters=task["parameters"], update=update)
 
     def install(self, update):
         print("installing:", self.name)
@@ -484,59 +482,19 @@ class DummyElf_Prefix(ABC_Elf):
     def __init__(self, mycellium, name):
         super(DummyElf_Prefix, self).__init__(mycellium)
         self.name = name
-        self.version = 1.1
 
-        # self.tasks = [
-        #     {
-        #         "name": "say_my_name",
-        #         "documentation": "print the class name with a prefix",
-        #         "parameters":{
-        #             "prefix": {
-        #                 "type": str,
-        #                 "documentation": "a prefix to append before the name"
-        #             }
-        #         },
-        #         "return": None
-        #         # "version": "1.0"
-        #     }
-        # ]
-        
-    def task_say_my_name(self, prefix:str) -> None:
+    def task_say_my_name(self, prefix) -> None:
         """Print class name and add prefix to it"""
         print(prefix + self.__class__.__name__)
-
-    def register_tasks(self, update):
-        for task in self.tasks:
-            self.mycellium.register_task(elf=self, name=task["name"], documentation=task["documentation"], parameters=task["parameters"], update=update)
 
 class DummyElf_Sufix(ABC_Elf):
     """docstring for DummyElf_Sufix"""
     def __init__(self, mycellium, name):
         super(DummyElf_Sufix, self).__init__(mycellium)
         self.name = name
-        self.version = 1.1
-
-        self.tasks = [
-            {
-                "name": "task_say_my_name",
-                "documentation": "print the class name with a sufix",
-                "parameters":{
-                    "sufix": {
-                        "type": str,
-                        "documentation": "a sufix to append after the name"
-                    }
-                },
-                "return": None
-                # "version": "1.0"
-            }
-        ]
 
     def task_say_my_name(self, sufix):
         print(self.__class__.__name__ + sufix)
-
-    def register_tasks(self, update):
-        for task in self.tasks:
-            self.mycellium.register_task(elf=self, name=task["name"], documentation=task["documentation"], parameters=task["parameters"], update=update)
 
 class KnowMyName(ABC_Elf):
     def __init__(self, mycellium, name):
