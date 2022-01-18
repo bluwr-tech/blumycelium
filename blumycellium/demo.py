@@ -332,23 +332,30 @@ class ABC_Elf(object):
     """docstring for ABC_Elf"""
     def __init__(self, mycellium):
         super(ABC_Elf, self).__init__()
+        import inspect
+        import hashlib
+
         self.mycellium = mycellium
         self.tasks = {}
+        self.name = self.__class__.__name__
+
+        source = self._none_if_exception_or_empty(method, inspect.getdoc)
+        self.version = str( hashlib.sha1(source.encode("utf-8")).hexdigest() )
         self.auto_inspect()
+    
+    def _none_if_exception_or_empty(self, method, inspect_fct):
+        ret = None
+        try:
+            ret = inspect_fct(method)
+            if len(ret) == 0: ret = None
+        except Exception as e:
+            pass
+
+        return ret
 
     def _add_task(self, task_name, method):
         import inspect
         import hashlib
-
-        def _none_if_exception_or_empty(method, inspect_fct):
-            ret = None
-            try:
-                ret = inspect_fct(method)
-                if len(ret) == 0: ret = None
-            except Exception as e:
-                pass
-
-            return ret
 
         signature = inspect.signature(method)
 
@@ -360,8 +367,8 @@ class ABC_Elf(object):
 
         none_if_signature_empty = lambda x: None if x is signature.empty else str(x)
         
-        documentation = _none_if_exception_or_empty(method, inspect.getdoc)
-        source = _none_if_exception_or_empty(method, inspect.getsource)
+        documentation = self._none_if_exception_or_empty(method, inspect.getdoc)
+        source = self._none_if_exception_or_empty(method, inspect.getsource)
 
         if source is None:
             raise TaskWithoutSourceCode(f"Task {task_name} has no retrievable source code")
@@ -479,9 +486,9 @@ class ABC_Elf(object):
 
 class DummyElf_Prefix(ABC_Elf):
     """docstring for DummyElf_Prefix"""
-    def __init__(self, mycellium, name):
-        super(DummyElf_Prefix, self).__init__(mycellium)
-        self.name = name
+    # def __init__(self, mycellium, name):
+    #     super(DummyElf_Prefix, self).__init__(mycellium)
+    #     self.name = name
 
     def task_say_my_name(self, prefix) -> None:
         """Print class name and add prefix to it"""
@@ -548,8 +555,8 @@ if __name__ == '__main__':
     kn = KnowMyName(myc, "My_name_is_KN")
     kn.install(update=True)
 
-    kn.mycellium.push_job(kn, dp, "task_say_my_name", {"prefix": " <======AmericAAA Fuck YEah!!!!-----> "}, kn.name)
-    kn.mycellium.push_job(kn, ds, "task_say_my_name", {"sufix": " <======AmericAAA Fuck YEah!!!!-----> "}, kn.name)
+    kn.mycellium.push_job(kn, dp, "task_say_my_name", {"prefix": "Hop"}, kn.name)
+    kn.mycellium.push_job(kn, ds, "task_say_my_name", {"sufix": "Pop"}, kn.name)
 
     print("ds rec", ds.mycellium.get_received_jobs(ds))
     print("dp rec", dp.mycellium.get_received_jobs(dp))
