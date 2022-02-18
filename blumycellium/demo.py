@@ -50,7 +50,7 @@ def get_date():
     import time
     return time.time()
 
-class Elves(Collection) :
+class Workers(Collection) :
     """Collection of all registered entities elves and bluwr"""
     _fields = {
         "name": Field(validators = [VAL.NotNull()]),
@@ -71,7 +71,7 @@ class Tasks(Collection) :
         "elf_name": Field(validators = [VAL.NotNull()]),
         "name": Field(validators = [VAL.NotNull()]),
         "creation_date": Field(validators = [VAL.NotNull()]),
-        "documentation": Field(validators = [VAL.NotNull()]),
+        "documentation": Field(),
         "parameters": Field(validators = [VAL.NotNull()], default=dict),
         # "version": Field(validators = [VAL.NotNull()]),
     }
@@ -87,7 +87,7 @@ class Jobs(Edges) :
         "creation_date": Field(validators = [VAL.NotNull()]),
         "status": Field(validators = [VAL.NotNull(), VAL.Enumeration(["unconfirmed", "pending", "revoked", "abandoned", "wip", "error", "success"])], default="unconfirmed"),
         "task_name": Field(validators = [VAL.NotNull()]),
-        "join_task_name": Field(validators = [VAL.NotNull()]),
+        "join_task_name": Field(),
         "task_parameters": Field(validators = [VAL.NotNull()]),
         "public_key": Field(validators = [VAL.NotNull()]),
         "job_single_key": Field(validators = [VAL.NotNull()]),
@@ -107,7 +107,7 @@ class Jobs(Edges) :
 
 class Jobs_graph(GR.Graph):
     _edgeDefinitions = (
-        GR.EdgeDefinition("Jobs", fromCollections = ["Elves"], toCollections = ["Elves"]),
+        GR.EdgeDefinition("Jobs", fromCollections = ["Workers"], toCollections = ["Workers"]),
     ) 
     _orphanedCollections = []
 
@@ -191,9 +191,9 @@ class Mycellium:
 
     def register_elf(self, name, documentation, update=False):
         if not update:
-            elf = self.db["Elves"].createDocument()
+            elf = self.db["Workers"].createDocument()
         else:
-            elf = self.db["Elves"][name.lower()]
+            elf = self.db["Workers"][name.lower()]
         elf["_key"] = name.lower()
         elf["name"] = name
         elf["creation_date"] = get_date()
@@ -210,7 +210,7 @@ class Mycellium:
             task = self.db["Tasks"][task_key]
         task["name"] = name
 
-        if elf.name.lower() not in self.db["Elves"]:
+        if elf.name.lower() not in self.db["Workers"]:
             raise ElfkNotFoundError("There is no elf with the name: %s" % elf.name)
         task["elf_name"] = elf.name
         
@@ -323,15 +323,15 @@ class Mycellium:
         job.save()
 
     def has_elf(self, elf):
-        return elf.name.lower() in self.db["Elves"]
+        return elf.name.lower() in self.db["Workers"]
 
     def get_elf_document(self, elf):
-        return self.db["Elves"][elf.name.lower()]
+        return self.db["Workers"][elf.name.lower()]
 
-class ABC_Elf(object):
-    """docstring for ABC_Elf"""
+class ABC_Worker(object):
+    """docstring for ABC_Worker"""
     def __init__(self, mycellium):
-        super(ABC_Elf, self).__init__()
+        super(ABC_Worker, self).__init__()
         import inspect
         import hashlib
 
@@ -339,7 +339,7 @@ class ABC_Elf(object):
         self.tasks = {}
         self.name = self.__class__.__name__
 
-        source = self._none_if_exception_or_empty(method, inspect.getdoc)
+        source = self._none_if_exception_or_empty(self.__class__, inspect.getsource)
         self.version = str( hashlib.sha1(source.encode("utf-8")).hexdigest() )
         self.auto_inspect()
     
@@ -404,7 +404,7 @@ class ABC_Elf(object):
 
     def register_tasks(self, update):
         """find all function begining by 'task_' """
-        for task in self.tasks:
+        for task_name, task in self.tasks.items():
             self.mycellium.register_task(elf=self, name=task["name"], documentation=task["documentation"], parameters=task["parameters"], update=update)
 
     def install(self, update):
@@ -480,21 +480,20 @@ class ABC_Elf(object):
         for job in jobs :
             self.revoke(self, job["name"], reason=reason)
 
-    @property
     def data(self):
         return self.mycellium.get_elf_document(self)
 
-class DummyElf_Prefix(ABC_Elf):
+class DummyElf_Prefix(ABC_Worker):
     """docstring for DummyElf_Prefix"""
-    # def __init__(self, mycellium, name):
-    #     super(DummyElf_Prefix, self).__init__(mycellium)
-    #     self.name = name
+    def __init__(self, mycellium, name):
+        super(DummyElf_Prefix, self).__init__(mycellium)
+        self.name = name
 
     def task_say_my_name(self, prefix) -> None:
         """Print class name and add prefix to it"""
         print(prefix + self.__class__.__name__)
 
-class DummyElf_Sufix(ABC_Elf):
+class DummyElf_Sufix(ABC_Worker):
     """docstring for DummyElf_Sufix"""
     def __init__(self, mycellium, name):
         super(DummyElf_Sufix, self).__init__(mycellium)
@@ -503,7 +502,7 @@ class DummyElf_Sufix(ABC_Elf):
     def task_say_my_name(self, sufix):
         print(self.__class__.__name__ + sufix)
 
-class KnowMyName(ABC_Elf):
+class KnowMyName(ABC_Worker):
     def __init__(self, mycellium, name):
         super(KnowMyName, self).__init__(mycellium)
         self.name = name.lower()
@@ -517,10 +516,10 @@ class KnowMyName(ABC_Elf):
         print("installing:", self.name)
         self.register(update)
 
-class Orchestrater(ABC_Elf):
+class Orchestrator(ABC_Worker):
     """An elf that dispatches several pushes to many elves, compiles them and sends a push to original sender"""
     def __init__(self, name):
-        super(Orchestrater, self).__init__()
+        super(Orchestrator, self).__init__()
         self.name = name
     
     def join(self):
@@ -528,7 +527,7 @@ class Orchestrater(ABC_Elf):
         public_key = str(uuid.uuid4())
 
 if __name__ == '__main__':
-    collections = ["Elves", "Tasks", "Jobs"]
+    collections = ["Workers", "Tasks", "Jobs"]
     graphs = ["Jobs_graph"]
     users_to_create=[ {"username": "mycellium", "password": "mycellium"}]
     connection = ADB.Connection(
