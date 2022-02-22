@@ -3,7 +3,7 @@ import pyArango.validation as VAL
 import pyArango.graph as GR
 
 
-COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions"]
+COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Results"]
 GRAPHS = ["Jobs_graph"]
 
 class Jobs(Collection) :
@@ -18,7 +18,7 @@ class Jobs(Collection) :
             "documentation": Field(),
             "revision": Field(),
         },
-        "worker" : {
+        "machine_elf" : {
             "id": Field(validators = [VAL.NotNull()]),
             "documentation": Field(),
             "revision": Field(),
@@ -69,10 +69,22 @@ class MachineElvesRevisions(Collection) :
         "allow_foreign_fields": False
     }
 
+class Results(Collection) :
+    _fields = {
+        "value": Field(),
+        "creation_date" : Field(validators = [VAL.NotNull()]),
+    }
+
+    _validation = {
+        "on_save": True,
+        "on_set": False,
+        "allow_foreign_fields": False
+    }
+
 class Parameters(Edges) :
     _fields = {
         "submit_date" : Field(validators = [VAL.NotNull()]),
-        "value" : Field(validators = [VAL.NotNull()]),
+        "value_id" : Field(),
         "completion_date": Field(),
         "status": Field(validators = [VAL.NotNull()])
     }

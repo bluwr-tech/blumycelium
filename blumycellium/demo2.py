@@ -29,12 +29,13 @@ def init_myc():
     )
 
     mycellium.init()
+    
     printer = PrinterElf("The Elf Printer", mycellium) 
     printer.register(store_source=True)
 
     printer.task_print_it("lala")
     ret = printer.print_it("lala")
     ic(ret)
-    
+
 if __name__ == '__main__':
     init_myc()

@@ -1,5 +1,8 @@
-def inpsect_none_if_exception_or_empty(obj_to_inspect, inspect_fct):
+def inpsect_none_if_exception_or_empty(obj_to_inspect, inspect_fct_name):
     """runs an inspect function on obj_to_inspect and returns None if the result is empty or returns an exception"""
+    import inspect
+
+    inspect_fct = getattr(inspect, inspect_fct_name)
     ret = None
     try:
         ret = inspect_fct(obj_to_inspect)

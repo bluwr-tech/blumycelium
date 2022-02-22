@@ -1,6 +1,5 @@
 from icecream import ic
 import uuid
-import inspect
 import pyArango.theExceptions as a_exc
 import utils as ut
 
@@ -104,9 +103,9 @@ class Mycellium:
     def register_machine_elf(self, elf, store_source):
         import hashlib
         
-        source = ut.inpsect_none_if_exception_or_empty(elf.__class__, inspect.getsource)
+        source = ut.inpsect_none_if_exception_or_empty(elf.__class__, "getsource")
         revision = str( elf.__class__.__name__ + hashlib.sha256(source.encode("utf-8")).hexdigest() )
-        documentation = ut.inpsect_none_if_exception_or_empty(elf.__class__, inspect.cleandoc)
+        documentation = ut.inpsect_none_if_exception_or_empty(elf.__class__, "cleandoc")
 
         now = ut.gettime()
         first_register = False
@@ -137,24 +136,56 @@ class Mycellium:
         elf_doc.save()
 
     def push_job(self, job):
+        now = ut.gettime()
         graph = self.db.graphs["Jobs_graph"]
         # to_elf = self.db["MachineElves"][job.to_elf_uid]
-        for parameter in job.parameters:
+        job_key = ut.legalize_key(job.run_id)
+        job_doc = self.db["Jobs"].createDocument()
+        job_doc.set(
+            {
+            "_key": job_key,
+            "task" : {
+                    "name": job.task.name,
+                    "signature": job.task.signature,
+                    "source_code": job.task.source_code,
+                    "documentation": job.task.documentation,
+                    "revision": job.task.revision,
+                },
+                "machine_elf" : {
+                    "id": job.elf.uid,
+                    "revision": job.elf.revision,
+                },
+                "static_parameters": job.parameters.get_static_parameters(),
+                "submit_date" : now,
+                "start_date": None,
+                "completion_date": None,
+                "status": self.STATUS_PENDING,
+                
+                "error_type": None,
+                "error_traceback": None,
+            }
+        )
+        job_doc.save()
+
+        for name, return_placeholder in job.parameters.get_placeholder_parameters():
+            result_id = "Results/" + return_placeholder.get_result_id(name)
             data = {
-                "submit_date" : ut.gettime(),
-                "value" : None,
+                "submit_date" : now,
+                "result_id" : result_id,
                 "completion_date": None,
                 "status": self.STATUS_PENDING
             }
-            graph.link(parameter.from_elf, job.to_elf_uid, data)
+            graph.link("Jobs/" + return_placeholder.from_job_id, job_doc, data)
         
     def get_received_jobs(self, elf_uid):
-        jobs = [ job for job in self.db["Jobs"].fetchByExample({"to_elf_uid": elf_uid}) ]
+        jobs = [ job["_key"] for job in self.db["Jobs"].fetchByExample({"to_elf_uid": "MachineElves/" + elf_uid}) ]
         return jobs
 
     def is_job_ready(self, job_id):
         ready = 0
-        for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": job_id})):
+        count = 0
+        for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id})):
+            count += 1
             if param["status"] is self.STATUS_READY:
                 ready += 1
         

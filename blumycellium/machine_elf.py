@@ -43,6 +43,12 @@ class ReturnPlaceHolder:
             for key in ret_annotation:
                 self.parameters[key] = ValuePlaceholder(self.job_unique_id, key)
 
+    def get_result_id(self, name):
+        if name not in self.parameters:
+            raise Exception("Placeholder has no parameter: '%s'" % name)
+
+        return self.job_unique_id + "_" + name
+
     def __getitem__(self, key, value):
         if self.is_none:
             return None
@@ -121,30 +127,79 @@ class JOB:
     """docstring for JOB"""
     def __init__(
         self,
-        task_name,
-        public_id,
-        to_elf_uid,
+        task,
+        run_id,
+        worker_elf_id,
+        worker_elf_revision,
         submit_date,
-        parameters,
-        static_parameters,
         start_date,
         completion_date,
         status,
-        mycellium
+        mycellium,
+        return_placeholder
     ):
-        self.task_name=task_name
-        self.public_id=public_id
-        self.to_elf_uid=to_elf_uid
+        self.task=task
+        self.run_id=run_id
+        self.worker_elf_id=worker_elf_id
+        self.worker_elf_revision=worker_elf_revision
         self.submit_date=submit_date
-        self.parameters=parameters
-        self.static_parameters=static_parameters
         self.start_date=start_date
         self.completion_date=completion_date
         self.status=status
         self.mycellium = mycellium
+        self.return_placeholder=return_placeholder
 
     def commit(self):
         self.mycellium.push_job(self)
+
+class Task:
+    """docstring for Task"""
+    def __init__(self, machine_elf, function):
+        self.machine_elf = machine_elf
+        self.function = function
+        self.parameters = None
+        self.return_placeholder = None
+
+        self.source = None
+        self.revision = None
+        self.documentation = None
+        self.signature = None
+
+    def inspect_function(self):
+        self.source = ut.inpsect_none_if_exception_or_empty(self.function, "getsource")
+        self.revision = str( hashlib.sha256(source.encode("utf-8")).hexdigest() )
+        self.documentation = ut.inpsect_none_if_exception_or_empty(self.function, "cleandoc")
+        self.signature = ut.inpsect_none_if_exception_or_empty(self.function, "signature")
+
+    def wrap(self):
+        def _wrapped(*args, **kwargs):
+            run_id = str(uuid.uuid4())
+
+            self.parameters = Parameters(self.function)
+            self.parameters.set_parameters(*args, **kwargs)
+            self.parameters.validate()
+
+            return_placeholder = ReturnPlaceHolder(from_elf=self.machine_elf.uid, task_function=self.function, job_unique_id=run_id)
+            return_placeholder.make_placeholder()
+
+            now = ut.gettime()
+            job = JOB(
+                task = self,
+                run_id = run_id,
+                worker_elf_id = self.machine_elf.uid,
+                worker_elf_revision = self.machine_elf.revision,
+                submit_date = now,
+                start_date = None,
+                completion_date = None,
+                status = self.machine_elf.mycellium.STATUS_PENDING,
+                mycellium = self.machine_elf.mycellium,
+                return_placeholder=return_placeholder
+            )
+            job.commit()
+
+            return return_placeholder
+
+        return _wrapped
 
 class MachineElf:
     """docstring for MachineElf"""
@@ -164,9 +219,9 @@ class MachineElf:
         self.mycellium.is_ready(job_id)
 
     def start_jobs(self):
-        jobs = self.mycellium.get_received_jobs(self.uid)
-        for job in jobs:
-            if self.check_job_ready(job):
+        job_ids = self.mycellium.get_received_jobs(self.uid)
+        for job_id in job_ids:
+            if self.mycellium.check_job_ready(job_id):
                 self.run_task(job)
 
     def run_task(self, job):
@@ -202,44 +257,35 @@ class MachineElf:
 
     #     return params
 
-    def register_job(self, task_name, params, job_id):
-        static_parameters = params.get_static_parameters()
-        placeholder_parameters = params.get_placeholder_parameters()
+    # def register_job(self, task_name, params, job_id):
+    #     static_parameters = params.get_static_parameters()
+    #     placeholder_parameters = params.get_placeholder_parameters()
 
-        now = ut.gettime()
-        job = JOB(
-            task_name = task_name,
-            public_id = job_id,
-            to_elf_uid = self.uid,
-            submit_date = now,
-            parameters = placeholder_parameters,
-            static_parameters = static_parameters,
-            start_date = None,
-            completion_date = None,
-            status = self.mycellium.STATUS_PENDING,
-            mycellium = self.mycellium
-        )
-        job.commit()
+    #     now = ut.gettime()
+    #     job = JOB(
+    #         task_name = task_name,
+    #         public_id = job_id,
+    #         to_elf_uid = self.uid,
+    #         submit_date = now,
+    #         parameters = placeholder_parameters,
+    #         static_parameters = static_parameters,
+    #         start_date = None,
+    #         completion_date = None,
+    #         status = self.mycellium.STATUS_PENDING,
+    #         mycellium = self.mycellium
+    #     )
+    #     job.commit()
 
-    def task_wrap(self, task_fct):
-        def _wrapper(*args, **kwargs):
-            job_id = str(uuid.uuid4())
-            params = Parameters(task_fct)
-            params.set_parameters(*args, **kwargs)
-            params.validate()
-
-            self.register_job(task_fct, params, job_id)
-
-            ret = ReturnPlaceHolder(from_elf=self.uid, task_function=task_fct, job_unique_id=job_id)
-            ret.make_placeholder()
-            return ret
-
-        return _wrapper
+    # def wrap_task(self, task_fct):
+    #     task = 
+    #     return task.wrap()
 
     def __getattr__(self, key):
+        if key.startswith("task_task_"):
+            die
         if hasattr(self, "task_" + key):
-            value = getattr(self, "task_" + key)
-            ret = self.task_wrap(value)
+            task_fct = getattr(self, "task_" + key)
+            ret = Task(self, task_fct).wrap()
         else:
             ret = getattr(self, key)
         return ret
