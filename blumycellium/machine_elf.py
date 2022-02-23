@@ -172,6 +172,7 @@ class Task:
 
         self.source_code = ut.inpsect_none_if_exception_or_empty(self.function, "getsource")
         self.revision = str( hashlib.sha256(self.source_code.encode("utf-8")).hexdigest() )
+        self.revision = ut.legalize_key(self.revision)
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.function, "cleandoc")
         self.signature = ut.inpsect_none_if_exception_or_empty(self.function, "signature")
 
@@ -242,10 +243,12 @@ class MachineElf:
 
         self.source = ut.inpsect_none_if_exception_or_empty(self.__class__, "getsource")
         self.revision = str( self.__class__.__name__ + hashlib.sha256(self.source.encode("utf-8")).hexdigest() )
+        self.revision = ut.legalize_key(self.revision)
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.__class__, "cleandoc")
 
     def find_tasks(self):
         import inspect
+        
         for name, member in inspect.getmembers(self):
             if name.startswith("task_") and inspect.ismethod(member):
                 task = Task(self, member, name)
