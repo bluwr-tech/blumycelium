@@ -210,6 +210,9 @@ class Task:
 
         return _wrapped
 
+    def run(self, *args, **kwargs):
+        return self.function(*args, **kwargs)
+
     def __call__(self, *args, **kwargs):
         return self.wrap( *args, **kwargs )()
 
@@ -256,25 +259,27 @@ class MachineElf:
     def get_jobs(self):
         return self.mycellium.get_jobs(self.uid)
 
-    def check_job_ready(self, job_id):
-        self.mycellium.is_ready(job_id)
+    def is_job_ready(self, job_id):
+        return self.mycellium.is_job_ready(job_id)
 
     def start_jobs(self):
-        job_ids = self.mycellium.get_received_jobs(self.uid)
-        for job_id in job_ids:
-            if self.mycellium.check_job_ready(job_id):
+        jobs = self.mycellium.get_received_jobs(self.uid)
+        for job in jobs:
+            if self.is_job_ready(job["id"]):
                 self.run_task(job)
 
     def run_task(self, job):
-        task = getattr(self, job["task_name"])
-        kwargs = self.mycellium.get_arguments(job["arguments_id"])
-        
-        try:
-            ret = task(kwargs)
-        except:
-            self.mycellium.c(job, self.mycellium.STATUS_FAILED)
-        
-        self.mycellium.update_job_status(job, self.mycellium.STATUS_DONE)
-        self.mycellium.push_job(job["receiver"], ret)
+        task = getattr(self, job["task"]["name"])
+        return task.run(**job["static_parameters"].store)
 
-        return ret
+        # kwargs = self.mycellium.get_arguments(job["arguments_id"])
+        
+        # try:
+        #     ret = task(kwargs)
+        # except:
+        #     self.mycellium.c(job, self.mycellium.STATUS_FAILED)
+        
+        # self.mycellium.update_job_status(job, self.mycellium.STATUS_DONE)
+        # self.mycellium.push_job(job["receiver"], ret)
+
+        # return ret

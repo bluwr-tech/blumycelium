@@ -173,17 +173,26 @@ class Mycellium:
             graph.link("Jobs/" + return_placeholder.from_job_id, job_doc, data)
         
     def get_received_jobs(self, elf_uid):
-        jobs = [ job["_key"] for job in self.db["Jobs"].fetchByExample({"to_elf_uid": "MachineElves/" + elf_uid}, batchSize=100) ]
-        return jobs
+        aql = """
+            FOR job in Jobs
+                FILTER job.machine_elf.id == @uid
+                RETURN job
+        """
+
+        ret_q = self.db.AQLQuery(aql, bindVars={"uid": elf_uid}, batchSize=100)
+        ret = []
+        for job in ret_q:
+            job["id"] = job["_key"]
+            ret.append(job)
+        return ret
 
     def is_job_ready(self, job_id):
         ready = 0
         count = 0
-        for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id})):
+        for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id}, batchSize=100)):
             count += 1
             if param["status"] is self.STATUS_READY:
                 ready += 1
-        
         return count == ready
 
     def get_job_parameters(self, elf_uid):
