@@ -179,7 +179,7 @@ class Mycellium:
                 RETURN job
         """
 
-        ret_q = self.db.AQLQuery(aql, bindVars={"uid": elf_uid}, batchSize=100)
+        ret_q = self.db.AQLQuery(aql, bindVars={"uid": elf_uid}, batchSize=100, rawResults=True)
         ret = []
         for job in ret_q:
             job["id"] = job["_key"]

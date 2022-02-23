@@ -8,7 +8,6 @@ GRAPHS = ["Jobs_graph"]
 
 class Jobs(Collection) :
     _fields = {
-        "id" : Field(), #placeholder to be able to use ["id"]
         "task" : {
             "name": Field(validators = [VAL.NotNull()]),
             "signature": Field(validators = [VAL.NotNull()]),

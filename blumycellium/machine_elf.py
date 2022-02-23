@@ -226,7 +226,6 @@ class MachineElf:
     """docstring for MachineElf"""
 
     def __init__(self, uid, mycellium):
-        # super(MachineElf, self).__init__()
         self.uid = ut.legalize_key(uid)
         self.mycellium = mycellium
         self.tasks = {}
@@ -270,7 +269,7 @@ class MachineElf:
 
     def run_task(self, job):
         task = getattr(self, job["task"]["name"])
-        return task.run(**job["static_parameters"].store)
+        return task.run(**job["static_parameters"])
 
         # kwargs = self.mycellium.get_arguments(job["arguments_id"])
         

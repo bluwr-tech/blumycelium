@@ -35,6 +35,6 @@ def init_myc():
     ret = printer.task_print_it("lala")
 
     printer.start_jobs()
-    
+
 if __name__ == '__main__':
     init_myc()
