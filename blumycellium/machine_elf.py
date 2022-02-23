@@ -57,9 +57,9 @@ class ReturnPlaceHolder:
 
     def __str__(self):
         if self.is_none:
-            return "<ReturnPlaceHolder: None>"
+            return "*-ReturnPlaceHolder: None-*"
 
-        return "<ReturnPlaceHolder: %s>" % str(self.parameters)
+        return "*-ReturnPlaceHolder: %s-*" % str(self.parameters)
 
     def __repr__(self):
         return str(self)
@@ -129,8 +129,8 @@ class JOB:
         self,
         task,
         run_id,
-        worker_elf_id,
-        worker_elf_revision,
+        worker_elf,
+        parameters,
         submit_date,
         start_date,
         completion_date,
@@ -140,8 +140,8 @@ class JOB:
     ):
         self.task=task
         self.run_id=run_id
-        self.worker_elf_id=worker_elf_id
-        self.worker_elf_revision=worker_elf_revision
+        self.worker_elf=worker_elf
+        self.parameters=parameters
         self.submit_date=submit_date
         self.start_date=start_date
         self.completion_date=completion_date
@@ -154,27 +154,34 @@ class JOB:
 
 class Task:
     """docstring for Task"""
-    def __init__(self, machine_elf, function):
+    def __init__(self, machine_elf, function, name):
         self.machine_elf = machine_elf
         self.function = function
+        self.name = name
         self.parameters = None
         self.return_placeholder = None
 
-        self.source = None
+        self.source_code = None
         self.revision = None
         self.documentation = None
         self.signature = None
+        
+        self.inspect_function()
 
     def inspect_function(self):
-        self.source = ut.inpsect_none_if_exception_or_empty(self.function, "getsource")
-        self.revision = str( hashlib.sha256(source.encode("utf-8")).hexdigest() )
+        import hashlib
+
+        self.source_code = ut.inpsect_none_if_exception_or_empty(self.function, "getsource")
+        self.revision = str( hashlib.sha256(self.source_code.encode("utf-8")).hexdigest() )
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.function, "cleandoc")
         self.signature = ut.inpsect_none_if_exception_or_empty(self.function, "signature")
 
-    def wrap(self):
-        def _wrapped(*args, **kwargs):
-            run_id = str(uuid.uuid4())
+    def wrap(self, *args, **kwargs):
+        args = args
+        kwargs = kwargs
+        run_id = str(uuid.uuid4())
 
+        def _wrapped():
             self.parameters = Parameters(self.function)
             self.parameters.set_parameters(*args, **kwargs)
             self.parameters.validate()
@@ -183,11 +190,12 @@ class Task:
             return_placeholder.make_placeholder()
 
             now = ut.gettime()
+            
             job = JOB(
                 task = self,
                 run_id = run_id,
-                worker_elf_id = self.machine_elf.uid,
-                worker_elf_revision = self.machine_elf.revision,
+                worker_elf = self.machine_elf,
+                parameters = self.parameters,
                 submit_date = now,
                 start_date = None,
                 completion_date = None,
@@ -195,20 +203,53 @@ class Task:
                 mycellium = self.machine_elf.mycellium,
                 return_placeholder=return_placeholder
             )
+            
             job.commit()
 
             return return_placeholder
 
         return _wrapped
 
+    def __call__(self, *args, **kwargs):
+        return self.wrap( *args, **kwargs )()
+
+    def __str__(self):
+        return "*-Task '%s.%s': %s -*" % (self.machine_elf.uid, self.name, self.signature)
+
+    def __repr__(self):
+        return str(self)
+
 class MachineElf:
     """docstring for MachineElf"""
 
     def __init__(self, uid, mycellium):
-        super(MachineElf, self).__init__()
+        # super(MachineElf, self).__init__()
         self.uid = ut.legalize_key(uid)
         self.mycellium = mycellium
-    
+        self.tasks = {}
+
+        self.source = None
+        self.revision = None
+        self.documentation= None
+        
+        self.inspect_self()
+        self.find_tasks()
+
+    def inspect_self(self):
+        import hashlib
+
+        self.source = ut.inpsect_none_if_exception_or_empty(self.__class__, "getsource")
+        self.revision = str( self.__class__.__name__ + hashlib.sha256(self.source.encode("utf-8")).hexdigest() )
+        self.documentation = ut.inpsect_none_if_exception_or_empty(self.__class__, "cleandoc")
+
+    def find_tasks(self):
+        import inspect
+        for name, member in inspect.getmembers(self):
+            if name.startswith("task_") and inspect.ismethod(member):
+                task = Task(self, member, name)
+                self.tasks[name] = task
+                setattr(self, name, task)
+
     def register(self, store_source):
         self.mycellium.register_machine_elf(self, store_source)
 
@@ -236,56 +277,4 @@ class MachineElf:
         self.mycellium.update_job_status(job, self.mycellium.STATUS_DONE)
         self.mycellium.push_job(job["receiver"], ret)
 
-        return ret
-
-    # def make_parameters(self, valued_parameters, placeholders):
-    #     def _make_parameter(value):
-    #         if isinstance(value, ValuePlaceholder):
-    #             return {
-    #                 "value": None,
-    #                 "pending": self.mycellium.STATUS_PENDING
-    #             }
-    #         return {
-    #             "value": value,
-    #             "pending": self.mycellium.STATUS_READY
-    #         }
-        
-    #     params = {}
-    #     for dct in (valued_parameters, placeholders):
-    #         for k_param, v_param in dct.items():
-    #             params[k_param] = _make_parameter(v_param)
-
-    #     return params
-
-    # def register_job(self, task_name, params, job_id):
-    #     static_parameters = params.get_static_parameters()
-    #     placeholder_parameters = params.get_placeholder_parameters()
-
-    #     now = ut.gettime()
-    #     job = JOB(
-    #         task_name = task_name,
-    #         public_id = job_id,
-    #         to_elf_uid = self.uid,
-    #         submit_date = now,
-    #         parameters = placeholder_parameters,
-    #         static_parameters = static_parameters,
-    #         start_date = None,
-    #         completion_date = None,
-    #         status = self.mycellium.STATUS_PENDING,
-    #         mycellium = self.mycellium
-    #     )
-    #     job.commit()
-
-    # def wrap_task(self, task_fct):
-    #     task = 
-    #     return task.wrap()
-
-    def __getattr__(self, key):
-        if key.startswith("task_task_"):
-            die
-        if hasattr(self, "task_" + key):
-            task_fct = getattr(self, "task_" + key)
-            ret = Task(self, task_fct).wrap()
-        else:
-            ret = getattr(self, key)
         return ret

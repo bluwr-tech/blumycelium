@@ -32,10 +32,9 @@ def init_myc():
     
     printer = PrinterElf("The Elf Printer", mycellium) 
     printer.register(store_source=True)
+    ret = printer.task_print_it("lala")
 
-    printer.task_print_it("lala")
-    ret = printer.print_it("lala")
-    ic(ret)
-
+    printer.start_jobs()
+    
 if __name__ == '__main__':
     init_myc()

@@ -11,9 +11,7 @@ class Jobs(Collection) :
         # "public_id" : job_id,
         "task" : {
             "name": Field(validators = [VAL.NotNull()]),
-            "signature": {
-                Field(validators = [VAL.NotNull()]),
-            },
+            "signature": Field(validators = [VAL.NotNull()]),
             "source_code": Field(),
             "documentation": Field(),
             "revision": Field(),

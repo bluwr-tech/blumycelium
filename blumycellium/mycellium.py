@@ -100,38 +100,32 @@ class Mycellium:
     def _init_indexes(self, *args, **kwargs):
         logger.info("No indexes defined")
 
-    def register_machine_elf(self, elf, store_source):
-        import hashlib
-        
-        source = ut.inpsect_none_if_exception_or_empty(elf.__class__, "getsource")
-        revision = str( elf.__class__.__name__ + hashlib.sha256(source.encode("utf-8")).hexdigest() )
-        documentation = ut.inpsect_none_if_exception_or_empty(elf.__class__, "cleandoc")
-
+    def register_machine_elf(self, machine_elf, store_source):
         now = ut.gettime()
         first_register = False
         try:
-            elf_doc = self.db["MachineElves"][elf.uid]
+            elf_doc = self.db["MachineElves"][machine_elf.uid]
             elf_doc["revisions"]["dates"].append(now)
             elf_doc["revisions"]["dates"] = elf_doc["revisions"]["dates"]
-            elf_doc["revisions"]["hashes"].append(revision)
+            elf_doc["revisions"]["hashes"].append(machine_elf.revision)
             elf_doc["revisions"]["hashes"] = elf_doc["revisions"]["hashes"]
         except a_exc.DocumentNotFoundError:
             elf_doc = self.db["MachineElves"].createDocument()
-            elf_doc["_key"] = elf.uid
+            elf_doc["_key"] = machine_elf.uid
             elf_doc["creation_date"] = now
             elf_doc["revisions"]["dates"] = [elf_doc["creation_date"]]
-            elf_doc["revisions"]["hashes"] = [revision]
+            elf_doc["revisions"]["hashes"] = [machine_elf.revision]
             first_register = True
 
-        if store_source and (elf_doc["last_revision"] != revision or first_register):
+        if store_source and (elf_doc["last_revision"] != machine_elf.revision or first_register):
             revision_doc = self.db["MachineElvesRevisions"].createDocument()
-            revision_doc["_key"] = ut.legalize_key(revision)
-            revision_doc["source_code"] = source
+            revision_doc["_key"] = ut.legalize_key(machine_elf.revision)
+            revision_doc["source_code"] = machine_elf.source
             revision_doc["creation_date"] = now
             revision_doc.save()
 
-        elf_doc["documentation"] = documentation
-        elf_doc["last_revision"] = revision
+        elf_doc["documentation"] = machine_elf.documentation
+        elf_doc["last_revision"] = machine_elf.revision
         
         elf_doc.save()
 
@@ -141,19 +135,20 @@ class Mycellium:
         # to_elf = self.db["MachineElves"][job.to_elf_uid]
         job_key = ut.legalize_key(job.run_id)
         job_doc = self.db["Jobs"].createDocument()
+
         job_doc.set(
             {
             "_key": job_key,
             "task" : {
                     "name": job.task.name,
-                    "signature": job.task.signature,
+                    "signature": str(job.task.signature),
                     "source_code": job.task.source_code,
                     "documentation": job.task.documentation,
                     "revision": job.task.revision,
                 },
                 "machine_elf" : {
-                    "id": job.elf.uid,
-                    "revision": job.elf.revision,
+                    "id": job.worker_elf.uid,
+                    "revision": job.worker_elf.revision,
                 },
                 "static_parameters": job.parameters.get_static_parameters(),
                 "submit_date" : now,
@@ -178,7 +173,7 @@ class Mycellium:
             graph.link("Jobs/" + return_placeholder.from_job_id, job_doc, data)
         
     def get_received_jobs(self, elf_uid):
-        jobs = [ job["_key"] for job in self.db["Jobs"].fetchByExample({"to_elf_uid": "MachineElves/" + elf_uid}) ]
+        jobs = [ job["_key"] for job in self.db["Jobs"].fetchByExample({"to_elf_uid": "MachineElves/" + elf_uid}, batchSize=100) ]
         return jobs
 
     def is_job_ready(self, job_id):
