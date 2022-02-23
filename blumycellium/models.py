@@ -3,8 +3,8 @@ import pyArango.validation as VAL
 import pyArango.graph as GR
 
 
-COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Results"]
-GRAPHS = ["Jobs_graph"]
+COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Results", "Failures"]
+GRAPHS = ["Jobs_graph", "JobFailures_graph"]
 
 class Jobs(Collection) :
     _fields = {
@@ -28,6 +28,20 @@ class Jobs(Collection) :
         
         "error_type": Field(),
         "error_traceback": Field(),
+    }
+
+    _validation = {
+        "on_save": True,
+        "on_set": False,
+        "allow_foreign_fields": False
+    }
+
+class Failures(Collection) :
+    _fields = {
+        "type": Field(validators = [VAL.NotNull()]),
+        "value": Field(validators = [VAL.NotNull()]),
+        "traceback": Field(validators = [VAL.NotNull()]),
+        "creation_date": Field(validators = [VAL.NotNull()])
     }
 
     _validation = {
@@ -80,10 +94,22 @@ class Results(Collection) :
 
 class Parameters(Edges) :
     _fields = {
+        "name": Field(validators = [VAL.NotNull()]),
         "submit_date" : Field(validators = [VAL.NotNull()]),
-        "value_id" : Field(),
+        "result_id" : Field(),
         "completion_date": Field(),
         "status": Field(validators = [VAL.NotNull()])
+    }
+
+    _validation = {
+        "on_save": True,
+        "on_set": False,
+        "allow_foreign_fields": False
+    }
+
+class JobFailures(Edges) :
+    _fields = {
+        "creation_date" : Field(validators = [VAL.NotNull()])
     }
 
     _validation = {
@@ -95,6 +121,13 @@ class Parameters(Edges) :
 class Jobs_graph(GR.Graph):
     _edgeDefinitions = (
         GR.EdgeDefinition("Parameters", fromCollections = ["Jobs"], toCollections = ["Jobs"]),
+    ) 
+    _orphanedCollections = []
+
+
+class JobFailures_graph(GR.Graph):
+    _edgeDefinitions = (
+        GR.EdgeDefinition("JobFailures", fromCollections = ["Jobs"], toCollections = ["Failures"]),
     ) 
     _orphanedCollections = []
 

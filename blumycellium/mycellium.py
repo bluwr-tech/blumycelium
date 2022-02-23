@@ -129,9 +129,14 @@ class Mycellium:
         
         elf_doc.save()
 
+    def get_job(self, job_id):
+        return self.db["Jobs"][job_id]
+    
+    def get_result_id(self, job_id, name):
+        return ut.legalize_key(job_id + name)
+
     def push_job(self, job):
         now = ut.gettime()
-        graph = self.db.graphs["Jobs_graph"]
         # to_elf = self.db["MachineElves"][job.to_elf_uid]
         job_key = ut.legalize_key(job.run_id)
         job_doc = self.db["Jobs"].createDocument()
@@ -162,11 +167,13 @@ class Mycellium:
         )
         job_doc.save()
 
+        graph = self.db.graphs["Jobs_graph"]
         for name, return_placeholder in job.parameters.get_placeholder_parameters():
-            result_id = "Results/" + return_placeholder.get_result_id(name)
+            result_key = ut.legalize_key(return_placeholder.get_result_id(name))
+            # result_id = "Results/" + result_key
             data = {
                 "submit_date" : now,
-                "result_id" : result_id,
+                "result_id" : result_key,
                 "completion_date": None,
                 "status": self.STATUS_PENDING
             }
@@ -176,6 +183,7 @@ class Mycellium:
         aql = """
             FOR job in Jobs
                 FILTER job.machine_elf.id == @uid
+                SORT job.creation_date DESC
                 RETURN job
         """
 
@@ -187,30 +195,104 @@ class Mycellium:
         return ret
 
     def is_job_ready(self, job_id):
+        job_doc = self.get_job(job_id)
+        if job_doc["status"] not in [self.STATUS_PENDING, self.STATUS_READY]:
+            return False
+
         ready = 0
         count = 0
-        for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id}, batchSize=100)):
+        for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": job_doc["_id"]}, batchSize=100)):
             count += 1
             if param["status"] is self.STATUS_READY:
                 ready += 1
         return count == ready
 
-    def get_job_parameters(self, elf_uid):
-        static_parameters = elf_doc["static_parameters"]
+    def get_job_parameters(self, job_id):
+        """returns the list of available parameters for a job"""
+        import custom_types
+
+        job_doc = self.get_job(job_id)
+
+        static_parameters = job_doc["static_parameters"]
         parameters = {}
-        for param in self.db["Parameters"].fetchByExample({"_to": elf_uid}):
-            if param["status"] is self.STATUS_READY:
-                parameters[param] = param["value"]
-        
-        elf_doc = self.db["MachineElves"][elf_uid]
-        parameters.update(elf_doc["static_parameters"])
+        for param in self.db["Parameters"].fetchByExample({"_to": job_id}, batchSize=100):
+            try:
+                value = self.db["Results"][param["value_id"]]
+                parameters[param["name"]] = value
+
+                if param["status"] != self.STATUS_READY:
+                    param["status"] = self.STATUS_READY
+                    param.save()
+            
+            except a_exc.DocumentNotFoundError:
+                parameters[param["name"]] = custom_types.EmptyParameter
+
+        parameters.update(job_doc["static_parameters"].getStore())
         return parameters
 
-    def get_job_parameters(job):
-        pass
-    
-    def update_job_status(self, *args, **kwargs):
-        pass
+    def update_job_status(self, job_id, status):
+        job_doc = self.get_job(job_id)
+        job_doc["status"] = status
+        job_doc.save()
 
-    def get_jobs(self, *args, **kwargs):
-        pass
+    def register_job_failure(self, exc_type, exc_value, exc_traceback, job_id):
+        import traceback
+        import hashlib
+
+        e = traceback.extract_tb(exc_traceback)
+        # ic(e)
+        # ic(e.format())
+        now = ut.gettime()
+
+        self.update_job_status(job_id, self.STATUS_FAILED)
+        
+        trace = traceback.extract_tb(exc_traceback).format()
+        trace_str = "".join(trace).encode("utf-8")
+        trace_key = ut.legalize_key( str( hashlib.sha256(trace_str).hexdigest() ) )
+
+        try:
+            failure_doc = self.db["Failures"][trace_key]
+        except a_exc.DocumentNotFoundError:
+            failure_doc = self.db["Failures"].createDocument()
+            failure_doc.set(
+                {
+                    "_key": trace_key,
+                    "type": str(exc_type),
+                    "value": str(exc_value),
+                    "traceback": trace,
+                    "creation_date": now
+                }
+            )
+            failure_doc.save()
+
+        job_doc = self.get_job(job_id)
+        graph = self.db.graphs["JobFailures_graph"]
+        graph.link("JobFailures", job_doc, failure_doc, {"creation_date": now})
+        job_doc["status"] = self.STATUS_FAILED
+        job_doc.save()
+
+    def store_results(self, job_id, results:dict):
+        if results is None:
+            return
+        
+        if not type(results) is dict:
+            raise  Exception("Results must be None or a dictionary")
+        
+        now = ut.gettime()
+
+        # job_doc = self.get_job(job_id)
+
+        for name, value in results.items():
+            result_key = ut.legalize_key(job_id + name)
+            try:
+                result_doc = self.db["Results"][result_key]
+            except a_exc.DocumentNotFoundError:
+                result_doc = self.db["Results"].createDocument()
+        
+            result_doc.set(
+                {
+                    "value": value,
+                    "creation_date": now,
+                }
+            )
+            result_doc.save()

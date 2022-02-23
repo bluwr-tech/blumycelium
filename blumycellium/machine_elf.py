@@ -4,23 +4,22 @@ import uuid
 
 class ValuePlaceholder:
 
-    def __init__(self, return_job_unique_id, parameter_key):
-        self.return_job_unique_id = return_job_unique_id
+    def __init__(self, return_run_id, parameter_key):
+        self.return_run_id = return_run_id
         self.parameter_key = parameter_key
 
     def __str__(self):
-        return "<ValuePlaceholder: parameter key: '%s', return key: '%s'>" %(self.parameter_key, self.return_job_unique_id)
+        return "<ValuePlaceholder: parameter key: '%s', return key: '%s'>" %(self.parameter_key, self.return_run_id)
 
     def __repr__(self):
         return str(self)
 
 class ReturnPlaceHolder:
     """docstring for ReturnPlaceHolder"""
-    def __init__(self, from_elf, task_function, job_unique_id):
-        super(ReturnPlaceHolder, self).__init__()
-        self.job_unique_id = job_unique_id
+    def __init__(self, worker_elf, task_function, run_id):
         self.task_function = task_function
-        self.from_elf = from_elf
+        self.worker_elf = worker_elf
+        self.run_id = run_id
         self.parameters = {}
         self.is_none = False
 
@@ -41,13 +40,13 @@ class ReturnPlaceHolder:
 
         if not self.is_none:
             for key in ret_annotation:
-                self.parameters[key] = ValuePlaceholder(self.job_unique_id, key)
+                self.parameters[key] = ValuePlaceholder(self.run_id, key)
 
     def get_result_id(self, name):
         if name not in self.parameters:
             raise Exception("Placeholder has no parameter: '%s'" % name)
 
-        return self.job_unique_id + "_" + name
+        return self.worker_elf.mycellium.get_result_id(self.run_id, name)
 
     def __getitem__(self, key, value):
         if self.is_none:
@@ -57,9 +56,9 @@ class ReturnPlaceHolder:
 
     def __str__(self):
         if self.is_none:
-            return "*-ReturnPlaceHolder: None-*"
+            return "*-%s: None-*"% self.__class__.__name__
 
-        return "*-ReturnPlaceHolder: %s-*" % str(self.parameters)
+        return "*-%s: %s-*" %( self.__class__.__name__, str(self.parameters) )
 
     def __repr__(self):
         return str(self)
@@ -186,10 +185,10 @@ class Task:
             self.parameters.set_parameters(*args, **kwargs)
             self.parameters.validate()
 
-            return_placeholder = ReturnPlaceHolder(from_elf=self.machine_elf.uid, task_function=self.function, job_unique_id=run_id)
-            return_placeholder.make_placeholder()
-
             now = ut.gettime()
+            
+            return_placeholder = ReturnPlaceHolder(worker_elf=self.machine_elf.uid, task_function=self.function, run_id=run_id)
+            return_placeholder.make_placeholder()
             
             job = JOB(
                 task = self,
@@ -204,7 +203,8 @@ class Task:
                 return_placeholder=return_placeholder
             )
             
-            job.commit()
+            job_id = job.commit()
+
 
             return return_placeholder
 
@@ -258,27 +258,30 @@ class MachineElf:
     def get_jobs(self):
         return self.mycellium.get_jobs(self.uid)
 
-    def is_job_ready(self, job_id):
-        return self.mycellium.is_job_ready(job_id)
+    def is_job_ready(self, parameters:dict):
+        import custom_types
+        return not (custom_types.EmptyParameter in parameters.values() )
 
-    def start_jobs(self):
+    def start_jobs(self, store_failures=True, raise_exceptions=True):
         jobs = self.mycellium.get_received_jobs(self.uid)
         for job in jobs:
-            if self.is_job_ready(job["id"]):
-                self.run_task(job)
+            params = self.mycellium.get_job_parameters(job["id"])
+            if job["status"]!= self.mycellium.STATUS_DONE and self.is_job_ready(params):
+                self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
-    def run_task(self, job):
-        task = getattr(self, job["task"]["name"])
-        return task.run(**job["static_parameters"])
+    def run_task(self, job_id, task_name, parameters:dict, store_failures, raise_exceptions):
+        import sys
+        try:
+            task = getattr(self, task_name)
+            ret = task.run(**parameters)
+            self.mycellium.store_results(job_id, ret)
+            self.mycellium.update_job_status(job_id, self.mycellium.STATUS_DONE)
+        except Exception as exp:
+            if store_failures:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                self.mycellium.register_job_failure(exc_type, exc_value, exc_traceback, job_id)
+            
+            if raise_exceptions:
+                raise exp
 
-        # kwargs = self.mycellium.get_arguments(job["arguments_id"])
-        
-        # try:
-        #     ret = task(kwargs)
-        # except:
-        #     self.mycellium.c(job, self.mycellium.STATUS_FAILED)
-        
-        # self.mycellium.update_job_status(job, self.mycellium.STATUS_DONE)
-        # self.mycellium.push_job(job["receiver"], ret)
-
-        # return ret
+        return ret

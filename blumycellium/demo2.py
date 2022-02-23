@@ -34,7 +34,7 @@ def init_myc():
     printer.register(store_source=True)
     ret = printer.task_print_it("lala")
 
-    printer.start_jobs()
+    printer.start_jobs(store_failures=False, raise_exceptions=True)
 
 if __name__ == '__main__':
     init_myc()
