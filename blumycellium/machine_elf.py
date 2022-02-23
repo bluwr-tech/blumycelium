@@ -171,8 +171,7 @@ class Task:
         import hashlib
 
         self.source_code = ut.inpsect_none_if_exception_or_empty(self.function, "getsource")
-        self.revision = str( hashlib.sha256(self.source_code.encode("utf-8")).hexdigest() )
-        self.revision = ut.legalize_key(self.revision)
+        self.revision = ut.get_hash_key(self.source_code )
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.function, "cleandoc")
         self.signature = ut.inpsect_none_if_exception_or_empty(self.function, "signature")
 
@@ -231,7 +230,7 @@ class MachineElf:
         self.mycellium = mycellium
         self.tasks = {}
 
-        self.source = None
+        self.source_code = None
         self.revision = None
         self.documentation= None
         
@@ -239,16 +238,14 @@ class MachineElf:
         self.find_tasks()
 
     def inspect_self(self):
-        import hashlib
-
-        self.source = ut.inpsect_none_if_exception_or_empty(self.__class__, "getsource")
-        self.revision = str( self.__class__.__name__ + hashlib.sha256(self.source.encode("utf-8")).hexdigest() )
-        self.revision = ut.legalize_key(self.revision)
+ 
+        self.source_code = ut.inpsect_none_if_exception_or_empty(self.__class__, "getsource")
+        self.revision = ut.get_hash_key(self.source_code, prefix=self.__class__.__name__ )
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.__class__, "cleandoc")
 
     def find_tasks(self):
         import inspect
-        
+
         for name, member in inspect.getmembers(self):
             if name.startswith("task_") and inspect.ismethod(member):
                 task = Task(self, member, name)

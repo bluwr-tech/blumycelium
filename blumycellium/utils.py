@@ -17,6 +17,17 @@ def gettime():
     import time
     return time.time()
 
+def get_hash_key(to_hash, prefix=None, suffix=None):
+    import hashlib
+    if prefix is None:
+        prefix = ""
+
+    if suffix is None:
+        suffix = ""
+
+    val =  prefix + str(hashlib.sha256(to_hash.encode("utf-8")).hexdigest()) + suffix
+    return legalize_key( val )
+
 def legalize_key(key):
     """returns a string that can serve as a valid arangodb _key"""
     import re
