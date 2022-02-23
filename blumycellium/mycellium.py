@@ -12,12 +12,14 @@ logger = logging.getLogger("BLUMYCELLIUM")
 class Mycellium:
     """docstring for Mycellium"""
 
-    STATUS_PENDING=0
-    STATUS_READY=1
-    STATUS_DONE=2
-    STATUS_FAILED=-1
-    STATUS_UPSTREAM_FAILED=-2
-    STATUS_EXPIRED=-3
+    STATUS_PENDING="pending"
+    STATUS_READY="ready"
+    STATUS_RUNING="runing"
+    STATUS_DONE="done"
+
+    STATUS_FAILED="failed"
+    STATUS_UPSTREAM_FAILED="upstream_failed"
+    STATUS_EXPIRED="expired"
 
     def __init__(self, connection, name):
         self.connection = connection
@@ -158,11 +160,8 @@ class Mycellium:
                 "static_parameters": job.parameters.get_static_parameters(),
                 "submit_date" : now,
                 "start_date": None,
-                "completion_date": None,
+                "end_date": None,
                 "status": self.STATUS_PENDING,
-                
-                "error_type": None,
-                "error_traceback": None,
             }
         )
         job_doc.save()
@@ -235,13 +234,23 @@ class Mycellium:
         job_doc["status"] = status
         job_doc.save()
 
+    def start_job(self, job_id):
+        job_doc = self.get_job(job_id)
+        job_doc["status"] = self.STATUS_RUNING
+        job_doc["start_date"] = ut.gettime()
+        job_doc.save()
+
+    def complete_job(self, job_id):
+        job_doc = self.get_job(job_id)
+        job_doc["status"] = self.STATUS_DONE
+        job_doc["end_date"] = ut.gettime()
+        job_doc.save()
+
     def register_job_failure(self, exc_type, exc_value, exc_traceback, job_id):
         import traceback
         import hashlib
 
         e = traceback.extract_tb(exc_traceback)
-        # ic(e)
-        # ic(e.format())
         now = ut.gettime()
 
         self.update_job_status(job_id, self.STATUS_FAILED)
@@ -269,6 +278,7 @@ class Mycellium:
         graph = self.db.graphs["JobFailures_graph"]
         graph.link("JobFailures", job_doc, failure_doc, {"creation_date": now})
         job_doc["status"] = self.STATUS_FAILED
+        job_doc["end_date"] = ut.gettime()
         job_doc.save()
 
     def store_results(self, job_id, results:dict):

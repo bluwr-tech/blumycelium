@@ -273,9 +273,11 @@ class MachineElf:
         import sys
         try:
             task = getattr(self, task_name)
+            self.mycellium.start_job(job_id)
             ret = task.run(**parameters)
             self.mycellium.store_results(job_id, ret)
             self.mycellium.update_job_status(job_id, self.mycellium.STATUS_DONE)
+            self.mycellium.complete_job(job_id)
         except Exception as exp:
             if store_failures:
                 exc_type, exc_value, exc_traceback = sys.exc_info()

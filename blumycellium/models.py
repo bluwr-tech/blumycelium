@@ -23,11 +23,8 @@ class Jobs(Collection) :
         "static_parameters": Field(default=dict),
         "submit_date" : Field(validators = [VAL.NotNull()]),
         "start_date": Field(),
-        "completion_date": Field(),
+        "end_date": Field(),
         "status": Field(validators = [VAL.NotNull()]),
-        
-        "error_type": Field(),
-        "error_traceback": Field(),
     }
 
     _validation = {
