@@ -1,10 +1,12 @@
-BLUMYCELIUM: Async micro-services, 100% in python
-=================================================
+BLUMYCELIUM: Async micro-services, 100% in python from Bluwr
+============================================================
 
-**Machine Elf <- Mycellium -> Machine Elf**
+**Machine Elf <- Mycelium -> Machine Elf**
 
-BLUMYCELIUM allows you to write complex arms-length microservices orchestration all in python.
-Arms-length microservices means that everybody trusts everybody
+BLUMYCELIUM allows you to write complex microservice orchestration all in python. Divide a complex application into many small parts that can be tested independlty and ran asyncounously.
+
+Arms-length microservices means that inside a mycelium we all trust each other, there are no credentials
+
 Agents are called machine elves
 
 creates agents called **Machine Elves**
