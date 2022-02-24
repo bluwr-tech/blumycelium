@@ -3,11 +3,9 @@ BLUMYCELIUM: Async micro-services, 100% in python from Bluwr
 
 **Machine Elf <- Mycelium -> Machine Elf**
 
-BLUMYCELIUM allows you to write complex microservice orchestration all in python. You can divide a complex application into many smaller parts that can be tested independtly and ran asyncounously.
+BLUMYCELIUM allows you to write complex microservice orchestration all in python. You can divide a complex application into many smaller parts that can be tested independtly and ran asynchronously. These smaller parts are agents called *Machine Elves* and the *Mycelium* is the database they use to communicate.
 
-These smaller parts are agents called *Machine Elves* and the *Mycelium* is the database they use to communicate.
-
-Myceliums are stored using the ArangoDB database and can be setup anywhere you'd like:
+Myceliums are stored in an ArangoDB instance and can be setup anywhere you'd like:
 	- Locally
 	- On the cloud
 	- Etc...
