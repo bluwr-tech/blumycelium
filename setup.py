@@ -10,7 +10,7 @@ def get_all_filepaths_including_subdirs(path):
     
 def get_package_version(here):
     import re
-    filename = os.path.join(here, "blumycellium", "_version.py")
+    filename = os.path.join(here, "blumycelium", "_version.py")
     with open(filename) as f:
         try:
             line = f.readlines()[0]
@@ -38,16 +38,16 @@ CHANGES = read_file_content(here, 'CHANGES.md')
 VERSION = get_package_version(here)
 
 package_data = []
-# package_data += get_all_filepaths_including_subdirs(here + '/blumycellium/locale')
-# package_data += get_all_filepaths_including_subdirs(here + '/blumycellium/configuration_json')
+# package_data += get_all_filepaths_including_subdirs(here + '/blumycelium/locale')
+# package_data += get_all_filepaths_including_subdirs(here + '/blumycelium/configuration_json')
 
 requires = [
     "pyArango>=1.3.5"
 ]
 
-setup(name='blumycellium',
+setup(name='blumycelium',
       version=VERSION,
-      description='blumycellium',
+      description='blumycelium',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Programming Language :: Python",
@@ -61,13 +61,13 @@ setup(name='blumycellium',
       keywords='web pyramid pylons',
       packages=find_packages(),
       include_package_data=True,
-      package_data={'blumycellium': package_data},
+      package_data={'blumycelium': package_data},
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
-      test_suite="blumycellium",
+      test_suite="blumycelium",
       entry_points="""\
       [paste.app_factory]
-      main = blumycellium:main
+      main = blumycelium:main
       """,
       )
