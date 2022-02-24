@@ -64,6 +64,11 @@ class Mycellium:
             for user in self.users_to_create :
                 self._init_user(self.connection, self.db_name, user["username"], user["password"])
     
+    def drop_jobs(self):
+        """delete all information related to jobs"""
+        for collection in ["Jobs", "Results", "Failures", "Parameters", "JobFailures"]:
+            self.db[collection].truncate() 
+
     def _init_collections(self, db, purge=False) :
         for collection in self.collections :
             if collection.lower() not in ("collection", "edges", "field") :
@@ -118,6 +123,7 @@ class Mycellium:
             first_register = True
 
         revision_key = ut.legalize_key(machine_elf.revision)
+
         if store_source and (elf_doc["last_revision"] != machine_elf.revision or first_register) and (self.db["MachineElvesRevisions"]):
             revision_doc = self.db["MachineElvesRevisions"].createDocument()
             revision_doc["_key"] = revision_key
@@ -136,9 +142,7 @@ class Mycellium:
     def get_result_id(self, job_id, name):
         return ut.legalize_key(job_id + name)
 
-    def push_job(self, job):
-        now = ut.gettime()
-        # to_elf = self.db["MachineElves"][job.to_elf_uid]
+    def _save_job(self, job, now_date):
         job_key = ut.legalize_key(job.run_job_id)
         job_doc = self.db["Jobs"].createDocument()
 
@@ -157,28 +161,58 @@ class Mycellium:
                     "revision": job.worker_elf.revision,
                 },
                 "static_parameters": job.parameters.get_static_parameters(),
-                "submit_date" : now,
+                "submit_date" : now_date,
                 "start_date": None,
                 "end_date": None,
                 "status": custom_types.STATUS["PENDING"],
             }
         )
         job_doc.save()
+        return job_doc
 
+    def _save_parameters(self, job, job_doc, now_date):
         graph = self.db.graphs["Jobs_graph"]
         for name, return_placeholder in job.parameters.get_placeholder_parameters().items():
             result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
-            # result_id = "Results/" + result_key
             data = {
                 "name": name,
-                "submit_date" : now,
+                "submit_date" : now_date,
                 "result_id" : result_key,
                 "completion_date": None,
-                "status": custom_types.STATUS["PENDING"]
+                "status": custom_types.STATUS["PENDING"],
+                "embedded": False,
+                "embedding":{}
             }
             from_job = ut.legalize_key(return_placeholder.run_job_id)
             graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
-        
+
+    def _save_embedded_parameters(self, job, job_doc, now_date):
+        graph = self.db.graphs["Jobs_graph"]
+        for parent_name, embed_placeholders in job.parameters.get_embedded_placeholder_parameters().items():
+            for child_name, return_placeholder in embed_placeholders["placeholders"].items():
+                result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
+                data = {
+                    "name": parent_name + "." + child_name,
+                    "submit_date" : now_date,
+                    "result_id" : result_key,
+                    "completion_date": None,
+                    "status": custom_types.STATUS["PENDING"],
+                    "embedded": True,
+                    "embedding":{
+                        "parent_parameter_name": parent_name,
+                        "self_name": child_name,
+                        "embedding_function": embed_placeholders["emebedding_function"]
+                    }
+                }
+                from_job = ut.legalize_key(return_placeholder.run_job_id)
+                graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
+
+    def push_job(self, job):
+        now = ut.gettime()
+        job_doc = self._save_job(job, now)
+        self._save_parameters(job, job_doc, now)
+        self._save_embedded_parameters(job, job_doc, now)
+
     def get_received_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):
         
         bind_vars = {"uid": elf_uid}
@@ -226,27 +260,58 @@ class Mycellium:
                 ready += 1
         return count == ready
 
-    def get_job_parameters(self, job_id):
+    def get_job_static_parameters(self, job_id):
+        job_doc = self.get_job(job_id)
+        return job_doc["static_parameters"].getStore()
+
+    # def get_job_parameters_(self, job_id, embedded):
+    #     """returns the list of available parameters for a job"""
+
+    #     parameters = {}
+    #     for param in self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id, "embedded": embedded}, batchSize=100):
+    #         try:
+    #             value = self.db["Results"][param["result_id"]]
+    #         except a_exc.DocumentNotFoundError:
+    #             parameters[param["name"]] = custom_types.EmptyParameter
+            
+    #         else:
+    #             parameters[param["name"]] = value["value"]
+    #             if param["status"] != custom_types.STATUS["READY"]:
+    #                 param["status"] = custom_types.STATUS["READY"]
+    #                 param.save()
+
+    #     return parameters
+
+    def get_job_parameters(self, job_id, embedded):
         """returns the list of available parameters for a job"""
 
-        job_doc = self.get_job(job_id)
+        aql = """
+        FOR param in Parameters
+            FILTER param._to == @job_id
+            FILTER param.embedded == @embedded
+            RETURN param
+        """
+        bind_vars = {"job_id": "Jobs/" +job_id, "embedded": embedded}
+        query = self.db.AQLQuery(aql, bindVars=bind_vars, batchSize=1000)
 
-        static_parameters = job_doc["static_parameters"]
         parameters = {}
-        for param in self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id}, batchSize=100):
-            # ic(param["result_id"])
+        for param in query:
             try:
                 value = self.db["Results"][param["result_id"]]
             except a_exc.DocumentNotFoundError:
                 parameters[param["name"]] = custom_types.EmptyParameter
-            
             else:
-                parameters[param["name"]] = value["value"]
+                if not embedded:
+                    parameters[param["name"]] = value["value"]
+                else:
+                    parameters[param["name"]] = {
+                        "value": value["value"],
+                        "embedding": param["embedding"].getStore()
+                    }
                 if param["status"] != custom_types.STATUS["READY"]:
                     param["status"] = custom_types.STATUS["READY"]
                     param.save()
 
-        parameters.update(job_doc["static_parameters"].getStore())
         return parameters
 
     def update_job_status(self, job_id, status):

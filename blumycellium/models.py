@@ -3,7 +3,7 @@ import pyArango.validation as VAL
 import pyArango.graph as GR
 
 
-COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Results", "Failures"]
+COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Results", "Failures", "Parameters", "JobFailures"]
 GRAPHS = ["Jobs_graph", "JobFailures_graph"]
 
 class Jobs(Collection) :
@@ -93,9 +93,15 @@ class Parameters(Edges) :
     _fields = {
         "name": Field(validators = [VAL.NotNull()]),
         "submit_date" : Field(validators = [VAL.NotNull()]),
-        "result_id" : Field(),
+        "result_id" : Field(validators = [VAL.NotNull()]),
         "completion_date": Field(),
-        "status": Field(validators = [VAL.NotNull()])
+        "status": Field(validators = [VAL.NotNull()]),
+        "embedded": Field(default=False),
+        "embedding":{
+            "parent_parameter_name": Field(),
+            "self_name": Field(),
+            "embedding_function": Field()
+        }
     }
 
     _validation = {

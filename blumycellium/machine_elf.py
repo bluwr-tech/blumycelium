@@ -92,11 +92,29 @@ class Parameters:
                 if parameters[param].default is _empty:
                     raise Exception("Mandatory parameter '{param}' missing)".format(param=param))
                 self.final_args[param] = parameters[param].default
-        
+                
         return self.final_args
     
+    def find_placeholders_in_list(self, lst):
+        """find placeholders in lists"""
+        placeholders = {}
+        for pid, elmt in enumerate(lst):
+            if isinstance(elmt, ValuePlaceholder):
+                placeholders[str(pid)] = elmt
+        return placeholders
+
+    def find_placeholders_in_dict(self, dct):
+        """find placeholders in dicts"""
+        placeholders = {}
+        for key, value in dct.items():
+            if isinstance(value, ValuePlaceholder):
+                placeholders[str(key)] = value
+        return placeholders
+
     def validate(self):
         from inspect import _empty
+
+        accepted_types = [dict, list, tuple, int, float, bool]
 
         parameters = self.signature.parameters
         for param, value in self.final_args.items():
@@ -109,20 +127,46 @@ class Parameters:
 
                 if not (param_clas is type(None)) and param_clas and not isinstance(value, param_clas):
                     raise Exception("Param '{param}' has the wrong type {type} expected {exp})".format(param=param, type=type(value), exp=param_clas))
+
+                if param_clas and (not param_clas in accepted_types ) :
+                    raise Exception("Param '{param}' has the wrong type {type} expected one of the following: {exp})".format(param=param, type=type(value), exp=accepted_types))
+
         return True
 
     def get_placeholder_parameters(self):
         args = {}
-        for param, value in self.final_args.items():
+        for param_name, value in self.final_args.items():
             if isinstance(value, ValuePlaceholder):
-                args[param] = value
+                args[param_name] = value
+
         return args
 
     def get_static_parameters(self):
         args = {}
-        for param, value in self.final_args.items():
+        for param_name, value in self.final_args.items():
             if not isinstance(value, ValuePlaceholder):
-                args[param] = value
+                args[param_name] = value
+        return args
+
+    def get_embedded_placeholder_parameters(self):
+        args = {}
+        for param_name, value in self.final_args.items():
+            if type(value) is dict:
+                emb_args = self.find_placeholders_in_dict(value)
+                if len(emb_args) > 0:
+                    args[param_name] = {
+                        "placeholders": emb_args,
+                        "emebedding_function": "__setitem__"
+                    }
+
+            if type(value) is list:
+                emb_args = self.find_placeholders_in_list(value)
+                if len(emb_args) > 0:
+                    args[param_name] = {
+                        "placeholders": emb_args,
+                        "emebedding_function": "__setitem__"
+                    }
+
         return args
 
 class JOB:
@@ -259,15 +303,31 @@ class MachineElf:
     def get_jobs(self):
         return self.mycellium.get_jobs(self.uid)
 
-    def is_job_ready(self, parameters:dict):
+    def is_job_ready(self, parameters:dict, embedded_params:dict):
         import custom_types
-        return not (custom_types.EmptyParameter in parameters.values() )
+        params_ready = not (custom_types.EmptyParameter in parameters.values() )
+        
+        for key, value in embedded_params.items():
+            if value is custom_types.EmptyParameter:
+                return False
+        
+        return params_ready
 
     def start_jobs(self, store_failures=True, raise_exceptions=True):
         jobs = self.mycellium.get_received_jobs(self.uid)
         for job in jobs:
-            params = self.mycellium.get_job_parameters(job["id"])
-            if job["status"]!= custom_types.STATUS["DONE"] and self.is_job_ready(params):
+            params = self.mycellium.get_job_parameters(job["id"], embedded=False)
+            params.update( self.mycellium.get_job_static_parameters(job["id"]) )
+            embedded_params = self.mycellium.get_job_parameters(job["id"], embedded=True)
+            
+            for emb_value in embedded_params.values():
+                value = emb_value["value"]
+                emb = emb_value["embedding"]
+                parent_obj = params[ emb["parent_parameter_name"] ]
+                insert_fct = getattr(parent_obj, emb["embedding_function"])
+                insert_fct( int(emb["self_name"]), value)
+
+            if job["status"]!= custom_types.STATUS["DONE"] and self.is_job_ready(params, embedded_params):
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):
