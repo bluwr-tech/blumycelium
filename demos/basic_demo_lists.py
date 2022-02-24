@@ -47,7 +47,7 @@ def init_myc():
     printer.task_print_it(ret["value"])
 
     ret = sender.task_send( "Tralala"  )
-    printer.task_print_it( [ "hoplala", ret["value"] ] )
+    printer.task_print_it( [ "hoplala", ret["value"], ret["value"], ret["value"] ] )
 
     sender.start_jobs(store_failures=True, raise_exceptions=True)
     print("===> print")
