@@ -37,16 +37,17 @@ def init_myc():
     
     printer = PrinterElf("The Elf Printer", mycellium) 
     printer.register(store_source=True)
-    # printer.task_print_it("lala")
 
     sender = SenderElf("The Sender Elf", mycellium)
+    sender.register(store_source=True)
+    
     ret = sender.task_send("a message sent on: %s" % time.ctime())
     
     printer.task_print_it(ret["value"])
 
-    sender.start_jobs(store_failures=False, raise_exceptions=True)
+    sender.start_jobs(store_failures=True, raise_exceptions=True)
     print("===> print")
-    printer.start_jobs(store_failures=False, raise_exceptions=True)
+    printer.start_jobs(store_failures=True, raise_exceptions=True)
 
 if __name__ == '__main__':
     init_myc()

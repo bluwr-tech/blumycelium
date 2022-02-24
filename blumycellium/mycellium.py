@@ -1,4 +1,4 @@
-from icecream import ic
+
 import uuid
 import pyArango.theExceptions as a_exc
 import utils as ut
@@ -6,8 +6,10 @@ import custom_types
 
 import models as mod
 
-import logging
+from icecream import ic
+ic.configureOutput(includeContext=True)
 
+import logging
 logger = logging.getLogger("BLUMYCELLIUM")
 
 class Mycellium:
@@ -44,10 +46,10 @@ class Mycellium:
 
     def init(self, init_db=False, users_to_create=None) :
         if init_db:
-            self._init_db()
+            self.db = self._init_db()
 
         if self.db is None:
-            raise Exception("Cannot contimue with the initialisation because database does not exist. Try runing init with init_db=True")
+            raise Exception("Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True")
 
         logger.info("Initializing %s..." % self.db_name)    
         logger.info("-- init collections")
@@ -207,6 +209,7 @@ class Mycellium:
         for job in ret_q:
             job["id"] = job["_key"]
             ret.append(job)
+        
         return ret
 
     def is_job_ready(self, job_id):
@@ -230,10 +233,12 @@ class Mycellium:
         static_parameters = job_doc["static_parameters"]
         parameters = {}
         for param in self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id}, batchSize=100):
+            # ic(param["result_id"])
             try:
                 value = self.db["Results"][param["result_id"]]
             except a_exc.DocumentNotFoundError:
                 parameters[param["name"]] = custom_types.EmptyParameter
+            
             else:
                 parameters[param["name"]] = value["value"]
                 if param["status"] != custom_types.STATUS["READY"]:

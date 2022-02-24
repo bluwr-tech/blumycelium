@@ -107,7 +107,7 @@ class Parameters:
                 elif not parameters[param].default is _empty :
                     param_clas = type(parameters[param].default)
 
-                if param_clas and not isinstance(value, param_clas):
+                if not (param_clas is type(None)) and param_clas and not isinstance(value, param_clas):
                     raise Exception("Param '{param}' has the wrong type {type} expected {exp})".format(param=param, type=type(value), exp=param_clas))
         return True
 
