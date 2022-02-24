@@ -39,3 +39,9 @@ def legalize_key(key):
     key = pattern.sub('', key) 
 
     return key
+
+def getuid():
+    """returns a random id that can serve as a key"""
+    import uuid
+    val = uuid.uuid4()
+    return legalize_key(val)

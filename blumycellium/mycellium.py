@@ -164,7 +164,7 @@ class Mycellium:
 
         graph = self.db.graphs["Jobs_graph"]
         for name, return_placeholder in job.parameters.get_placeholder_parameters().items():
-            result_key = ut.legalize_key(return_placeholder.run_job_id)
+            result_key = self.get_result_id(return_placeholder.run_job_id, name)
             # result_id = "Results/" + result_key
             data = {
                 "name": name,
@@ -189,8 +189,11 @@ class Mycellium:
             str_status_filter.append(pending)
             bind_vars[status] = status
 
-        str_status_filter = "FILTER " + " OR ".join(str_status_filter)
-        
+        if len(str_status_filter) > 0:
+            str_status_filter = "FILTER " + " OR ".join(str_status_filter)
+        else:
+            str_status_filter = ""
+
         aql = """
             FOR job in Jobs
                 FILTER job.machine_elf.id == @uid
@@ -227,16 +230,16 @@ class Mycellium:
         static_parameters = job_doc["static_parameters"]
         parameters = {}
         for param in self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id}, batchSize=100):
-            try:
-                value = self.db["Results"][param["result_id"]]
-                parameters[param["name"]] = value
+            value = self.db["Results"][param["result_id"]]
+            parameters[param["name"]] = value
 
-                if param["status"] != custom_types.STATUS["READY"]:
-                    param["status"] = custom_types.STATUS["READY"]
-                    param.save()
+            if param["status"] != custom_types.STATUS["READY"]:
+                param["status"] = custom_types.STATUS["READY"]
+                param.save()
             
-            except a_exc.DocumentNotFoundError:
-                parameters[param["name"]] = custom_types.EmptyParameter
+            # try:
+            # except a_exc.DocumentNotFoundError:
+                # parameters[param["name"]] = custom_types.EmptyParameter
 
         parameters.update(job_doc["static_parameters"].getStore())
         return parameters
@@ -305,7 +308,8 @@ class Mycellium:
         # job_doc = self.get_job(job_id)
 
         for name, value in results.items():
-            result_key = ut.legalize_key(job_id + name)
+            ic(name, value)
+            result_key = self.get_result_id(job_id, name)
             try:
                 result_doc = self.db["Results"][result_key]
             except a_exc.DocumentNotFoundError:
@@ -313,6 +317,7 @@ class Mycellium:
         
             result_doc.set(
                 {
+                    "_key": result_key,
                     "value": value,
                     "creation_date": now,
                 }

@@ -9,6 +9,7 @@ class ValuePlaceholder:
     def __init__(self, run_job_id, parameter_key):
         self.run_job_id = run_job_id
         self.parameter_key = parameter_key
+        self.uid = ut.getuid()
 
     def __str__(self):
         return "<ValuePlaceholder: parameter key: '%s', return key: '%s'>" %(self.parameter_key, self.run_job_id)
@@ -180,7 +181,7 @@ class Task:
     def wrap(self, *args, **kwargs):
         args = args
         kwargs = kwargs
-        run_job_id = str(uuid.uuid4())
+        run_job_id = ut.getuid()
 
         def _wrapped():
             self.parameters = Parameters(self.function)
