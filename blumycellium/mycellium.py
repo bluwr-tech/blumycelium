@@ -117,9 +117,10 @@ class Mycellium:
             elf_doc["revisions"]["hashes"] = [machine_elf.revision]
             first_register = True
 
-        if store_source and (elf_doc["last_revision"] != machine_elf.revision or first_register):
+        revision_key = ut.legalize_key(machine_elf.revision)
+        if store_source and (elf_doc["last_revision"] != machine_elf.revision or first_register) and (self.db["MachineElvesRevisions"]):
             revision_doc = self.db["MachineElvesRevisions"].createDocument()
-            revision_doc["_key"] = ut.legalize_key(machine_elf.revision)
+            revision_doc["_key"] = revision_key
             revision_doc["source_code"] = machine_elf.source_code
             revision_doc["creation_date"] = now
             revision_doc.save()

@@ -174,7 +174,7 @@ class Task:
         import hashlib
 
         self.source_code = ut.inpsect_none_if_exception_or_empty(self.function, "getsource")
-        self.revision = ut.get_hash_key(self.source_code )
+        self.revision = ut.legalize_key(self.name + ut.get_hash_key(self.source_code))
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.function, "cleandoc")
         self.signature = ut.inpsect_none_if_exception_or_empty(self.function, "signature")
 
@@ -241,7 +241,7 @@ class MachineElf:
 
     def inspect_self(self): 
         self.source_code = ut.inpsect_none_if_exception_or_empty(self.__class__, "getsource")
-        self.revision = ut.get_hash_key(self.source_code, prefix=self.__class__.__name__ )
+        self.revision = ut.get_hash_key(self.source_code+self.uid, prefix=self.__class__.__name__ )
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.__class__, "cleandoc")
 
     def find_tasks(self):
