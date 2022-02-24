@@ -17,7 +17,9 @@ def gettime():
     import time
     return time.time()
 
-def get_hash_key(to_hash, prefix=None, suffix=None):
+def get_hash_key(to_hash:str, prefix=None, suffix=None):
+    """return a hash of to_hash that can serve as a key"""
+
     import hashlib
     if prefix is None:
         prefix = ""
@@ -29,7 +31,7 @@ def get_hash_key(to_hash, prefix=None, suffix=None):
     return legalize_key( val )
 
 def legalize_key(key):
-    """returns a string that can serve as a valid arangodb _key"""
+    """returns a string that can serve as a valid key for database"""
     import re
     key = key.lower().replace(" ", "_")
 

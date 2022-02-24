@@ -2,6 +2,7 @@ from icecream import ic
 import uuid
 import pyArango.theExceptions as a_exc
 import utils as ut
+import custom_types
 
 import models as mod
 
@@ -12,15 +13,6 @@ logger = logging.getLogger("BLUMYCELLIUM")
 class Mycellium:
     """docstring for Mycellium"""
 
-    STATUS_PENDING="pending"
-    STATUS_READY="ready"
-    STATUS_RUNING="runing"
-    STATUS_DONE="done"
-
-    STATUS_FAILED="failed"
-    STATUS_UPSTREAM_FAILED="upstream_failed"
-    STATUS_EXPIRED="expired"
-
     def __init__(self, connection, name):
         self.connection = connection
         self.name = name
@@ -29,13 +21,14 @@ class Mycellium:
         self.collections = mod.COLLECTIONS
         self.graphs = mod.GRAPHS
 
-        print(self.db_name)
+        self.db = None
+
         if not self.connection.hasDatabase(self.db_name):
-            logger.warning("Warining: Database %s does not exist. To create it run self.init with init_db=True" % self.db_name)
+            logger.warning("Warning: Database %s does not exist. To create it run self.init with init_db=True" % self.db_name)
         else:
             self.db = self.connection[self.db_name]
 
-    def _init_dB(self) :
+    def _init_db(self) :
         from pyArango.theExceptions import CreationError
 
         print("Creating database", self.db_name)
@@ -52,6 +45,9 @@ class Mycellium:
     def init(self, init_db=False, users_to_create=None) :
         if init_db:
             self._init_db()
+
+        if self.db is None:
+            raise Exception("Cannot contimue with the initialisation because database does not exist. Try runing init with init_db=True")
 
         logger.info("Initializing %s..." % self.db_name)    
         logger.info("-- init collections")
@@ -122,7 +118,7 @@ class Mycellium:
         if store_source and (elf_doc["last_revision"] != machine_elf.revision or first_register):
             revision_doc = self.db["MachineElvesRevisions"].createDocument()
             revision_doc["_key"] = ut.legalize_key(machine_elf.revision)
-            revision_doc["source_code"] = machine_elf.source
+            revision_doc["source_code"] = machine_elf.source_code
             revision_doc["creation_date"] = now
             revision_doc.save()
 
@@ -140,7 +136,7 @@ class Mycellium:
     def push_job(self, job):
         now = ut.gettime()
         # to_elf = self.db["MachineElves"][job.to_elf_uid]
-        job_key = ut.legalize_key(job.run_id)
+        job_key = ut.legalize_key(job.run_job_id)
         job_doc = self.db["Jobs"].createDocument()
 
         job_doc.set(
@@ -161,32 +157,49 @@ class Mycellium:
                 "submit_date" : now,
                 "start_date": None,
                 "end_date": None,
-                "status": self.STATUS_PENDING,
+                "status": custom_types.STATUS["PENDING"],
             }
         )
         job_doc.save()
 
         graph = self.db.graphs["Jobs_graph"]
-        for name, return_placeholder in job.parameters.get_placeholder_parameters():
-            result_key = ut.legalize_key(return_placeholder.get_result_id(name))
+        for name, return_placeholder in job.parameters.get_placeholder_parameters().items():
+            result_key = ut.legalize_key(return_placeholder.run_job_id)
             # result_id = "Results/" + result_key
             data = {
+                "name": name,
                 "submit_date" : now,
                 "result_id" : result_key,
                 "completion_date": None,
-                "status": self.STATUS_PENDING
+                "status": custom_types.STATUS["PENDING"]
             }
-            graph.link("Jobs/" + return_placeholder.from_job_id, job_doc, data)
+            from_job = ut.legalize_key(return_placeholder.run_job_id)
+            graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
         
-    def get_received_jobs(self, elf_uid):
+    def get_received_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):
+        
+        bind_vars = {"uid": elf_uid}
+        
+        if all_jobs:
+            status_restriction = list(custom_types.STATUS.values())
+        
+        str_status_filter = []
+        for status in status_restriction:
+            pending = "job.status == @%s" % status
+            str_status_filter.append(pending)
+            bind_vars[status] = status
+
+        str_status_filter = "FILTER " + " OR ".join(str_status_filter)
+        
         aql = """
             FOR job in Jobs
                 FILTER job.machine_elf.id == @uid
+                {str_status_filter}
                 SORT job.creation_date DESC
                 RETURN job
-        """
+        """.format(str_status_filter=str_status_filter)
 
-        ret_q = self.db.AQLQuery(aql, bindVars={"uid": elf_uid}, batchSize=100, rawResults=True)
+        ret_q = self.db.AQLQuery(aql, bindVars=bind_vars, batchSize=100, rawResults=True)
         ret = []
         for job in ret_q:
             job["id"] = job["_key"]
@@ -195,32 +208,31 @@ class Mycellium:
 
     def is_job_ready(self, job_id):
         job_doc = self.get_job(job_id)
-        if job_doc["status"] not in [self.STATUS_PENDING, self.STATUS_READY]:
+        if job_doc["status"] not in [custom_types.STATUS["PENDING"], custom_types.STATUS["READY"]]:
             return False
 
         ready = 0
         count = 0
         for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": job_doc["_id"]}, batchSize=100)):
             count += 1
-            if param["status"] is self.STATUS_READY:
+            if param["status"] is custom_types.STATUS["READY"]:
                 ready += 1
         return count == ready
 
     def get_job_parameters(self, job_id):
         """returns the list of available parameters for a job"""
-        import custom_types
 
         job_doc = self.get_job(job_id)
 
         static_parameters = job_doc["static_parameters"]
         parameters = {}
-        for param in self.db["Parameters"].fetchByExample({"_to": job_id}, batchSize=100):
+        for param in self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id}, batchSize=100):
             try:
-                value = self.db["Results"][param["value_id"]]
+                value = self.db["Results"][param["result_id"]]
                 parameters[param["name"]] = value
 
-                if param["status"] != self.STATUS_READY:
-                    param["status"] = self.STATUS_READY
+                if param["status"] != custom_types.STATUS["READY"]:
+                    param["status"] = custom_types.STATUS["READY"]
                     param.save()
             
             except a_exc.DocumentNotFoundError:
@@ -236,13 +248,13 @@ class Mycellium:
 
     def start_job(self, job_id):
         job_doc = self.get_job(job_id)
-        job_doc["status"] = self.STATUS_RUNING
+        job_doc["status"] = custom_types.STATUS["RUNING"]
         job_doc["start_date"] = ut.gettime()
         job_doc.save()
 
     def complete_job(self, job_id):
         job_doc = self.get_job(job_id)
-        job_doc["status"] = self.STATUS_DONE
+        job_doc["status"] = custom_types.STATUS["DONE"]
         job_doc["end_date"] = ut.gettime()
         job_doc.save()
 
@@ -253,7 +265,7 @@ class Mycellium:
         e = traceback.extract_tb(exc_traceback)
         now = ut.gettime()
 
-        self.update_job_status(job_id, self.STATUS_FAILED)
+        self.update_job_status(job_id, custom_types.STATUS["FAILED"])
         
         trace = traceback.extract_tb(exc_traceback).format()
         trace_str = "".join(trace).encode("utf-8")
@@ -277,7 +289,7 @@ class Mycellium:
         job_doc = self.get_job(job_id)
         graph = self.db.graphs["JobFailures_graph"]
         graph.link("JobFailures", job_doc, failure_doc, {"creation_date": now})
-        job_doc["status"] = self.STATUS_FAILED
+        job_doc["status"] = custom_types.STATUS["FAILED"]
         job_doc["end_date"] = ut.gettime()
         job_doc.save()
 
