@@ -164,7 +164,7 @@ class Mycellium:
 
         graph = self.db.graphs["Jobs_graph"]
         for name, return_placeholder in job.parameters.get_placeholder_parameters().items():
-            result_key = self.get_result_id(return_placeholder.run_job_id, name)
+            result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
             # result_id = "Results/" + result_key
             data = {
                 "name": name,
@@ -230,16 +230,15 @@ class Mycellium:
         static_parameters = job_doc["static_parameters"]
         parameters = {}
         for param in self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id}, batchSize=100):
-            value = self.db["Results"][param["result_id"]]
-            parameters[param["name"]] = value
-
-            if param["status"] != custom_types.STATUS["READY"]:
-                param["status"] = custom_types.STATUS["READY"]
-                param.save()
-            
-            # try:
-            # except a_exc.DocumentNotFoundError:
-                # parameters[param["name"]] = custom_types.EmptyParameter
+            try:
+                value = self.db["Results"][param["result_id"]]
+            except a_exc.DocumentNotFoundError:
+                parameters[param["name"]] = custom_types.EmptyParameter
+            else:
+                parameters[param["name"]] = value["value"]
+                if param["status"] != custom_types.STATUS["READY"]:
+                    param["status"] = custom_types.STATUS["READY"]
+                    param.save()
 
         parameters.update(job_doc["static_parameters"].getStore())
         return parameters
@@ -308,7 +307,6 @@ class Mycellium:
         # job_doc = self.get_job(job_id)
 
         for name, value in results.items():
-            ic(name, value)
             result_key = self.get_result_id(job_id, name)
             try:
                 result_doc = self.db["Results"][result_key]

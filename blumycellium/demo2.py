@@ -3,6 +3,8 @@ import mycellium as myc
 import machine_elf as melf
 
 from icecream import ic
+import time
+
 ic.configureOutput(includeContext=True)
 
 class PrinterElf(melf.MachineElf):
@@ -38,13 +40,12 @@ def init_myc():
     # printer.task_print_it("lala")
 
     sender = SenderElf("The Sender Elf", mycellium)
-    ret = sender.task_send("a message")
+    ret = sender.task_send("a message sent on: %s" % time.ctime())
     
-    # ic(ret)
-    # ic(ret["value"])
     printer.task_print_it(ret["value"])
 
     sender.start_jobs(store_failures=False, raise_exceptions=True)
+    print("===> print")
     printer.start_jobs(store_failures=False, raise_exceptions=True)
 
 if __name__ == '__main__':

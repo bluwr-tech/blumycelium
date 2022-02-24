@@ -6,13 +6,13 @@ import custom_types
 
 class ValuePlaceholder:
 
-    def __init__(self, run_job_id, parameter_key):
+    def __init__(self, run_job_id, name):
         self.run_job_id = run_job_id
-        self.parameter_key = parameter_key
-        self.uid = ut.getuid()
+        self.name = name
+        self.uid = ut.legalize_key(self.run_job_id + name)
 
     def __str__(self):
-        return "<ValuePlaceholder: parameter key: '%s', return key: '%s'>" %(self.parameter_key, self.run_job_id)
+        return "<ValuePlaceholder: parameter key: '%s', return key: '%s'>" %(self.name, self.run_job_id)
 
     def __repr__(self):
         return str(self)
@@ -192,7 +192,7 @@ class Task:
             
             return_placeholder = ReturnPlaceHolder(worker_elf=self.machine_elf.uid, task_function=self.function, run_job_id=run_job_id)
             return_placeholder.make_placeholder()
-            
+
             job = JOB(
                 task = self,
                 run_job_id = run_job_id,
@@ -207,7 +207,6 @@ class Task:
             )
             
             job_id = job.commit()
-
 
             return return_placeholder
 
@@ -240,8 +239,7 @@ class MachineElf:
         self.inspect_self()
         self.find_tasks()
 
-    def inspect_self(self):
- 
+    def inspect_self(self): 
         self.source_code = ut.inpsect_none_if_exception_or_empty(self.__class__, "getsource")
         self.revision = ut.get_hash_key(self.source_code, prefix=self.__class__.__name__ )
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.__class__, "cleandoc")
@@ -270,7 +268,6 @@ class MachineElf:
         for job in jobs:
             params = self.mycellium.get_job_parameters(job["id"])
             if job["status"]!= custom_types.STATUS["DONE"] and self.is_job_ready(params):
-                ic(params)
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):
