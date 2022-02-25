@@ -96,12 +96,25 @@ class Parameters(Edges) :
         "result_id" : Field(validators = [VAL.NotNull()]),
         "completion_date": Field(),
         "status": Field(validators = [VAL.NotNull()]),
+        "value": Field(),
+        "static": Field(default=False),
         "embedded": Field(default=False),
-        "embedding":{
-            "parent_parameter_name": Field(),
-            "self_name": Field(),
-            "embedding_function": Field()
-        }
+        # "embedding":{
+        #     "parent_parameter_name": Field(),
+        #     "self_name": Field(),
+        #     "embedding_function": Field()
+        # }
+    }
+
+    _validation = {
+        "on_save": True,
+        "on_set": False,
+        "allow_foreign_fields": False
+    }
+
+class ParameterOperations(Edges) :
+    _fields = {
+        "function_name": Field()
     }
 
     _validation = {
@@ -134,9 +147,9 @@ class JobFailures_graph(GR.Graph):
     ) 
     _orphanedCollections = []
 
+class ParameterOperations_graph(GR.Graph):
+    _edgeDefinitions = (
+        GR.EdgeDefinition("ParameterOperations", fromCollections = ["Parameters"], toCollections = ["Parameters"]),
+    ) 
+    _orphanedCollections = []
 
-# class Results_graph(GR.Graph):
-#     _edgeDefinitions = (
-#         GR.EdgeDefinition("Results", fromCollections = ["MachineElves"], toCollections = ["MachineElves"]),
-#     ) 
-#     _orphanedCollections = []

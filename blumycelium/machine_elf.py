@@ -95,18 +95,10 @@ class Parameters:
                 
         return self.final_args
     
-    def find_placeholders_in_list(self, lst):
-        """find placeholders in lists"""
+    def find_placeholders_in_key_value_iterrator(self, iterator):
+        """find placeholders in dicts lists etc..."""
         placeholders = {}
-        for pid, elmt in enumerate(lst):
-            if isinstance(elmt, ValuePlaceholder):
-                placeholders[str(pid)] = elmt
-        return placeholders
-
-    def find_placeholders_in_dict(self, dct):
-        """find placeholders in dicts"""
-        placeholders = {}
-        for key, value in dct.items():
+        for key, value in iterator:
             if isinstance(value, ValuePlaceholder):
                 placeholders[str(key)] = value
         return placeholders
@@ -152,20 +144,15 @@ class Parameters:
         args = {}
         for param_name, value in self.final_args.items():
             if type(value) is dict:
-                emb_args = self.find_placeholders_in_dict(value)
-                if len(emb_args) > 0:
-                    args[param_name] = {
-                        "placeholders": emb_args,
-                        "emebedding_function": "__setitem__"
-                    }
-
-            if type(value) is list:
-                emb_args = self.find_placeholders_in_list(value)
-                if len(emb_args) > 0:
-                    args[param_name] = {
-                        "placeholders": emb_args,
-                        "emebedding_function": "__setitem__"
-                    }
+                iterator = value.items()
+            elif type(value) is list:
+                iterator = enumerate(value)
+            emb_args = self.find_placeholders_in_key_value_iterrator(iterator)
+            if len(emb_args) > 0:
+                args[param_name] = {
+                    "placeholders": emb_args,
+                    "emebedding_function": "__setitem__"
+                }
 
         return args
 
