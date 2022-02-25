@@ -20,7 +20,7 @@ class Jobs(Collection) :
             "documentation": Field(),
             "revision": Field(),
         },
-        "static_parameters": Field(default=dict),
+        # "static_parameters": Field(default=dict),
         "submit_date" : Field(validators = [VAL.NotNull()]),
         "start_date": Field(),
         "end_date": Field(),

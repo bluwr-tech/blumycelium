@@ -1,6 +1,6 @@
 import pyArango.connection as ADB
-import mycellium as myc
-import machine_elf as melf
+import blumycelium.mycellium as myc
+import blumycelium.machine_elf as melf
 
 from icecream import ic
 import time

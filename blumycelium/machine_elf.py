@@ -1,8 +1,7 @@
-import utils as ut
-from icecream import ic
-import uuid
+from . import utils as ut
+from . import custom_types
 
-import custom_types
+from icecream import ic
 
 class ValuePlaceholder:
 
@@ -125,6 +124,43 @@ class Parameters:
 
         return True
 
+    def get_parameters(self):
+        def _add_param(value, static, embeddings, embedding_function):
+            ret = {
+                "value": value,
+                "static": static,
+                "embeddings": embeddings,
+                "embedding_function": embedding_function
+            }
+            return ret
+
+        def _rec_find_parameters(obj_key_value):
+            args = {}
+            for param_name, value in obj_key_value:
+                embeddings = {}
+                embedding_function=None
+                if isinstance(value, ValuePlaceholder):
+                    static = False
+                else:
+                    static = True            
+                    iterator = None
+                    if type(value) is dict:
+                        iterator = value.items()
+                        embedding_function = "__setitem__"
+                    elif type(value) is list:
+                        iterator = enumerate(value)
+                        embedding_function = "__setitem__"
+                   
+                    if not iterator is None:
+                        embeddings = _rec_find_parameters(iterator)
+                args[param_name] = _add_param(value, static, embedding, embedding_function)
+
+            return args
+
+        ret = _rec_find_parameters(self.final_args)
+
+        return ret
+
     def get_placeholder_parameters(self):
         args = {}
         for param_name, value in self.final_args.items():
@@ -140,21 +176,21 @@ class Parameters:
                 args[param_name] = value
         return args
 
-    def get_embedded_placeholder_parameters(self):
-        args = {}
-        for param_name, value in self.final_args.items():
-            if type(value) is dict:
-                iterator = value.items()
-            elif type(value) is list:
-                iterator = enumerate(value)
-            emb_args = self.find_placeholders_in_key_value_iterrator(iterator)
-            if len(emb_args) > 0:
-                args[param_name] = {
-                    "placeholders": emb_args,
-                    "emebedding_function": "__setitem__"
-                }
+    # def get_embedded_placeholder_parameters(self):
+    #     args = {}
+    #     for param_name, value in self.final_args.items():
+    #         if type(value) is dict:
+    #             iterator = value.items()
+    #         elif type(value) is list:
+    #             iterator = enumerate(value)
+    #         emb_args = self.find_placeholders_in_key_value_iterrator(iterator)
+    #         if len(emb_args) > 0:
+    #             args[param_name] = {
+    #                 "placeholders": emb_args,
+    #                 "emebedding_function": "__setitem__"
+    #             }
 
-        return args
+    #     return args
 
 class JOB:
     """docstring for JOB"""

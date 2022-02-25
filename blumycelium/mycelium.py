@@ -1,10 +1,9 @@
+from . import utils as ut
+from . import custom_types
+from . import models as mod
 
-import uuid
 import pyArango.theExceptions as a_exc
-import utils as ut
-import custom_types
 
-import models as mod
 
 from icecream import ic
 ic.configureOutput(includeContext=True)
@@ -160,7 +159,7 @@ class Mycellium:
                     "id": job.worker_elf.uid,
                     "revision": job.worker_elf.revision,
                 },
-                "static_parameters": job.parameters.get_static_parameters(),
+                # "static_parameters": job.parameters.get_static_parameters(),
                 "submit_date" : now_date,
                 "start_date": None,
                 "end_date": None,
@@ -173,43 +172,49 @@ class Mycellium:
     def _save_parameters(self, job, job_doc, now_date):
         graph = self.db.graphs["Jobs_graph"]
         for name, return_placeholder in job.parameters.get_placeholder_parameters().items():
-            result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
+            if not static:
+                result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
+            else:
+                result_key = None
             data = {
                 "name": name,
                 "submit_date" : now_date,
+                "static": static,
                 "result_id" : result_key,
                 "completion_date": None,
                 "status": custom_types.STATUS["PENDING"],
                 "embedded": False,
-                "embedding":{}
+                # "embedding":{}
             }
             from_job = ut.legalize_key(return_placeholder.run_job_id)
             graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
 
-    def _save_embedded_parameters(self, job, job_doc, now_date):
-        graph = self.db.graphs["Jobs_graph"]
-        for parent_name, embed_placeholders in job.parameters.get_embedded_placeholder_parameters().items():
-            for child_name, return_placeholder in embed_placeholders["placeholders"].items():
-                result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
-                data = {
-                    "name": parent_name + "." + child_name,
-                    "submit_date" : now_date,
-                    "result_id" : result_key,
-                    "completion_date": None,
-                    "status": custom_types.STATUS["PENDING"],
-                    "embedded": True,
-                    "embedding":{
-                        "parent_parameter_name": parent_name,
-                        "self_name": child_name,
-                        "embedding_function": embed_placeholders["emebedding_function"]
-                    }
-                }
-                from_job = ut.legalize_key(return_placeholder.run_job_id)
-                graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
+    # def _save_embedded_parameters(self, job, job_doc, now_date, static):
+    #     graph = self.db.graphs["Jobs_graph"]
+    #     for parent_name, embed_placeholders in job.parameters.get_embedded_placeholder_parameters().items():
+    #         for child_name, return_placeholder in embed_placeholders["placeholders"].items():
+    #             result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
+    #             data = {
+    #                 "name": parent_name + "." + child_name,
+    #                 "submit_date" : now_date,
+    #                 "result_id" : result_key,
+    #                 "completion_date": None,
+    #                 "status": custom_types.STATUS["PENDING"],
+    #                 "embedded": True,
+    #                 "embedding":{
+    #                     "parent_parameter_name": parent_name,
+    #                     "self_name": child_name,
+    #                     "embedding_function": embed_placeholders["emebedding_function"]
+    #                 }
+    #             }
+    #             from_job = ut.legalize_key(return_placeholder.run_job_id)
+    #             graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
 
     def push_job(self, job):
         now = ut.gettime()
         job_doc = self._save_job(job, now)
+        ic(job.parameters.get_parameters())
+        stop
         self._save_parameters(job, job_doc, now)
         self._save_embedded_parameters(job, job_doc, now)
 
