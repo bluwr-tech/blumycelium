@@ -1,5 +1,5 @@
 import pyArango.connection as ADB
-import blumycelium.mycellium as myc
+import blumycelium.mycelium as myc
 import blumycelium.machine_elf as melf
 
 from icecream import ic
@@ -43,11 +43,13 @@ def init_myc():
     sender = SenderElf_demo3("The Elf Sender", mycellium)
     sender.register(store_source=True)
     
-    ret = sender.task_send( ("a message sent on: %s" % time.ctime(), "a message sent on: %s" % time.ctime() ) )    
-    printer.task_print_it(ret["value"])
+    msgs = ("a message sent on: %s" % time.ctime(), "a message sent on: %s" % time.ctime(), [ "mop", "kop", [ "hop", "clop"] ] )
 
-    ret = sender.task_send( "Tralala"  )
-    printer.task_print_it( [ "hoplala", ret["value"], ret["value"], ret["value"] ] )
+    ret = sender.task_send( msgs )    
+    # printer.task_print_it(ret["value"])
+
+    # ret = sender.task_send( "Tralala"  )
+    # printer.task_print_it( [ "hoplala", ret["value"], ret["value"], ret["value"] ] )
 
     sender.start_jobs(store_failures=True, raise_exceptions=True)
     print("===> print")

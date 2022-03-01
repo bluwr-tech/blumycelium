@@ -65,7 +65,7 @@ class ReturnPlaceHolder:
     def __repr__(self):
         return str(self)
 
-class Parameters:
+class TaskParameters:
 
     def __init__(self, fct):
         from inspect import signature
@@ -124,57 +124,130 @@ class Parameters:
 
         return True
 
+    def get_storable_type(self, obj):
+        """
+        get a type storable by the mycellum for obj
+            [list, tuple] -> array
+            dict -> obj
+            [str, float, int] -> primitive
+            None -> null
+        """
+        if type(obj) in [list, tuple]:
+            return "array"
+        elif type(obj) is dict:
+            return "object"
+        elif type(obj) in [str, float, int]:
+            return "primitive"
+        elif type(obj) in type(None):
+            return "null"
+        else:
+            raise Exception("Unknown type; %s must be in %s" % (type(obj), [list, tuple, dict, str, float, int]))
+
     def get_parameters(self):
-        def _add_param(value, static, embeddings, embedding_function):
+        def _add_param(value, uid, value_type, expression):
             ret = {
+                "uid": uid,
+                "type": value_type,
                 "value": value,
-                "static": static,
-                "embeddings": embeddings,
-                "embedding_function": embedding_function
+                "expression": expression,
             }
             return ret
 
-        def _rec_find_parameters(obj_key_value):
+        def _rec_find_parameters(obj_key_value, embedding_operation):
             args = {}
             for param_name, value in obj_key_value:
-                embeddings = {}
-                embedding_function=None
+                placeholder = None
                 if isinstance(value, ValuePlaceholder):
-                    static = False
+                    placeholder = value
+                    value = None
                 else:
-                    static = True            
+                    value_type = self.get_storable_type(value)
                     iterator = None
                     if type(value) is dict:
                         iterator = value.items()
-                        embedding_function = "__setitem__"
-                    elif type(value) is list:
+                        new_value = {}
+                        expression = "{parent_uid}[{self_name}] = {self_value}"
+                    elif type(value) in [list, tuple]:
                         iterator = enumerate(value)
-                        embedding_function = "__setitem__"
+                        new_value = []
+                        expression = "{parent_uid}.append({self_value})"
                    
                     if not iterator is None:
-                        embeddings = _rec_find_parameters(iterator)
-                args[param_name] = _add_param(value, static, embedding, embedding_function)
+                        embeddings = _rec_find_parameters(iterator, new_embedding_operation)
+                        
+                    # if len(embeddings) > 0:
+                        # value = None
+
+                args[param_name] = _add_param(new_value, uid=ut.getuid(), value_type=value_type, expression=expression)
 
             return args
 
-        ret = _rec_find_parameters(self.final_args)
+        ret = _rec_find_parameters(self.final_args.items(), None)
 
         return ret
 
-    def get_placeholder_parameters(self):
-        args = {}
-        for param_name, value in self.final_args.items():
-            if isinstance(value, ValuePlaceholder):
-                args[param_name] = value
+    def get_parameters_bck(self):
+        def _add_param(value, value_type, static, embeddings, embedding_operation, placeholder):
+            ret = {
+                "type": value_type,
+                "value": value,
+                "is_static": static,
+                "is_embedded": not (embedding_operation is None),
+                "embeddings": embeddings,
+                "embedding_operation": embedding_operation,
+                "has_embeddings": not (embeddings is None) and len(embeddings) > 0,
+                "placeholder": placeholder
+            }
+            return ret
 
-        return args
+        def _rec_find_parameters(obj_key_value, embedding_operation):
+            args = {}
+            for param_name, value in obj_key_value:
+                embeddings = {}
+                placeholder = None
+                if isinstance(value, ValuePlaceholder):
+                    placeholder = value
+                    value = None
+                    static = False
+                else:
+                    value_type = self.get_storable_type(value)
+                    static = True
+                    iterator = None
+                    if type(value) is dict:
+                        iterator = value.items()
+                        new_embedding_operation = "__setitem__"
+                    elif type(value) in [list, tuple]:
+                        iterator = enumerate(value)
+                        new_embedding_operation = "__setitem__"
+                    
+                    if not iterator is None:
+                        embeddings = _rec_find_parameters(iterator, new_embedding_operation)
+                        
+                    if len(embeddings) > 0:
+                        value = None
 
-    def get_static_parameters(self):
-        args = {}
-        for param_name, value in self.final_args.items():
-            if not isinstance(value, ValuePlaceholder):
-                args[param_name] = value
-        return args
+                args[param_name] = _add_param(value, value_type, static, embeddings, embedding_operation, placeholder)
+
+            return args
+        
+        ret = _rec_find_parameters(self.final_args.items(), None)
+
+        return ret
+
+    # def get_placeholder_parameters(self):
+    #     args = {}
+    #     for param_name, value in self.final_args.items():
+    #         if isinstance(value, ValuePlaceholder):
+    #             args[param_name] = value
+
+    #     return args
+
+    # def get_static_parameters(self):
+    #     args = {}
+    #     for param_name, value in self.final_args.items():
+    #         if not isinstance(value, ValuePlaceholder):
+    #             args[param_name] = value
+    #     return args
 
     # def get_embedded_placeholder_parameters(self):
     #     args = {}
@@ -251,7 +324,7 @@ class Task:
         run_job_id = ut.getuid()
 
         def _wrapped():
-            self.parameters = Parameters(self.function)
+            self.parameters = TaskParameters(self.function)
             self.parameters.set_parameters(*args, **kwargs)
             self.parameters.validate()
 

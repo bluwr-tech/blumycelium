@@ -45,3 +45,9 @@ def getuid():
     import uuid
     val = str(uuid.uuid4())
     return legalize_key(val)
+
+def get_random_variable_name():
+    """returns a string that can serve as a python variable name"""
+    import uuid
+    val = str(uuid.uuid4())
+    return "var_" + legalize_key(val)
