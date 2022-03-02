@@ -16,8 +16,8 @@ class ValuePlaceholder:
     def __repr__(self):
         return str(self)
 
-class ReturnPlaceHolder:
-    """docstring for ReturnPlaceHolder"""
+class TaskReturnPlaceHolder:
+    """docstring for TaskReturnPlaceHolder"""
     def __init__(self, worker_elf, task_function, run_job_id):
         self.task_function = task_function
         self.worker_elf = worker_elf
@@ -330,7 +330,7 @@ class Task:
 
             now = ut.gettime()
             
-            return_placeholder = ReturnPlaceHolder(worker_elf=self.machine_elf.uid, task_function=self.function, run_job_id=run_job_id)
+            return_placeholder = TaskReturnPlaceHolder(worker_elf=self.machine_elf.uid, task_function=self.function, run_job_id=run_job_id)
             return_placeholder.make_placeholder()
 
             job = JOB(
