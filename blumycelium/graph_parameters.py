@@ -56,12 +56,34 @@ class GraphParameter:
         self.dependencies = None
         self.dependency_values = {}
 
-    def make(self):
+    def add_dependencies(self, *deps):
+        if self.dependencies is None:
+            self.dependencies = []
+
+        dct = {dep.uid: dep for dep in deps}
+        self.dependencies.append(dct)
+
+    def make(self, is_root=False):
+        def _run_deps():
+            if self.dependencies:
+                for batch in self.dependencies:
+                    for dep in batch.values():
+                        # print(dep.uid)
+                        dep_ret = dep.make()
+                        if dep.uid in self.dependency_values:
+                            self.dependency_values[dep.uid] = dep_ret
+        
+        # print("---in:", self.uid)
+        if is_root:
+            # print("====ROOT")
+            _run_deps()
+
         if not self.value is None:
             return self.value
 
-        for dep in self.dependencies.values():
-            self.dependency_values[dep.uid] = dep.make()
+        if not is_root:
+            # print("====NOT ROOT")
+            _run_deps()
 
         ret = self.code_block.run(**self.dependency_values)
         return ret
@@ -74,20 +96,28 @@ class GraphParameter:
     def set_code_block(self, init_code, return_statement, **dependencies):
         if self.value is not None:
             raise Exception("A code block has been defined, you can either set a value or a code block")
-        self.code_block = CodeBlock(init_code, return_statement)
-        self.dependencies = dependencies
-        
+
         string_kwargs = {}
-        for hr_name, dep in self.dependencies.items():
+        for hr_name, dep in dependencies.items():
+            self.dependency_values[dep.uid] = None
             if not isinstance(dep, GraphParameter):
                 raise Exception("All depenedencies must be GraphParameters, got: '%s'" % type(dep))
             string_kwargs[hr_name] = dep.uid 
+
+        if self.dependencies is None:
+            self.dependencies = []
+        self.dependencies.append(dependencies)
         
+        
+        self.code_block = CodeBlock(init_code, return_statement)
         self.code_block.format(**string_kwargs)
 
     def __str__(self):
         if self.dependencies is not None:
-            deps = [ dep.uid for dep in self.dependencies.values() ]
+            deps = []
+            for batch in self.dependencies:
+                for dep in batch.values():
+                    deps.append(dep.uid)
         else:
             deps = None
         return "*-GraphParameter '%s' value:'%s' code_block:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, deps)
@@ -154,10 +184,11 @@ def unravel_dict(dct):
     return params
 
 class Value(object):
-    def __init__(self, as_type=None):
+    def __init__(self, as_type=None, parent=None):
         super(Value, self).__init__()
         self.parameter = GraphParameter()
         self.as_type = as_type
+        self.parent = parent
 
     def set_value(self, *args, **kwargs):
         return self.parameter.set_value(*args, **kwargs)
@@ -210,7 +241,7 @@ class Value(object):
         new_param = GraphParameter()
         new_param.set_code_block(init_code=None, return_statement=return_statement, self_param=self_param, key=key_param)
         
-        new_value = Value()
+        new_value = Value(parent=self)
         new_value.parameter = new_param
         return new_value
 
@@ -240,11 +271,15 @@ class Value(object):
         
         new_param = GraphParameter()
         new_param.set_code_block(init_code=None, return_statement=return_statement, self_param=self.parameter, **final_params_map)
+        
+        if not self.parent is None:
+            self.parent.parameter.add_dependencies(new_param)
         self.parameter = new_param
+
         return self
 
     def make(self):
-        return self.parameter.make()
+        return self.parameter.make(is_root=True)
 
     def __str__(self):
         return "Value: %s" % str(self.parameter)
@@ -293,13 +328,11 @@ def test_arbitrary():
     param = Value()
     param.set_value(lst)
 
-    ic(param)
-    h = param.append(60)
-    ic(h)
-    ic(h.make())
+    param.append(60)
     ic(param.make())
-    # ic(param.append(60).make())
-    # ic(param)
-
+   
+    param.extend(lst)
+    ic(param.make())
+     
 if __name__ == '__main__':
     test_arbitrary()
