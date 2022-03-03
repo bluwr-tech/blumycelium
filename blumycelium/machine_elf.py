@@ -20,8 +20,6 @@ class TaskReturnPlaceHolder:
         self.parameters = {}
         self.is_none = False
         
-        # self.value = gp.Value()
-
     def make_placeholder(self):
         from inspect import signature, _empty
 
@@ -186,6 +184,49 @@ class TaskParameters:
         ret = _rec_find_parameters(self.final_args.items(), None)
 
         return ret
+        
+    # def get_parameters(self):
+    #     def _add_param(value, uid, value_type, expression):
+    #         ret = {
+    #             "uid": uid,
+    #             "type": value_type,
+    #             "value": value,
+    #             "expression": expression,
+    #         }
+    #         return ret
+
+    #     def _rec_find_parameters(obj_key_value, embedding_operation):
+    #         args = {}
+    #         for param_name, value in obj_key_value:
+    #             placeholder = None
+    #             if isinstance(value, ValuePlaceholder):
+    #                 placeholder = value
+    #                 value = None
+    #             else:
+    #                 value_type = self.get_storable_type(value)
+    #                 iterator = None
+    #                 if type(value) is dict:
+    #                     iterator = value.items()
+    #                     new_value = {}
+    #                     expression = "{parent_uid}[{self_name}] = {self_value}"
+    #                 elif type(value) in [list, tuple]:
+    #                     iterator = enumerate(value)
+    #                     new_value = []
+    #                     expression = "{parent_uid}.append({self_value})"
+                   
+    #                 if not iterator is None:
+    #                     embeddings = _rec_find_parameters(iterator, new_embedding_operation)
+                        
+    #                 # if len(embeddings) > 0:
+    #                     # value = None
+
+    #             args[param_name] = _add_param(new_value, uid=ut.getuid(), value_type=value_type, expression=expression)
+
+    #         return args
+
+    #     ret = _rec_find_parameters(self.final_args.items(), None)
+
+    #     return ret
 
     def get_parameters_bck(self):
         def _add_param(value, value_type, static, embeddings, embedding_operation, placeholder):

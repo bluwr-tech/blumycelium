@@ -129,66 +129,42 @@ class GraphParameter:
         visited_nodes.add(self.uid)
         return tree
 
-    def pp_traverse(self):
+    def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block"]):
         from rich.tree import Tree
         from rich import print
 
+        def _get_represenation(node):
+            if full_representation:
+                return str(node)
+            elif len(representation_attributes) > 0:
+                vals = [ "%s: %s" % (attr, str( getattr(node, attr)) ) for attr in representation_attributes if not getattr(node, attr) is None]
+                return ", ".join(vals)
+            return repr(node)
+            
         def _get_node(node):
             if node["is_root"]:
-                tree = Tree("[bold cyan] ROOT: %s" % repr(self))
+                tree = Tree("[bold cyan]>ROOT: %s" % _get_represenation(node["node"]))
             elif node['visited']:
-                tree = Tree("[bold magenta] ALREADY VISITED: %s" % repr(self))
+                tree = Tree("[bold magenta]>ALREADY VISITED: %s" % _get_represenation(node["node"]))
             else:
-                tree = Tree("%s" % repr(self))
+                tree = Tree("%s" % _get_represenation(node["node"]))
             return tree
         
-        def _traverse(trav, tree):
+        def _traverse(trav, curr_tree):
             for branch in trav["branches"].values():
                 node = _get_node(branch)
-                tree.add(node)
+                curr_tree.add(node)
                 _traverse(branch, node)
             return tree
 
         trav = self.traverse()
         tree = _get_node(trav)
+        tree = _traverse(trav, tree)
 
-        return _traverse(trav, tree)
+        print(tree)
 
-    def pp_traverse_bck(self, visited_nodes=None, is_root=True, root_uid=None):
-        from rich.tree import Tree
-        from rich import print
-
-        def _run_deps(visited, tree, tree_root_uid):
-            if self.dependencies:
-                for batch in self.dependencies:
-                    for dep in batch.values():
-                        tree.add(dep.traverse(visited, False, tree_root_uid))
-        
-        if is_root or root_uid == self.uid:
-            tree = Tree("[bold cyan] ROOT: %s" % repr(self))
-        else:
-            tree = Tree("%s" % repr(self))
-        
-        if visited_nodes is None:
-            visited_nodes = set()
-        elif self.uid in visited_nodes:
-            if self.uid != root_uid:
-                tree = Tree("[bold magenta] ALREADY VISITED: %s" % repr(self))
-            return tree
-
-        if is_root:
-            root_uid = self.uid
-            _run_deps(visited_nodes, tree, root_uid)
-
-        if not self.value is None:
-            visited_nodes.add(self.uid)
-            return tree
-
-        if not is_root:
-            _run_deps(visited_nodes, tree, root_uid)
-
-        visited_nodes.add(self.uid)
         return tree
+
     def set_value(self, value):
         if self.code_block is not None or self.dependencies is not None:
             raise Exception("A code block has been defined, you can either set a value or a code block")
@@ -231,64 +207,6 @@ class GraphParameter:
                     deps += 1 
         return "*-GraphParameter '%s' value:'%s' code_block:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, deps)
 
-def unravel_list(lst):
-    last_list_param = GraphParameter()
-    last_list_param.set_value([])
-
-    params = [last_list_param]
-    for value in lst:
-        val_param = GraphParameter()
-        val_param.set_value(value)
-
-        new_list_param = GraphParameter()
-        
-        init_code="""
-        def add(lst, value):
-            lst.append(value)
-            return lst""".strip()
-        return_statement = "add({list_var}, {value_var})"
-        
-        new_list_param.set_code_block(
-            init_code=init_code,
-            return_statement=return_statement,
-            list_var=last_list_param,
-            value_var=val_param
-            )
-        
-        last_list_param = new_list_param
-        params.append(val_param)
-        params.append(last_list_param)
-    return params
-
-def unravel_dict(dct):
-    last_list_param = GraphParameter()
-    last_list_param.set_value({})
-
-    params = [last_list_param]
-    for key, value in dct.items():
-        val_param = GraphParameter()
-        val_param.set_value(value)
-
-        new_list_param = GraphParameter()
-        
-        init_code="""
-        def add(dct, key, value):
-            dct[key]=value
-            return dct""".strip()
-        return_statement = "add({list_var}, %s, {value_var})" % key
-        
-        new_list_param.set_code_block(
-            init_code=init_code,
-            return_statement=return_statement,
-            list_var=last_list_param,
-            value_var=val_param
-            )
-        
-        last_list_param = new_list_param
-        params.append(val_param)
-        params.append(last_list_param)
-    return params
-
 class Value(object):
     
     def _init(self, as_type=None, parent=None):
@@ -297,6 +215,7 @@ class Value(object):
         self.as_type = as_type
         self.parent = parent
         self.closed_init = False
+        self.dependencies = []
 
     def close_init(self):
         self.closed_init = True
@@ -305,16 +224,25 @@ class Value(object):
         self._init(*args, **kwargs)
         self.close_init()
 
-    def set_value(self, *args, **kwargs):
-        return self.parameter.set_value(*args, **kwargs)
+    def set_value(self, value):
+        self.as_type = type(value)
+        return self.parameter.set_value(value)
 
     def set_code_block(self, *args, **kwargs):
         return self.parameter.set_code_block(*args, **kwargs)
 
+    def traverse(self, *args, **kwargs):
+        return self.parameter.traverse(*args, **kwargs)
+
+    def pp_traverse(self, *args, **kwargs):
+        return self.parameter.pp_traverse(*args, **kwargs)
+
     def _get_parameter(self, param):
         if isinstance(param, Value):
-            return params.parameter
+            self.parent.dependencies.append(param)
+            return param.parameter
         elif isinstance(param, GraphParameter):
+            self.parent.dependencies.append(param)
             return param
 
         new_param = GraphParameter()
@@ -432,6 +360,9 @@ class Value(object):
         return self
 
     def make(self):
+        for dep in self.dependencies:
+            dep.make()
+        
         return self.parameter.make(is_root=True)
 
     def __str__(self):
@@ -440,13 +371,85 @@ class Value(object):
     def __repr__(self):
         return "Value: %s" % repr(self.parameter)
 
-def test_unravels():
-    lst = [1, 2, 3, 4, 5, 10]
-    res = unravel_list(lst)
-    print(res[-1].make())
+# def unravel_list(lst):
+#     last_list_param = GraphParameter()
+#     last_list_param.set_value([])
 
-    res = unravel_dict(dct)
-    print(res[-1].make())
+#     params = [last_list_param]
+#     for value in lst:
+#         val_param = GraphParameter()
+#         val_param.set_value(value)
+
+#         new_list_param = GraphParameter()
+        
+#         init_code="""
+#         def add(lst, value):
+#             lst.append(value)
+#             return lst""".strip()
+#         return_statement = "add({list_var}, {value_var})"
+        
+#         new_list_param.set_code_block(
+#             init_code=init_code,
+#             return_statement=return_statement,
+#             list_var=last_list_param,
+#             value_var=val_param
+#             )
+        
+#         last_list_param = new_list_param
+#         params.append(val_param)
+#         params.append(last_list_param)
+#     return params
+
+# def unravel_dict(dct):
+#     last_list_param = GraphParameter()
+#     last_list_param.set_value({})
+
+#     params = [last_list_param]
+#     for key, value in dct.items():
+#         val_param = GraphParameter()
+#         val_param.set_value(value)
+
+#         new_list_param = GraphParameter()
+        
+#         init_code="""
+#         def add(dct, key, value):
+#             dct[key]=value
+#             return dct""".strip()
+#         return_statement = "add({list_var}, %s, {value_var})" % key
+        
+#         new_list_param.set_code_block(
+#             init_code=init_code,
+#             return_statement=return_statement,
+#             list_var=last_list_param,
+#             value_var=val_param
+#             )
+        
+#         last_list_param = new_list_param
+#         params.append(val_param)
+#         params.append(last_list_param)
+#     return params
+
+# def test_unravels():
+#     lst = [1, 2, 3, 4, 5, 10]
+#     res = unravel_list(lst)
+#     print(res[-1].make())
+
+#     res = unravel_dict(dct)
+#     print(res[-1].make())
+
+def unravel_list(lst):
+    param = Value()
+    param.set_value([])
+    for val in lst:
+        param.append(val)
+    return param
+
+def unravel_dict(dct):
+    param = Value()
+    param.set_value({})
+    for key, val in dct.items():
+        param.append(val)
+    return param
 
 def test_subslist():
     lst = [1, 2, 3, 4, 5, 10]
@@ -497,11 +500,26 @@ def test_easy_unravel():
 
     for v in lst:
         param.append(v)
-    
-    tree = param.parameter.pp_traverse()
-    
-    print(tree)
+        
+    ic(param.make())
+
+def test_nested_unravel():
+    from rich import print
+
+    lst = [1, 2, 3, 4, 5]
+    param = Value()
+    param.set_value([])
+
+    for v in lst:
+        param.append(v)
+
+    val = Value()
+    val.set_value([1])
+    val.append(100)
+
+    param.append(val)
+        
     ic(param.make())
 
 if __name__ == '__main__':
-    test_easy_unravel()
+    test_nested_unravel()
