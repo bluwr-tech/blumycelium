@@ -66,7 +66,7 @@ class GraphParameter:
         dct = {dep.uid: dep for dep in deps}
         self.dependencies.append(dct)
 
-    def make(self, visited_nodes=None, is_root=False):
+    def make_bck(self, visited_nodes=None, is_root=False):
         def _run_deps(visited):
             if self.dependencies:
                 for batch in self.dependencies:
@@ -95,6 +95,32 @@ class GraphParameter:
         visited_nodes.add(self.uid)
         return self.computed_value
 
+    def make(self, visited_nodes=None, is_root=False):
+        def _run_deps(visited):
+            if self.dependencies:
+                for batch in self.dependencies:
+                    for dep in batch.values():
+                        dep_ret = dep.make(visited)
+                        if dep.uid in self.dependency_values:
+                            self.dependency_values[dep.uid] = dep_ret
+        
+        if not self.value is None:
+            self.computed_value = self.value
+        
+        if visited_nodes is None:
+            visited_nodes = set()
+        
+        if self.uid in visited_nodes:
+            return self.computed_value
+
+        visited_nodes.add(self.uid)
+        _run_deps(visited_nodes)
+
+        if self.value is None:
+            self.computed_value = self.code_block.run(**self.dependency_values)
+    
+        return self.computed_value
+
     def traverse(self, visited_nodes=None, is_root=True, root_uid=None):
         def _add_tree(node, is_root, root_uid, visited):
             return {"node": node, "is_root": is_root, "root_uid": root_uid, "visited": visited, "branches": {}}
@@ -116,17 +142,18 @@ class GraphParameter:
         if self.uid in visited_nodes:
             return tree
 
-        if is_root:
-            _run_deps(visited_nodes, tree, root_uid)
-
-        if not self.value is None:
-            visited_nodes.add(self.uid)
-            return tree
-
-        if not is_root:
-            _run_deps(visited_nodes, tree, root_uid)
-
         visited_nodes.add(self.uid)
+        _run_deps(visited_nodes, tree, root_uid)
+        # if is_root:
+            # _run_deps(visited_nodes, tree, root_uid)
+
+        # if not self.value is None:
+            # visited_nodes.add(self.uid)
+            # return tree
+
+        # if not is_root:
+            # _run_deps(visited_nodes, tree, root_uid)
+
         return tree
 
     def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block"]):
@@ -136,14 +163,14 @@ class GraphParameter:
         def _get_represenation(node):
             if full_representation:
                 return str(node)
-            elif len(representation_attributes) > 0:
+            elif representation_attributes and len(representation_attributes) > 0:
                 vals = [ "%s: %s" % (attr, str( getattr(node, attr)) ) for attr in representation_attributes if not getattr(node, attr) is None]
                 return ", ".join(vals)
             return repr(node)
             
         def _get_node(node):
             if node["is_root"]:
-                tree = Tree("[bold cyan]>ROOT: %s" % _get_represenation(node["node"]))
+                tree = Tree("[bold blue]>ROOT: %s" % _get_represenation(node["node"]))
             elif node['visited']:
                 tree = Tree("[bold magenta]>ALREADY VISITED: %s" % _get_represenation(node["node"]))
             else:
@@ -239,10 +266,12 @@ class Value(object):
 
     def _get_parameter(self, param):
         if isinstance(param, Value):
-            self.parent.dependencies.append(param)
+            # self.parent.dependencies.append(param)
+            self.parent.parameter.add_dependencies(param.parameter)
             return param.parameter
         elif isinstance(param, GraphParameter):
             self.parent.dependencies.append(param)
+            self.parent.parameter.add_dependencies(param)
             return param
 
         new_param = GraphParameter()
@@ -360,8 +389,8 @@ class Value(object):
         return self
 
     def make(self):
-        for dep in self.dependencies:
-            dep.make()
+        # for dep in self.dependencies:
+        #     dep.make()
         
         return self.parameter.make(is_root=True)
 
@@ -517,8 +546,15 @@ def test_nested_unravel():
     val.set_value([1])
     val.append(100)
 
+    val2 = Value()
+    val2.set_value([2])
+    val2.append(200)
+
+    val.append(val2)
+    # val.pp_traverse(representation_attributes=None)
     param.append(val)
         
+    param.pp_traverse(representation_attributes=None)
     ic(param.make())
 
 if __name__ == '__main__':
