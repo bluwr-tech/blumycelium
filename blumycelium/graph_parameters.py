@@ -96,6 +96,65 @@ class GraphParameter:
         return self.computed_value
 
     def traverse(self, visited_nodes=None, is_root=True, root_uid=None):
+        def _add_tree(node, is_root, root_uid, visited):
+            return {"node": node, "is_root": is_root, "root_uid": root_uid, "visited": visited, "branches": {}}
+
+        def _run_deps(visited, tree, tree_root_uid):
+            if self.dependencies:
+                for batch in self.dependencies:
+                    for dep in batch.values():
+                        tree["branches"][dep.uid] = dep.traverse(visited, False, tree_root_uid)
+        
+        if visited_nodes is None:
+            visited_nodes = set()
+
+        if is_root:
+            root_uid = self.uid
+
+        tree = _add_tree(self, root_uid==self.uid, root_uid, self.uid in visited_nodes)
+        
+        if self.uid in visited_nodes:
+            return tree
+
+        if is_root:
+            _run_deps(visited_nodes, tree, root_uid)
+
+        if not self.value is None:
+            visited_nodes.add(self.uid)
+            return tree
+
+        if not is_root:
+            _run_deps(visited_nodes, tree, root_uid)
+
+        visited_nodes.add(self.uid)
+        return tree
+
+    def pp_traverse(self):
+        from rich.tree import Tree
+        from rich import print
+
+        def _get_node(node):
+            if node["is_root"]:
+                tree = Tree("[bold cyan] ROOT: %s" % repr(self))
+            elif node['visited']:
+                tree = Tree("[bold magenta] ALREADY VISITED: %s" % repr(self))
+            else:
+                tree = Tree("%s" % repr(self))
+            return tree
+        
+        def _traverse(trav, tree):
+            for branch in trav["branches"].values():
+                node = _get_node(branch)
+                tree.add(node)
+                _traverse(branch, node)
+            return tree
+
+        trav = self.traverse()
+        tree = _get_node(trav)
+
+        return _traverse(trav, tree)
+
+    def pp_traverse_bck(self, visited_nodes=None, is_root=True, root_uid=None):
         from rich.tree import Tree
         from rich import print
 
@@ -104,10 +163,9 @@ class GraphParameter:
                 for batch in self.dependencies:
                     for dep in batch.values():
                         tree.add(dep.traverse(visited, False, tree_root_uid))
-                        # print(tree)
-
+        
         if is_root or root_uid == self.uid:
-            tree = Tree("[blue]%s" % repr(self))
+            tree = Tree("[bold cyan] ROOT: %s" % repr(self))
         else:
             tree = Tree("%s" % repr(self))
         
@@ -115,7 +173,7 @@ class GraphParameter:
             visited_nodes = set()
         elif self.uid in visited_nodes:
             if self.uid != root_uid:
-                tree = Tree("[red]%s" % repr(self))
+                tree = Tree("[bold magenta] ALREADY VISITED: %s" % repr(self))
             return tree
 
         if is_root:
@@ -131,13 +189,6 @@ class GraphParameter:
 
         visited_nodes.add(self.uid)
         return tree
-
-    def pp_traverse(self):
-        import json
-        trav = self.traverse()
-
-        print(json.dumps(trav, indent=4).replace(" ", "-"))
-
     def set_value(self, value):
         if self.code_block is not None or self.dependencies is not None:
             raise Exception("A code block has been defined, you can either set a value or a code block")
@@ -447,7 +498,7 @@ def test_easy_unravel():
     for v in lst:
         param.append(v)
     
-    tree = param.parameter.traverse()
+    tree = param.parameter.pp_traverse()
     
     print(tree)
     ic(param.make())
