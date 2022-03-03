@@ -1,20 +1,16 @@
 from . import utils as ut
 from . import custom_types
+from . import graph_parameters as gp
 
 from icecream import ic
 
-class ValuePlaceholder:
+class ValuePlaceholder(gp.Value):
 
-    def __init__(self, run_job_id, name):
+    def _init(self, run_job_id, name, *args, **kwargs):
+        super(ValuePlaceholder, self)._init(*args, **kwargs)
+        ic(self.as_type)
         self.run_job_id = run_job_id
         self.name = name
-        self.uid = ut.legalize_key(self.run_job_id + name)
-
-    def __str__(self):
-        return "<ValuePlaceholder: parameter key: '%s', return key: '%s'>" %(self.name, self.run_job_id)
-
-    def __repr__(self):
-        return str(self)
 
 class TaskReturnPlaceHolder:
     """docstring for TaskReturnPlaceHolder"""
@@ -24,6 +20,8 @@ class TaskReturnPlaceHolder:
         self.run_job_id = run_job_id
         self.parameters = {}
         self.is_none = False
+        
+        # self.value = gp.Value()
 
     def make_placeholder(self):
         from inspect import signature, _empty
@@ -41,8 +39,12 @@ class TaskReturnPlaceHolder:
             raise Exception("Task return annotation cannot be empty, expecting None, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
 
         if not self.is_none:
-            for key in ret_annotation:
-                self.parameters[key] = ValuePlaceholder(self.run_job_id, key)
+            if type(ret_annotation) is dict:
+                for key, value in ret_annotation.items():
+                    self.parameters[key] = ValuePlaceholder(self.run_job_id, key, as_type=value)
+            else:
+                for key in ret_annotation:
+                    self.parameters[key] = ValuePlaceholder(self.run_job_id, key)
 
     def get_result_id(self, name):
         if name not in self.parameters:

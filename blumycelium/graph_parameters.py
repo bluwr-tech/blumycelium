@@ -1,4 +1,4 @@
-import utils as ut
+from . import utils as ut
 from icecream import ic
 ic.configureOutput(includeContext=True)
 
@@ -190,11 +190,20 @@ def unravel_dict(dct):
     return params
 
 class Value(object):
-    def __init__(self, as_type=None, parent=None):
+    
+    def _init(self, as_type=None, parent=None):
         super(Value, self).__init__()
         self.parameter = GraphParameter()
         self.as_type = as_type
         self.parent = parent
+        self.closed_init = False
+
+    def close_init(self):
+        self.closed_init = True
+
+    def __init__(self, *args, **kwargs):
+        self._init(*args, **kwargs)
+        self.close_init()
 
     def set_value(self, *args, **kwargs):
         return self.parameter.set_value(*args, **kwargs)
@@ -214,7 +223,14 @@ class Value(object):
         new_param.set_value(param)
         return new_param
 
+    def _validate_type(self, key):
+        as_type = object.__getattribute__(self, "as_type")
+        if not as_type is None:
+            getattr(as_type, key) #will raise an exception if the attribute is non-existant
+
     def __getitem__(self, key):
+        self._validate_type("__getitem__")
+
         code = "{self_param}[{key}]"
         key_param = GraphParameter()
         key_param.set_value(key)
@@ -223,6 +239,8 @@ class Value(object):
         return new_param
 
     def __setitem__(self, key, value):
+        self._validate_type("__setitem__")
+
         init_code="""
         def add(dct, key, value):
             dct[key]=value
@@ -238,7 +256,34 @@ class Value(object):
         new_param.set_code_block(init_code=init_code, return_statement=return_statement, self_param=self.parameter, key=key_param, value=value_param)
         self.parameter = new_param
 
+    def __setattr__(self, key, value):
+        try:
+            closed_init = object.__getattribute__(self, "closed_init")
+        except AttributeError:
+            closed_init = False
+
+        if not closed_init:
+            return object.__setattr__(self, key, value)
+        else:        
+            init_code="""
+            def add(obj, key, value):
+                setattr(obj, key, value)
+                return obj""".strip()
+            return_statement = "add({self_param}, {key}, {value})"
+
+            code = "{self_param}[{key}]={value}"
+            
+            key_param = self._get_parameter(key)
+            value_param = self._get_parameter(value)
+            
+            new_param = GraphParameter()
+            new_param.set_code_block(init_code=init_code, return_statement=return_statement, self_param=self.parameter, key=key_param, value=value_param)
+            self.parameter = new_param
+
     def __getattr__(self, key):
+        _validate_type = object.__getattribute__(self, "_validate_type")
+        _validate_type(key)
+
         self_param = object.__getattribute__(self, "parameter")
         key_param = object.__getattribute__(self, "_get_parameter")(key)
 
@@ -337,13 +382,18 @@ def test_arbitrary():
     param.extend(lst)
     
     param.append(60)
+    param.append(61)
+    param.pop()
     ic(param.make())
 
-    # l = [1, 2, 3, 4, 5]
-    # l.append(60)
-    # l.extend(l)
-    # ic(l)
-    # param.lala = 2
+def test_easy_unravel():
+    lst = [1, 2, 3, 4, 5]
+    param = Value()
+    param.set_value([])
+
+    for v in lst:
+        param.append(v)
+    ic(param.make())
 
 if __name__ == '__main__':
-    test_arbitrary()
+    test_easy_unravel()
