@@ -55,6 +55,8 @@ class GraphParameter:
         self.code_block = None
         self.dependencies = None
         self.dependency_values = {}
+        
+        self.computed_value = None
 
     def add_dependencies(self, *deps):
         if self.dependencies is None:
@@ -63,30 +65,34 @@ class GraphParameter:
         dct = {dep.uid: dep for dep in deps}
         self.dependencies.append(dct)
 
-    def make(self, is_root=False):
-        def _run_deps():
+    def make(self, visited_nodes=None, is_root=False):
+        def _run_deps(visited):
             if self.dependencies:
                 for batch in self.dependencies:
                     for dep in batch.values():
-                        # print(dep.uid)
-                        dep_ret = dep.make()
+                        dep_ret = dep.make(visited)
                         if dep.uid in self.dependency_values:
                             self.dependency_values[dep.uid] = dep_ret
         
-        # print("---in:", self.uid)
+        if visited_nodes is None:
+            visited_nodes = set()
+        elif self.uid in visited_nodes:
+            return self.computed_value
+
         if is_root:
-            # print("====ROOT")
-            _run_deps()
+             _run_deps(visited_nodes)
 
         if not self.value is None:
-            return self.value
+            self.computed_value = self.value
+            visited_nodes.add(self.uid)
+            return self.computed_value
 
         if not is_root:
-            # print("====NOT ROOT")
-            _run_deps()
+            _run_deps(visited_nodes)
 
-        ret = self.code_block.run(**self.dependency_values)
-        return ret
+        self.computed_value = self.code_block.run(**self.dependency_values)
+        visited_nodes.add(self.uid)
+        return self.computed_value
 
     def set_value(self, value):
         if self.code_block is not None or self.dependencies is not None:
@@ -328,11 +334,16 @@ def test_arbitrary():
     param = Value()
     param.set_value(lst)
 
+    param.extend(lst)
+    
     param.append(60)
     ic(param.make())
-   
-    param.extend(lst)
-    ic(param.make())
-     
+
+    # l = [1, 2, 3, 4, 5]
+    # l.append(60)
+    # l.extend(l)
+    # ic(l)
+    # param.lala = 2
+
 if __name__ == '__main__':
     test_arbitrary()
