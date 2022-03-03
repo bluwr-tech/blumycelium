@@ -8,7 +8,6 @@ class ValuePlaceholder(gp.Value):
 
     def _init(self, run_job_id, name, *args, **kwargs):
         super(ValuePlaceholder, self)._init(*args, **kwargs)
-        ic(self.as_type)
         self.run_job_id = run_job_id
         self.name = name
 

@@ -1,4 +1,5 @@
-from . import utils as ut
+# from . import utils as ut
+import utils as ut
 from icecream import ic
 ic.configureOutput(includeContext=True)
 
@@ -94,6 +95,49 @@ class GraphParameter:
         visited_nodes.add(self.uid)
         return self.computed_value
 
+    def traverse(self, visited_nodes=None, is_root=True, root_uid=None):
+        from rich.tree import Tree
+        from rich import print
+
+        def _run_deps(visited, tree, tree_root_uid):
+            if self.dependencies:
+                for batch in self.dependencies:
+                    for dep in batch.values():
+                        tree.add(dep.traverse(visited, False, tree_root_uid))
+                        # print(tree)
+
+        if is_root or root_uid == self.uid:
+            tree = Tree("[blue]%s" % repr(self))
+        else:
+            tree = Tree("%s" % repr(self))
+        
+        if visited_nodes is None:
+            visited_nodes = set()
+        elif self.uid in visited_nodes:
+            if self.uid != root_uid:
+                tree = Tree("[red]%s" % repr(self))
+            return tree
+
+        if is_root:
+            root_uid = self.uid
+            _run_deps(visited_nodes, tree, root_uid)
+
+        if not self.value is None:
+            visited_nodes.add(self.uid)
+            return tree
+
+        if not is_root:
+            _run_deps(visited_nodes, tree, root_uid)
+
+        visited_nodes.add(self.uid)
+        return tree
+
+    def pp_traverse(self):
+        import json
+        trav = self.traverse()
+
+        print(json.dumps(trav, indent=4).replace(" ", "-"))
+
     def set_value(self, value):
         if self.code_block is not None or self.dependencies is not None:
             raise Exception("A code block has been defined, you can either set a value or a code block")
@@ -129,7 +173,12 @@ class GraphParameter:
         return "*-GraphParameter '%s' value:'%s' code_block:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, deps)
 
     def __repr__(self):
-        return str(self)
+        deps = 0
+        if self.dependencies is not None:
+            for batch in self.dependencies:
+                for dep in batch.values():
+                    deps += 1 
+        return "*-GraphParameter '%s' value:'%s' code_block:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, deps)
 
 def unravel_list(lst):
     last_list_param = GraphParameter()
@@ -256,29 +305,31 @@ class Value(object):
         new_param.set_code_block(init_code=init_code, return_statement=return_statement, self_param=self.parameter, key=key_param, value=value_param)
         self.parameter = new_param
 
-    def __setattr__(self, key, value):
-        try:
-            closed_init = object.__getattribute__(self, "closed_init")
-        except AttributeError:
-            closed_init = False
+    # def __setattr__(self, key, value):
+    #     # ic(key, value)
+    #     try:
+    #         closed_init = object.__getattribute__(self, "closed_init")
+    #     except AttributeError:
+    #         closed_init = False
 
-        if not closed_init:
-            return object.__setattr__(self, key, value)
-        else:        
-            init_code="""
-            def add(obj, key, value):
-                setattr(obj, key, value)
-                return obj""".strip()
-            return_statement = "add({self_param}, {key}, {value})"
+    #     if not closed_init:
+    #         return object.__setattr__(self, key, value)
+    #     else:        
+    #         init_code="""
+    #         def add(obj, key, value):
+    #             setattr(obj, key, value)
+    #             return obj""".strip()
+    #         return_statement = "add({self_param}, {key}, {value})"
 
-            code = "{self_param}[{key}]={value}"
+    #         code = "{self_param}[{key}]={value}"
             
-            key_param = self._get_parameter(key)
-            value_param = self._get_parameter(value)
+    #         key_param = self._get_parameter(key)
+    #         value_param = self._get_parameter(value)
             
-            new_param = GraphParameter()
-            new_param.set_code_block(init_code=init_code, return_statement=return_statement, self_param=self.parameter, key=key_param, value=value_param)
-            self.parameter = new_param
+    #         new_param = GraphParameter()
+    #         new_param.set_code_block(init_code=init_code, return_statement=return_statement, self_param=self.parameter, key=key_param, value=value_param)
+            
+    #         self.parameter = new_param
 
     def __getattr__(self, key):
         _validate_type = object.__getattribute__(self, "_validate_type")
@@ -387,12 +438,18 @@ def test_arbitrary():
     ic(param.make())
 
 def test_easy_unravel():
+    from rich import print
+
     lst = [1, 2, 3, 4, 5]
     param = Value()
     param.set_value([])
 
     for v in lst:
         param.append(v)
+    
+    tree = param.parameter.traverse()
+    
+    print(tree)
     ic(param.make())
 
 if __name__ == '__main__':
