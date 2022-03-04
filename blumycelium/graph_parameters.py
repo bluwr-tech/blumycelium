@@ -57,6 +57,7 @@ class GraphParameter:
     def __init__(self, uid=None):
         if uid is None:
             uid = ut.get_random_variable_name()
+        self.python_id = id(self)
         self.uid = uid
         self.value = None
         self.code_block = None
@@ -65,13 +66,19 @@ class GraphParameter:
         
         self.computed_value = None
 
-    def to_dict(self, reccursive=False, visited_nodes=None):
+    def to_dict(self, reccursive=False, visited_nodes=None, copy_values=True):
+        import copy
+
         if visited_nodes is None:
             visited_nodes = set()
 
+        value = self.value
+        if copy_values:
+            value = copy.copy(value)
+
         ret = {
             "uid": self.uid,
-            "value": self.value,
+            "value": value,
             "code_block": self.code_block
         }
         
@@ -94,6 +101,8 @@ class GraphParameter:
         if len(deps) > 0:
             dct = {dep.uid: dep for dep in deps}
             self.dependencies.append(dct)
+            for duid in dct:
+                self.dependency_values[duid] = None
 
     def make(self, visited_nodes=None, is_root=False):
         def _run_deps(visited):
@@ -185,12 +194,9 @@ class GraphParameter:
         nodes = _rec_build(trav, None)
         root = nodes[trav["uid"]]
     
-        for k, v in nodes.items():
-            ic(k, v.dependencies)
-    
         return root
 
-    def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block"]):
+    def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block"], print_it=True):
         from rich.tree import Tree
         from rich import print
 
@@ -222,7 +228,9 @@ class GraphParameter:
         tree = _get_node(trav)
         tree = _traverse(trav, tree)
 
-        print(tree)
+        if print_it:
+            print(tree)
+    
         return tree
 
     def set_value(self, value):
@@ -276,6 +284,7 @@ class Value(object):
         self.parent = parent
         self.closed_init = False
         self.dependencies = []
+        self.made_value = None
 
     def close_init(self):
         self.closed_init = True
@@ -424,11 +433,12 @@ class Value(object):
 
         return self
 
-    def make(self):
+    def make(self, force=False):
         # for dep in self.dependencies:
         #     dep.make()
-        
-        return self.parameter.make(is_root=True)
+        if self.made_value is None or force :
+            self.made_value = self.parameter.make(is_root=True)
+        return self.made_value
 
     def __str__(self):
         return "Value: %s" % str(self.parameter)
@@ -621,16 +631,16 @@ def test_rebuild_from_traversal():
     for v in lst:
         param.append(v)
         
-    param.pp_traverse(representation_attributes=["value", "code_block", "uid"])
+    param.pp_traverse(representation_attributes=["value", "code_block", "uid", "python_id"])
     print("=====")
     trav = param.traverse()
     # print(trav)
 
     param2 = GraphParameter.build_from_traversal(trav)
-    param2.pp_traverse(representation_attributes=["value", "code_block", "uid"])
-    # print(param2.traverse())
-    print(param2.make())
+    param2.pp_traverse(representation_attributes=["value", "code_block", "uid", "python_id"])
 
     ic(param.make())
+    ic(param2.make())
+
 if __name__ == '__main__':
     test_rebuild_from_traversal()
