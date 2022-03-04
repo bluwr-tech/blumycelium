@@ -146,7 +146,6 @@ class TaskParameters:
     def get_parameter_graph(self):
         params = {}
         for name, arg in self.final_args.items():
-            ic(name, arg)
             if type(arg) in [dict, list, tuple, set]:
                 param = gp.unravel(arg)
                 val = ValuePlaceholder(self.run_job_id, name)

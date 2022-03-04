@@ -65,7 +65,7 @@ class Mycellium:
     
     def drop_jobs(self):
         """delete all information related to jobs"""
-        for collection in ["Jobs", "Results", "Failures", "Parameters", "JobFailures", "ParameterOperations"]:
+        for collection in ["Jobs", "Failures", "Parameters", "JobFailures", "ParameterDependencies"]:
             self.db[collection].truncate() 
 
     def _init_collections(self, db, purge=False) :
@@ -79,6 +79,7 @@ class Mycellium:
 
     def _init_graphs(self, db) :
         for graph in self.graphs :
+            # ic(graph)
             if graph.lower() != "graph":
                 logger.info("Creating graph", graph)
                 try :
@@ -328,18 +329,36 @@ class Mycellium:
         #     # stp
 
     def _save_parameters(self, job, job_doc, params, now):
-        def _get_param_doc(name, node):
-            param_doc = self.db["Parameters"].createDocument()
-            dct = {
-                "_key": node["uid"],
-                "name": name
-            }
-            dct.update(node)
-            param_doc.set(dct)
-            return param_doc
-            
-        for name, value in params.items():
-            pass
+        def _get_param_doc(node, date):
+            try: 
+                return self.db["Parameters"][node["uid"]]
+            except a_exc.DocumentNotFoundError:
+                doc = self.db["Parameters"].createDocument()
+                dct = {
+                    "_key": node["uid"],
+                    "creation_date": date
+                }
+                dct.update(node)
+                doc.set(dct)
+                return doc
+
+        def _link(_from, _to, date, name=None):
+            # ic(self.db.graphs)
+            graph = self.db.graphs["Parameters_graph"]
+            data = {"creation_date": date, "name": name}
+            graph.link("ParameterDependencies", _from, _to, data)
+
+        def _rec_save(_from_node, node_value, date):
+            if not node_value["visited"]:
+                for uid, node in node_value["dependencies"].items():
+                    _to_doc = _get_param_doc(node_value, date)
+                    _link(_from_node, _to_doc, date)
+                    _rec_save(_to_doc, node, date)
+
+        for name, node_value in params.items():
+            param_doc = _get_param_doc(node_value, now)
+            _link(job_doc, param_doc, name, now)
+            _rec_save(param_doc, node_value, now)
 
     def push_job(self, job):
         from rich import print

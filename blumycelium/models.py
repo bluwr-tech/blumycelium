@@ -3,8 +3,8 @@ import pyArango.validation as VAL
 import pyArango.graph as GR
 
 
-COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Results", "Failures", "Parameters", "JobFailures", "ParameterOperations"]
-GRAPHS = ["Jobs_graph", "JobFailures_graph", "ParameterOperations_graph"]
+COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Failures", "JobFailures", "ParameterDependencies", "Parameters"]
+GRAPHS = ["Jobs_graph", "JobFailures_graph", "Parameters_graph"]
 
 class Jobs(Collection) :
     _fields = {
@@ -79,47 +79,19 @@ class MachineElvesRevisions(Collection) :
 
 class Parameters(Collection) :
     _fields = {
-        "name": Field(validators = [VAL.NotNull()]),
-        "submit_date" : Field(validators = [VAL.NotNull()]),
-        "result_id" : Field(),
-        "completion_date": Field(),
-        "status": Field(validators = [VAL.NotNull()]),
-        "value": Field(),
-        "expression": Field(),
-        # "is_static": Field(default=False),
-        # "is_embedded": Field(default=False),
-        # "has_embeddings": Field(default=False),
-        "type": Field()
-
-        # "embedding":{
-        #     "parent_parameter_name": Field(),
-        #     "self_name": Field(),
-        #     "embedding_function": Field()
-        # }
+        "creation_date": Field(validators=[VAL.NotNull()]),
     }
 
     _validation = {
         "on_save": True,
         "on_set": False,
-        "allow_foreign_fields": False
+        "allow_foreign_fields": True
     }
 
-# class Results(Collection) :
-#     _fields = {
-#         "creation_date" : Field(validators = [VAL.NotNull()]),
-#         "value": Field(),
-#     }
-
-#     _validation = {
-#         "on_save": True,
-#         "on_set": False,
-#         "allow_foreign_fields": False
-#     }
-
-class ParameterOperations(Edges) :
+class ParameterDependencies(Edges) :
     _fields = {
         "creation_date": Field(validators=[VAL.NotNull()]),
-        # "function_name": Field(),
+        "name": Field(),
     }
 
     _validation = {
@@ -127,6 +99,13 @@ class ParameterOperations(Edges) :
         "on_set": False,
         "allow_foreign_fields": False
     }
+
+class Parameters_graph(GR.Graph):
+    _edgeDefinitions = (
+        GR.EdgeDefinition("ParameterDependencies", fromCollections = ["Jobs", "Parameters"], toCollections = ["Parameters"]),
+    ) 
+    _orphanedCollections = []
+
 
 class JobFailures(Edges) :
     _fields = {
@@ -148,13 +127,6 @@ class JobFailures(Edges) :
 class JobFailures_graph(GR.Graph):
     _edgeDefinitions = (
         GR.EdgeDefinition("JobFailures", fromCollections = ["Jobs"], toCollections = ["Failures"]),
-    ) 
-    _orphanedCollections = []
-
-class ParameterOperations_graph(GR.Graph):
-    _edgeDefinitions = (
-        GR.EdgeDefinition("ParameterOperations", fromCollections = ["Parameters"], toCollections = ["Parameters"]),
-        # GR.EdgeDefinition("ParameterOperations", fromCollections = ["Parameters"], toCollections = ["Parameters", "Results"]),
     ) 
     _orphanedCollections = []
 

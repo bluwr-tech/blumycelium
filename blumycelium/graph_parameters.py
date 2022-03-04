@@ -1,5 +1,5 @@
-from . import utils as ut
-# import utils as ut
+# from . import utils as ut
+import utils as ut
 from icecream import ic
 ic.configureOutput(includeContext=True)
 
@@ -91,8 +91,9 @@ class GraphParameter:
         if self.dependencies is None:
             self.dependencies = []
 
-        dct = {dep.uid: dep for dep in deps}
-        self.dependencies.append(dct)
+        if len(deps) > 0:
+            dct = {dep.uid: dep for dep in deps}
+            self.dependencies.append(dct)
 
     def make(self, visited_nodes=None, is_root=False):
         def _run_deps(visited):
@@ -120,18 +121,18 @@ class GraphParameter:
     
         return self.computed_value
 
-    def traverse(self, visited_nodes=None, is_root=True, root_uid=None, to_dict=False):
-        def _add_tree(node, is_root, root_uid, visited):
+    def traverse(self, visited_nodes=None, is_root=True, root_uid=None, to_dict=True):
+        def _add_tree(node, is_root, root_uid, visited, as_dict):
             nnn = node
-            if to_dict:
+            if as_dict:
                 nnn = node.to_dict()
             return {"node": nnn, "uid": node.uid, "is_root": is_root, "root_uid": root_uid, "visited": visited, "dependencies": {}}
 
-        def _run_deps(visited, tree, tree_root_uid):
+        def _run_deps(visited, tree, tree_root_uid, as_dict):
             if self.dependencies:
                 for batch in self.dependencies:
                     for dep in batch.values():
-                        tree["dependencies"][dep.uid] = dep.traverse(visited, False, tree_root_uid)
+                        tree["dependencies"][dep.uid] = dep.traverse(visited_nodes=visited, is_root=False, root_uid=tree_root_uid, to_dict=as_dict)
         
         if visited_nodes is None:
             visited_nodes = set()
@@ -139,15 +140,55 @@ class GraphParameter:
         if is_root:
             root_uid = self.uid
 
-        tree = _add_tree(self, root_uid==self.uid, root_uid, self.uid in visited_nodes)
+        tree = _add_tree(self, root_uid==self.uid, root_uid, self.uid in visited_nodes, as_dict=to_dict)
         
         if self.uid in visited_nodes:
             return tree
 
         visited_nodes.add(self.uid)
-        _run_deps(visited_nodes, tree, root_uid)
+        _run_deps(visited_nodes, tree, root_uid, as_dict=to_dict)
 
         return tree
+
+    @classmethod
+    def build_from_traversal(cls, trav:dict):
+        def _build_node(dct_node):
+            node = GraphParameter(uid=dct_node["uid"])
+            node.value = dct_node["value"]
+            if not dct_node["code_block"] is None:
+                code_block = CodeBlock(init_code=dct_node["code_block"]["init_code"], return_statement=dct_node["code_block"]["return_statement"])
+                node.code_block = code_block
+            return node
+
+        def _get_node(dct, all_nodes_dct):
+            try:
+                return all_nodes_dct[dct["uid"]]
+            except KeyError:
+                node = _build_node(dct)
+                all_nodes_dct[node.uid] = node
+                return node
+
+        def _rec_build(dct, all_nodes_dct):
+            if all_nodes_dct is None:
+                all_nodes_dct = {}
+
+            root_node = _get_node(dct["node"], all_nodes_dct)
+            deps = []
+            for dep_dct in dct["dependencies"].values():
+                dep_node = _get_node(dep_dct["node"], all_nodes_dct)
+                deps.append(dep_node)
+                if not dct["visited"]:
+                    _rec_build(dep_dct, all_nodes_dct)
+            root_node.add_dependencies(*deps)
+            return all_nodes_dct
+        
+        nodes = _rec_build(trav, None)
+        root = nodes[trav["uid"]]
+    
+        for k, v in nodes.items():
+            ic(k, v.dependencies)
+    
+        return root
 
     def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block"]):
         from rich.tree import Tree
@@ -171,22 +212,21 @@ class GraphParameter:
             return tree
         
         def _traverse(trav, curr_tree):
-            for branch in trav["branches"].values():
+            for branch in trav["dependencies"].values():
                 node = _get_node(branch)
                 curr_tree.add(node)
                 _traverse(branch, node)
             return tree
 
-        trav = self.traverse()
+        trav = self.traverse(to_dict=False)
         tree = _get_node(trav)
         tree = _traverse(trav, tree)
 
         print(tree)
-
         return tree
 
     def set_value(self, value):
-        if self.code_block is not None or self.dependencies is not None:
+        if self.code_block is not None:
             raise Exception("A code block has been defined, you can either set a value or a code block")
         self.value = value
 
@@ -544,7 +584,7 @@ def test_easy_unravel():
         
     ic(param.make())
 
-def test_nested_unravel():
+def test_nested_unravel_traversal():
     from rich import print
 
     lst = [1, 2, 3, 4, 5]
@@ -570,5 +610,27 @@ def test_nested_unravel():
     print(param.to_dict(reccursive=True))
     ic(param.make())
 
+
+def test_rebuild_from_traversal():
+    from rich import print
+
+    lst = [1, 2, 3, 4, 5]
+    param = Value()
+    param.set_value([])
+
+    for v in lst:
+        param.append(v)
+        
+    param.pp_traverse(representation_attributes=["value", "code_block", "uid"])
+    print("=====")
+    trav = param.traverse()
+    # print(trav)
+
+    param2 = GraphParameter.build_from_traversal(trav)
+    param2.pp_traverse(representation_attributes=["value", "code_block", "uid"])
+    # print(param2.traverse())
+    print(param2.make())
+
+    ic(param.make())
 if __name__ == '__main__':
-    test_nested_unravel()
+    test_rebuild_from_traversal()
