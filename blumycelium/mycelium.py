@@ -210,69 +210,64 @@ class Mycellium:
     #             from_job = ut.legalize_key(return_placeholder.run_job_id)
     #             graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
 
-    def _save_parameters(self, job, job_doc, now_date):
-        def _rec_save(now, obj_key_value, job_doc, operations_graph, from_node):
-            roots = []
-            for name, data_value in obj_key_value:#job.parameters.get_parameters().items():
-                data = {
-                    "name": name,
-                    "type": data_value["type"],
-                    "submit_date" : now_date,
-                    "is_static": data_value["is_static"],
-                    "is_embedded": data_value["is_embedded"],
-                    "has_embeddings": data_value["has_embeddings"],
-                    "completion_date": None,
-                    "status": custom_types.STATUS["PENDING"],
-                }
-                result_key = None
-                if not data_value["is_static"]:
-                    result_key = self.get_result_id(data_value["placeholder"].run_job_id, data_value["placeholder"].name)
-                elif not data["has_embeddings"]:
-                    result_key = self.get_result_id(job_doc["_key"], str(name))
-                data["result_id"] = result_key
+    # def _save_parameters(self, job, job_doc, now_date):
+    #     def _rec_save(now, obj_key_value, job_doc, operations_graph, from_node):
+    #         roots = []
+    #         for name, data_value in obj_key_value:#job.parameters.get_parameters().items():
+    #             data = {
+    #                 "name": name,
+    #                 "type": data_value["type"],
+    #                 "submit_date" : now_date,
+    #                 "is_static": data_value["is_static"],
+    #                 "is_embedded": data_value["is_embedded"],
+    #                 "has_embeddings": data_value["has_embeddings"],
+    #                 "completion_date": None,
+    #                 "status": custom_types.STATUS["PENDING"],
+    #             }
+    #             result_key = None
+    #             if not data_value["is_static"]:
+    #                 result_key = self.get_result_id(data_value["placeholder"].run_job_id, data_value["placeholder"].name)
+    #             elif not data["has_embeddings"]:
+    #                 result_key = self.get_result_id(job_doc["_key"], str(name))
+    #             data["result_id"] = result_key
 
-                parameter_doc = self.db["Parameters"].createDocument()
-                parameter_doc.set(data)
-                parameter_doc.save()
+    #             parameter_doc = self.db["Parameters"].createDocument()
+    #             parameter_doc.set(data)
+    #             parameter_doc.save()
 
-                if from_node is None:
-                    roots.append(parameter_doc)
+    #             if from_node is None:
+    #                 roots.append(parameter_doc)
 
-                if not from_node is None:
-                    operation_data = {
-                        "creation_date": now,
-                        "function_name": data_value["embedding_operation"]
-                    }
-                    operations_graph.link("ParameterOperations", from_node, parameter_doc, operation_data)
+    #             if not from_node is None:
+    #                 operation_data = {
+    #                     "creation_date": now,
+    #                     "function_name": data_value["embedding_operation"]
+    #                 }
+    #                 operations_graph.link("ParameterOperations", from_node, parameter_doc, operation_data)
                     
-                if data["has_embeddings"]:
-                    _rec_save(now, data_value["embeddings"].items(), job_doc, operations_graph, from_node=parameter_doc)
-                else:
-                    result_doc = self.db["Results"].createDocument()
-                    result_doc.set({
-                        "creation_date": now,
-                        "value": data_value["value"]
-                    })
-                    operation_data = {
-                        "creation_date": now,
-                        "function_name": "identity"
-                    }
-                    operations_graph.link("ParameterOperations", parameter_doc, result_doc, operation_data)
-                # jobs_graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
-            return roots
+    #             if data["has_embeddings"]:
+    #                 _rec_save(now, data_value["embeddings"].items(), job_doc, operations_graph, from_node=parameter_doc)
+    #             else:
+    #                 result_doc = self.db["Results"].createDocument()
+    #                 result_doc.set({
+    #                     "creation_date": now,
+    #                     "value": data_value["value"]
+    #                 })
+    #                 operation_data = {
+    #                     "creation_date": now,
+    #                     "function_name": "identity"
+    #                 }
+    #                 operations_graph.link("ParameterOperations", parameter_doc, result_doc, operation_data)
+    #             # jobs_graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
+    #         return roots
 
-        # ic(job.parameters.get_parameters())
-        operations_graph = self.db.graphs["ParameterOperations_graph"]
-        roots = _rec_save(now_date, job.parameters.get_parameters().items(), job_doc, operations_graph, from_node=None)
-        root_ids = [ root["_id"] for root in roots ]
-        job_doc["parameter_ids"] = root_ids
-        job_doc.save()
+    #     # ic(job.parameters.get_parameters())
+    #     operations_graph = self.db.graphs["ParameterOperations_graph"]
+    #     roots = _rec_save(now_date, job.parameters.get_parameters().items(), job_doc, operations_graph, from_node=None)
+    #     root_ids = [ root["_id"] for root in roots ]
+    #     job_doc["parameter_ids"] = root_ids
+    #     job_doc.save()
         
-        self.develop_parameters(root_ids)
-
-    def develop_parameters(self, root_ids):
-        for root_id in root_ids:
-            self.develop_parameter(root_id)
 
     def develop_parameter(self, parameter_id):
         
@@ -332,10 +327,21 @@ class Mycellium:
         # ic(list(res_value.values()))
         #     # stp
 
+    def _save_parameters(self, job, job_doc, params, now):
+        def _get_param_doc(name, node):
+            param_doc = self.db["Parameters"]
+
+        for name, value in params.items():
+            pass
+
     def push_job(self, job):
+        from rich import print
         now = ut.gettime()
         job_doc = self._save_job(job, now)
-        self._save_parameters(job, job_doc, now)
+        
+        params = job.parameters.get_parameter_graph()
+        print(params)
+        self._save_parameters(job, job_doc, params, now)
         # self._save_embedded_parameters(job, job_doc, now)
 
     def get_received_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):

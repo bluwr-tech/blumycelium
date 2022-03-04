@@ -66,9 +66,10 @@ class TaskReturnPlaceHolder:
 
 class TaskParameters:
 
-    def __init__(self, fct):
+    def __init__(self, fct, run_job_id):
         from inspect import signature
 
+        self.run_job_id = run_job_id
         self.signature = signature(fct)
         self.final_args = {}
 
@@ -142,49 +143,22 @@ class TaskParameters:
         else:
             raise Exception("Unknown type; %s must be in %s" % (type(obj), [list, tuple, dict, str, float, int]))
 
-    def get_parameters(self):
-        def _add_param(value, uid, value_type, expression):
-            ret = {
-                "uid": uid,
-                "type": value_type,
-                "value": value,
-                "expression": expression,
-            }
-            return ret
+    def get_parameter_graph(self):
+        params = {}
+        for name, arg in self.final_args.items():
+            ic(name, arg)
+            if type(arg) in [dict, list, tuple, set]:
+                param = gp.unravel(arg)
+                val = ValuePlaceholder(self.run_job_id, name)
+                val.parameter = param
+            elif not isinstance(arg, ValuePlaceholder):
+                val = ValuePlaceholder(self.run_job_id, name)
+                val.set_value(arg)
+            else:
+                val = arg
+            params[name] = val.traverse(to_dict=True)
+        return params
 
-        def _rec_find_parameters(obj_key_value, embedding_operation):
-            args = {}
-            for param_name, value in obj_key_value:
-                placeholder = None
-                if isinstance(value, ValuePlaceholder):
-                    placeholder = value
-                    value = None
-                else:
-                    value_type = self.get_storable_type(value)
-                    iterator = None
-                    if type(value) is dict:
-                        iterator = value.items()
-                        new_value = {}
-                        expression = "{parent_uid}[{self_name}] = {self_value}"
-                    elif type(value) in [list, tuple]:
-                        iterator = enumerate(value)
-                        new_value = []
-                        expression = "{parent_uid}.append({self_value})"
-                   
-                    if not iterator is None:
-                        embeddings = _rec_find_parameters(iterator, new_embedding_operation)
-                        
-                    # if len(embeddings) > 0:
-                        # value = None
-
-                args[param_name] = _add_param(new_value, uid=ut.getuid(), value_type=value_type, expression=expression)
-
-            return args
-
-        ret = _rec_find_parameters(self.final_args.items(), None)
-
-        return ret
-        
     # def get_parameters(self):
     #     def _add_param(value, uid, value_type, expression):
     #         ret = {
@@ -307,8 +281,8 @@ class TaskParameters:
 
     #     return args
 
-class JOB:
-    """docstring for JOB"""
+class Job:
+    """docstring for Job"""
     def __init__(
         self,
         task,
@@ -342,7 +316,7 @@ class Task:
         self.machine_elf = machine_elf
         self.function = function
         self.name = name
-        self.parameters = None
+        # self.parameters = None
         self.return_placeholder = None
 
         self.source_code = None
@@ -366,20 +340,20 @@ class Task:
         run_job_id = ut.getuid()
 
         def _wrapped():
-            self.parameters = TaskParameters(self.function)
-            self.parameters.set_parameters(*args, **kwargs)
-            self.parameters.validate()
+            parameters = TaskParameters(self.function, run_job_id=run_job_id)
+            parameters.set_parameters(*args, **kwargs)
+            parameters.validate()
 
             now = ut.gettime()
             
             return_placeholder = TaskReturnPlaceHolder(worker_elf=self.machine_elf.uid, task_function=self.function, run_job_id=run_job_id)
             return_placeholder.make_placeholder()
 
-            job = JOB(
+            job = Job(
                 task = self,
                 run_job_id = run_job_id,
                 worker_elf = self.machine_elf,
-                parameters = self.parameters,
+                parameters = parameters,
                 submit_date = now,
                 start_date = None,
                 completion_date = None,

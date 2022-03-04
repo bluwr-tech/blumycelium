@@ -1,5 +1,5 @@
-# from . import utils as ut
-import utils as ut
+from . import utils as ut
+# import utils as ut
 from icecream import ic
 ic.configureOutput(includeContext=True)
 
@@ -39,6 +39,12 @@ class CodeBlock:
             except:
                 raise ExecutionError(self.return_statement)
     
+    def to_dict(self):
+        return {
+            "init_code": self.init_code,
+            "return_statement": self.return_statement
+        }
+
     def __str__(self):
         return "*-CodeBlock %s-*" % (id(self))
 
@@ -59,41 +65,34 @@ class GraphParameter:
         
         self.computed_value = None
 
+    def to_dict(self, reccursive=False, visited_nodes=None):
+        if visited_nodes is None:
+            visited_nodes = set()
+
+        ret = {
+            "uid": self.uid,
+            "value": self.value,
+            "code_block": self.code_block
+        }
+        
+        if not self.code_block is None:
+            ret["code_block"] = self.code_block.to_dict()
+
+        if reccursive and not (self.uid in visited_nodes):
+            visited_nodes.add(self.uid)
+            ret["dependencies"] = {}
+            if self.dependencies is not None:
+                for batch in self.dependencies:
+                    for uid, dep in batch.items():
+                        ret["dependencies"][uid] = dep.to_dict(reccursive=True, visited_nodes=visited_nodes)
+        return ret
+
     def add_dependencies(self, *deps):
         if self.dependencies is None:
             self.dependencies = []
 
         dct = {dep.uid: dep for dep in deps}
         self.dependencies.append(dct)
-
-    def make_bck(self, visited_nodes=None, is_root=False):
-        def _run_deps(visited):
-            if self.dependencies:
-                for batch in self.dependencies:
-                    for dep in batch.values():
-                        dep_ret = dep.make(visited)
-                        if dep.uid in self.dependency_values:
-                            self.dependency_values[dep.uid] = dep_ret
-        
-        if visited_nodes is None:
-            visited_nodes = set()
-        elif self.uid in visited_nodes:
-            return self.computed_value
-
-        if is_root:
-             _run_deps(visited_nodes)
-
-        if not self.value is None:
-            self.computed_value = self.value
-            visited_nodes.add(self.uid)
-            return self.computed_value
-
-        if not is_root:
-            _run_deps(visited_nodes)
-
-        self.computed_value = self.code_block.run(**self.dependency_values)
-        visited_nodes.add(self.uid)
-        return self.computed_value
 
     def make(self, visited_nodes=None, is_root=False):
         def _run_deps(visited):
@@ -121,15 +120,18 @@ class GraphParameter:
     
         return self.computed_value
 
-    def traverse(self, visited_nodes=None, is_root=True, root_uid=None):
+    def traverse(self, visited_nodes=None, is_root=True, root_uid=None, to_dict=False):
         def _add_tree(node, is_root, root_uid, visited):
-            return {"node": node, "is_root": is_root, "root_uid": root_uid, "visited": visited, "branches": {}}
+            nnn = node
+            if to_dict:
+                nnn = node.to_dict()
+            return {"node": nnn, "uid": node.uid, "is_root": is_root, "root_uid": root_uid, "visited": visited, "dependencies": {}}
 
         def _run_deps(visited, tree, tree_root_uid):
             if self.dependencies:
                 for batch in self.dependencies:
                     for dep in batch.values():
-                        tree["branches"][dep.uid] = dep.traverse(visited, False, tree_root_uid)
+                        tree["dependencies"][dep.uid] = dep.traverse(visited, False, tree_root_uid)
         
         if visited_nodes is None:
             visited_nodes = set()
@@ -144,15 +146,6 @@ class GraphParameter:
 
         visited_nodes.add(self.uid)
         _run_deps(visited_nodes, tree, root_uid)
-        # if is_root:
-            # _run_deps(visited_nodes, tree, root_uid)
-
-        # if not self.value is None:
-            # visited_nodes.add(self.uid)
-            # return tree
-
-        # if not is_root:
-            # _run_deps(visited_nodes, tree, root_uid)
 
         return tree
 
@@ -260,6 +253,9 @@ class Value(object):
 
     def traverse(self, *args, **kwargs):
         return self.parameter.traverse(*args, **kwargs)
+
+    def to_dict(self, *args, **kwargs):
+        return self.parameter.to_dict( *args, **kwargs)
 
     def pp_traverse(self, *args, **kwargs):
         return self.parameter.pp_traverse(*args, **kwargs)
@@ -470,6 +466,10 @@ def unravel_list(lst):
     param = Value()
     param.set_value([])
     for val in lst:
+        if type(val) in (list, tuple, set):
+            val = unravel_list(val)
+        elif type(val) is dict:
+            val = unravel_dict(val)
         param.append(val)
     return param
 
@@ -477,8 +477,20 @@ def unravel_dict(dct):
     param = Value()
     param.set_value({})
     for key, val in dct.items():
+        if type(val) in (list, tuple, set):
+            val = unravel_list(val)
+        elif type(val) is dict:
+            val = unravel_dict(val)
         param.append(val)
     return param
+
+def unravel(obj):
+    if type(obj) in (list, tuple, set):
+        return unravel_list(obj)
+    elif type(obj) is dict:
+        return unravel_dict(obj)
+    else:
+        raise Exception("Wrong type: '%s', except list or dict" % type(obj))
 
 def test_subslist():
     lst = [1, 2, 3, 4, 5, 10]
@@ -555,6 +567,7 @@ def test_nested_unravel():
     param.append(val)
         
     param.pp_traverse(representation_attributes=None)
+    print(param.to_dict(reccursive=True))
     ic(param.make())
 
 if __name__ == '__main__':
