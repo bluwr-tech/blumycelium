@@ -3,8 +3,8 @@ import pyArango.validation as VAL
 import pyArango.graph as GR
 
 
-COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Failures", "JobFailures", "ParameterDependencies", "Parameters"]
-GRAPHS = ["Jobs_graph", "JobFailures_graph", "Parameters_graph"]
+COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Failures", "JobFailures", "Parameters", "JobParameters", "Results"]
+GRAPHS = ["Jobs_graph", "JobFailures_graph", "JobParameters_graph"]
 
 class Jobs(Collection) :
     _fields = {
@@ -88,7 +88,18 @@ class Parameters(Collection) :
         "allow_foreign_fields": True
     }
 
-class ParameterDependencies(Edges) :
+class Results(Collection) :
+    _fields = {
+        "creation_date": Field(validators=[VAL.NotNull()]),
+    }
+
+    _validation = {
+        "on_save": True,
+        "on_set": False,
+        "allow_foreign_fields": True
+    }
+
+class JobParameters(Edges) :
     _fields = {
         "creation_date": Field(validators=[VAL.NotNull()]),
         "name": Field(),
@@ -100,12 +111,11 @@ class ParameterDependencies(Edges) :
         "allow_foreign_fields": False
     }
 
-class Parameters_graph(GR.Graph):
+class JobParameters_graph(GR.Graph):
     _edgeDefinitions = (
-        GR.EdgeDefinition("ParameterDependencies", fromCollections = ["Jobs", "Parameters"], toCollections = ["Parameters"]),
+        GR.EdgeDefinition("JobParameters", fromCollections = ["Jobs"], toCollections = ["Parameters"]),
     ) 
     _orphanedCollections = []
-
 
 class JobFailures(Edges) :
     _fields = {

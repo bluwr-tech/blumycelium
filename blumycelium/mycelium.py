@@ -9,10 +9,10 @@ from icecream import ic
 ic.configureOutput(includeContext=True)
 
 import logging
-logger = logging.getLogger("BLUMYCELLIUM")
+logger = logging.getLogger("BLUMYCELIUM")
 
-class Mycellium:
-    """docstring for Mycellium"""
+class Mycelium:
+    """docstring for Mycelium"""
 
     def __init__(self, connection, name):
         self.connection = connection
@@ -65,7 +65,7 @@ class Mycellium:
     
     def drop_jobs(self):
         """delete all information related to jobs"""
-        for collection in ["Jobs", "Failures", "Parameters", "JobFailures", "ParameterDependencies"]:
+        for collection in ["Jobs", "Failures", "Parameters", "JobFailures", "JobParameters", "Results"]:
             self.db[collection].truncate() 
 
     def _init_collections(self, db, purge=False) :
@@ -139,8 +139,8 @@ class Mycellium:
     def get_job(self, job_id):
         return self.db["Jobs"][job_id]
     
-    def get_result_id(self, job_id, name):
-        return ut.legalize_key(job_id + name)
+    # def get_result_id(self, job_id, name):
+    #     return ut.legalize_key(job_id + name)
 
     def _save_job(self, job, now_date):
         job_key = ut.legalize_key(job.run_job_id)
@@ -170,205 +170,48 @@ class Mycellium:
         job_doc.save()
         return job_doc
 
-    # def _save_parameters(self, job, job_doc, now_date):
-    #     graph = self.db.graphs["Jobs_graph"]
-    #     for name, return_placeholder in job.parameters.get_placeholder_parameters().items():
-    #         if not static:
-    #             result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
-    #         else:
-    #             result_key = None
-    #         data = {
-    #             "name": name,
-    #             "submit_date" : now_date,
-    #             "static": static,
-    #             "result_id" : result_key,
-    #             "completion_date": None,
-    #             "status": custom_types.STATUS["PENDING"],
-    #             "embedded": False,
-    #             # "embedding":{}
-    #         }
-    #         from_job = ut.legalize_key(return_placeholder.run_job_id)
-    #         graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
-
-    # def _save_embedded_parameters(self, job, job_doc, now_date, static):
-    #     graph = self.db.graphs["Jobs_graph"]
-    #     for parent_name, embed_placeholders in job.parameters.get_embedded_placeholder_parameters().items():
-    #         for child_name, return_placeholder in embed_placeholders["placeholders"].items():
-    #             result_key = self.get_result_id(return_placeholder.run_job_id, return_placeholder.name)
-    #             data = {
-    #                 "name": parent_name + "." + child_name,
-    #                 "submit_date" : now_date,
-    #                 "result_id" : result_key,
-    #                 "completion_date": None,
-    #                 "status": custom_types.STATUS["PENDING"],
-    #                 "embedded": True,
-    #                 "embedding":{
-    #                     "parent_parameter_name": parent_name,
-    #                     "self_name": child_name,
-    #                     "embedding_function": embed_placeholders["emebedding_function"]
-    #                 }
-    #             }
-    #             from_job = ut.legalize_key(return_placeholder.run_job_id)
-    #             graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
-
-    # def _save_parameters(self, job, job_doc, now_date):
-    #     def _rec_save(now, obj_key_value, job_doc, operations_graph, from_node):
-    #         roots = []
-    #         for name, data_value in obj_key_value:#job.parameters.get_parameters().items():
-    #             data = {
-    #                 "name": name,
-    #                 "type": data_value["type"],
-    #                 "submit_date" : now_date,
-    #                 "is_static": data_value["is_static"],
-    #                 "is_embedded": data_value["is_embedded"],
-    #                 "has_embeddings": data_value["has_embeddings"],
-    #                 "completion_date": None,
-    #                 "status": custom_types.STATUS["PENDING"],
-    #             }
-    #             result_key = None
-    #             if not data_value["is_static"]:
-    #                 result_key = self.get_result_id(data_value["placeholder"].run_job_id, data_value["placeholder"].name)
-    #             elif not data["has_embeddings"]:
-    #                 result_key = self.get_result_id(job_doc["_key"], str(name))
-    #             data["result_id"] = result_key
-
-    #             parameter_doc = self.db["Parameters"].createDocument()
-    #             parameter_doc.set(data)
-    #             parameter_doc.save()
-
-    #             if from_node is None:
-    #                 roots.append(parameter_doc)
-
-    #             if not from_node is None:
-    #                 operation_data = {
-    #                     "creation_date": now,
-    #                     "function_name": data_value["embedding_operation"]
-    #                 }
-    #                 operations_graph.link("ParameterOperations", from_node, parameter_doc, operation_data)
-                    
-    #             if data["has_embeddings"]:
-    #                 _rec_save(now, data_value["embeddings"].items(), job_doc, operations_graph, from_node=parameter_doc)
-    #             else:
-    #                 result_doc = self.db["Results"].createDocument()
-    #                 result_doc.set({
-    #                     "creation_date": now,
-    #                     "value": data_value["value"]
-    #                 })
-    #                 operation_data = {
-    #                     "creation_date": now,
-    #                     "function_name": "identity"
-    #                 }
-    #                 operations_graph.link("ParameterOperations", parameter_doc, result_doc, operation_data)
-    #             # jobs_graph.link("Parameters", "Jobs/" + from_job, job_doc, data)
-    #         return roots
-
-    #     # ic(job.parameters.get_parameters())
-    #     operations_graph = self.db.graphs["ParameterOperations_graph"]
-    #     roots = _rec_save(now_date, job.parameters.get_parameters().items(), job_doc, operations_graph, from_node=None)
-    #     root_ids = [ root["_id"] for root in roots ]
-    #     job_doc["parameter_ids"] = root_ids
-    #     job_doc.save()
-        
-
-    def develop_parameter(self, parameter_id):
-        
-        # def _rec_populate(names, values, types, fct_names):
-        #     if types[0].lower() in ["array", "object"]:
-        #         ret = {}
-        #         children = _rec_populate( names[1:], values[1:], types[1:], fct_names[1:] )
-        #         ret.update(children)
-        #         if types[0].lower() == "array":
-        #             return list()
-
-        aql = """
-            FOR vertice, edge, path IN 1..10 OUTBOUND @id GRAPH 'ParameterOperations_graph'
-                FILTER IS_SAME_COLLECTION('Results', vertice)
-                RETURN {
-                    ids: path.vertices[*]._id,
-                    names: path.vertices[*].name,
-                    values: path.vertices[*].value,
-                    types: path.vertices[*].type,
-                    function_names: path.edges[*].function_name
-                }
-        """
-
-        res = [ret for ret in self.db.AQLQuery(aql, bindVars={"id": parameter_id}, batchSize=100, rawResults=True)]
-        
-        containers = {}
-        for path in res:
-            # ic(path)
-            container_name = None
-            path["function_names"].append(None)
-            last_countainer = None
-            for _id, name, value, typ, fct_name in zip(path["ids"], path["names"], path["values"], path["types"], path["function_names"]):
-                ic(_id, typ)
-                # ic(_id, name, value, typ, fct_name)
-                pass
-                # if typ in ["array", "object"]:
-                #     if not name in countainers:
-                #         countainers[name] = {}
-                # elif not value is None:
-                #     last_value = 
-
-        # for path in res:
-        #     value = None
-        #     for idx in range(len(path["values"])-1, -1, -1):
-        #         if value is None:
-        #             value = path["values"][idx]
-        #         elif path["types"][idx].lower() == "array":
-        #             tmp_value = dict()
-        #             fct_name = path["function_names"][idx]
-        #             fct = getattr(tmp_value, fct_name)
-        #             if fct_name == "__setitem__":
-        #                 fct(name, value)
-        #             value = tmp_value
-        #         name = path["names"][idx]
-            
-        #     res_value.update(value)
-        # ic(list(res_value.values()))
-        #     # stp
-
-    def _save_parameters(self, job, job_doc, params, now):
+    def _save_parameters(self, job_doc, params, now):
+        # from rich import print
         def _get_param_doc(node, date):
-            try: 
-                return self.db["Parameters"][node["uid"]]
-            except a_exc.DocumentNotFoundError:
-                doc = self.db["Parameters"].createDocument()
-                dct = {
-                    "_key": node["uid"],
-                    "creation_date": date
-                }
-                dct.update(node)
-                doc.set(dct)
-                return doc
+            doc = self.db["Parameters"].createDocument()
+            dct = {"creation_date": date}
+            dct.update(node)
+            doc.set(dct)
+            return doc
 
-        def _link(_from, _to, date, name=None):
-            # ic(self.db.graphs)
-            graph = self.db.graphs["Parameters_graph"]
-            data = {"creation_date": date, "name": name}
-            graph.link("ParameterDependencies", _from, _to, data)
-
-        def _rec_save(_from_node, node_value, date):
-            if not node_value["visited"]:
-                for uid, node in node_value["dependencies"].items():
-                    _to_doc = _get_param_doc(node_value, date)
-                    _link(_from_node, _to_doc, date)
-                    _rec_save(_to_doc, node, date)
-
-        for name, node_value in params.items():
-            param_doc = _get_param_doc(node_value, now)
-            _link(job_doc, param_doc, name, now)
-            _rec_save(param_doc, node_value, now)
+        graph = self.db.graphs["JobParameters_graph"]
+        for name, traversal in params.items():
+            # print(traversal)
+            param_doc = _get_param_doc(traversal, now)
+            data = {"creation_date": now, "name": name}
+            graph.link("JobParameters", job_doc, param_doc, data)
 
     def push_job(self, job):
-        from rich import print
+        # from rich import print
         now = ut.gettime()
         job_doc = self._save_job(job, now)
         
-        params = job.parameters.get_parameter_graph()
-        print(params)
-        self._save_parameters(job, job_doc, params, now)
-        # self._save_embedded_parameters(job, job_doc, now)
+        params = job.parameters.get_parameter_dict()
+        self._save_parameters(job_doc, params, now)
+        
+    def get_job_parameters(self, job_id):
+        aql = """
+        FOR jparam IN JobParameters
+            FILTER jparam._from == @id
+            FOR node IN Parameters
+                FILTER node._id == jparam._to
+                RETURN {
+                    name: jparam.name,
+                    node: node
+                }
+        """
+        bind_vars = {"id": "Jobs/"+ job_id}
+        res_aql = self.db.AQLQuery(aql, bindVars=bind_vars, batchSize=100, rawResults=True)
+        ret = {}
+        for res in res_aql:
+            ret[res["name"]] = res["node"]
+
+        return ret
 
     def get_received_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):
         
@@ -416,60 +259,6 @@ class Mycellium:
             if param["status"] is custom_types.STATUS["READY"]:
                 ready += 1
         return count == ready
-
-    # def get_job_static_parameters(self, job_id):
-    #     job_doc = self.get_job(job_id)
-    #     return job_doc["static_parameters"].getStore()
-
-    # def get_job_parameters_(self, job_id, embedded):
-    #     """returns the list of available parameters for a job"""
-
-    #     parameters = {}
-    #     for param in self.db["Parameters"].fetchByExample({"_to": "Jobs/" + job_id, "embedded": embedded}, batchSize=100):
-    #         try:
-    #             value = self.db["Results"][param["result_id"]]
-    #         except a_exc.DocumentNotFoundError:
-    #             parameters[param["name"]] = custom_types.EmptyParameter
-            
-    #         else:
-    #             parameters[param["name"]] = value["value"]
-    #             if param["status"] != custom_types.STATUS["READY"]:
-    #                 param["status"] = custom_types.STATUS["READY"]
-    #                 param.save()
-
-    #     return parameters
-
-    def get_job_parameters(self, job_id, embedded):
-        """returns the list of available parameters for a job"""
-
-        aql = """
-        FOR param in Parameters
-            FILTER param._to == @job_id
-            FILTER param.embedded == @embedded
-            RETURN param
-        """
-        bind_vars = {"job_id": "Jobs/" +job_id, "embedded": embedded}
-        query = self.db.AQLQuery(aql, bindVars=bind_vars, batchSize=1000)
-
-        parameters = {}
-        for param in query:
-            try:
-                value = self.db["Results"][param["result_id"]]
-            except a_exc.DocumentNotFoundError:
-                parameters[param["name"]] = custom_types.EmptyParameter
-            else:
-                if not embedded:
-                    parameters[param["name"]] = value["value"]
-                else:
-                    parameters[param["name"]] = {
-                        "value": value["value"],
-                        "embedding": param["embedding"].getStore()
-                    }
-                if param["status"] != custom_types.STATUS["READY"]:
-                    param["status"] = custom_types.STATUS["READY"]
-                    param.save()
-
-        return parameters
 
     def update_job_status(self, job_id, status):
         job_doc = self.get_job(job_id)
@@ -535,7 +324,7 @@ class Mycellium:
         # job_doc = self.get_job(job_id)
 
         for name, value in results.items():
-            result_key = self.get_result_id(job_id, name)
+            # result_key = self.get_result_id(job_id, name)
             try:
                 result_doc = self.db["Results"][result_key]
             except a_exc.DocumentNotFoundError:

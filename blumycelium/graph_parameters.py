@@ -1,5 +1,5 @@
-# from . import utils as ut
-import utils as ut
+from . import utils as ut
+# import utils as ut
 from icecream import ic
 ic.configureOutput(includeContext=True)
 
@@ -65,6 +65,21 @@ class GraphParameter:
         self.dependency_values = {}
         
         self.computed_value = None
+        
+        self.mirroring = None
+
+    def set_origin(self, uid):
+        self.mirroring = uid
+
+    def _dict_representation(self):
+        ret = {
+            "uid": self.uid,
+            "value": value,
+            "code_block": self.code_block,
+            "mirroring": self.mirroring
+        }
+        
+        return ret
 
     def to_dict(self, reccursive=False, visited_nodes=None, copy_values=True):
         import copy
@@ -76,11 +91,7 @@ class GraphParameter:
         if copy_values:
             value = copy.copy(value)
 
-        ret = {
-            "uid": self.uid,
-            "value": value,
-            "code_block": self.code_block
-        }
+        ret = self._dict_representation()
         
         if not self.code_block is None:
             ret["code_block"] = self.code_block.to_dict()
@@ -234,13 +245,13 @@ class GraphParameter:
         return tree
 
     def set_value(self, value):
-        if self.code_block is not None:
-            raise Exception("A code block has been defined, you can either set a value or a code block")
+        if not (self.code_block is None and self.mirroring is None) :
+            raise Exception("Can either have a code block, a value or an origin")
         self.value = value
 
     def set_code_block(self, init_code, return_statement, **dependencies):
-        if self.value is not None:
-            raise Exception("A code block has been defined, you can either set a value or a code block")
+        if not (self.value is None and self.mirroring is None) :
+            raise Exception("Can either have a code block, a value or an origin")
 
         string_kwargs = {}
         for hr_name, dep in dependencies.items():
@@ -441,10 +452,10 @@ class Value(object):
         return self.made_value
 
     def __str__(self):
-        return "Value: %s" % str(self.parameter)
+        return "%s: %s" % (self.__class__.__name__, str(self.parameter))
 
     def __repr__(self):
-        return "Value: %s" % repr(self.parameter)
+        return "%s: %s" % (self.__class__.__name__, repr(self.parameter))
 
 # def unravel_list(lst):
 #     last_list_param = GraphParameter()

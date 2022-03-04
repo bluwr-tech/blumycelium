@@ -10,6 +10,13 @@ class ValuePlaceholder(gp.Value):
         super(ValuePlaceholder, self)._init(*args, **kwargs)
         self.run_job_id = run_job_id
         self.name = name
+        self.result_id = self.get_result_id(self.run_job_id, self.name)
+
+        self.parameter.set_origin(self.result_id)
+
+    @classmethod
+    def get_result_id(cls, job_id, name):
+        return ut.legalize_key(job_id + name)
 
 class TaskReturnPlaceHolder:
     """docstring for TaskReturnPlaceHolder"""
@@ -37,22 +44,23 @@ class TaskReturnPlaceHolder:
 
         if not self.is_none:
             if type(ret_annotation) is dict:
-                for key, value in ret_annotation.items():
-                    self.parameters[key] = ValuePlaceholder(self.run_job_id, key, as_type=value)
+                for name, value in ret_annotation.items():
+                    self.parameters[name] = ValuePlaceholder(self.run_job_id, name, as_type=value)
             else:
-                for key in ret_annotation:
-                    self.parameters[key] = ValuePlaceholder(self.run_job_id, key)
-
+                for name in ret_annotation:
+                    self.parameters[name] = ValuePlaceholder(self.run_job_id, name)
+            
     def get_result_id(self, name):
         if name not in self.parameters:
             raise Exception("Placeholder has no parameter: '%s'" % name)
 
-        return self.worker_elf.mycellium.get_result_id(self.run_job_id, name)
+        return self.parameters[name].result_id
+        # return ValuePlaceholder.get_result_id(self.run_job_id, name)
 
     def __getitem__(self, key):
         if self.is_none:
             return None
-
+        # ic(key, type(self.parameters[key]), self.parameters[key])
         return self.parameters[key]
 
     def __str__(self):
@@ -143,14 +151,17 @@ class TaskParameters:
         else:
             raise Exception("Unknown type; %s must be in %s" % (type(obj), [list, tuple, dict, str, float, int]))
 
-    def get_parameter_graph(self):
+    def get_parameter_dict(self):
         params = {}
         for name, arg in self.final_args.items():
+            # ic(name, arg)
             if type(arg) in [dict, list, tuple, set]:
                 param = gp.unravel(arg)
                 val = ValuePlaceholder(self.run_job_id, name)
                 val.parameter = param
             elif not isinstance(arg, ValuePlaceholder):
+                # print("=================================")
+                # ic(arg)
                 val = ValuePlaceholder(self.run_job_id, name)
                 val.set_value(arg)
             else:
@@ -158,127 +169,15 @@ class TaskParameters:
             params[name] = val.traverse(to_dict=True)
         return params
 
-    # def get_parameters(self):
-    #     def _add_param(value, uid, value_type, expression):
-    #         ret = {
-    #             "uid": uid,
-    #             "type": value_type,
-    #             "value": value,
-    #             "expression": expression,
-    #         }
-    #         return ret
-
-    #     def _rec_find_parameters(obj_key_value, embedding_operation):
-    #         args = {}
-    #         for param_name, value in obj_key_value:
-    #             placeholder = None
-    #             if isinstance(value, ValuePlaceholder):
-    #                 placeholder = value
-    #                 value = None
-    #             else:
-    #                 value_type = self.get_storable_type(value)
-    #                 iterator = None
-    #                 if type(value) is dict:
-    #                     iterator = value.items()
-    #                     new_value = {}
-    #                     expression = "{parent_uid}[{self_name}] = {self_value}"
-    #                 elif type(value) in [list, tuple]:
-    #                     iterator = enumerate(value)
-    #                     new_value = []
-    #                     expression = "{parent_uid}.append({self_value})"
-                   
-    #                 if not iterator is None:
-    #                     embeddings = _rec_find_parameters(iterator, new_embedding_operation)
-                        
-    #                 # if len(embeddings) > 0:
-    #                     # value = None
-
-    #             args[param_name] = _add_param(new_value, uid=ut.getuid(), value_type=value_type, expression=expression)
-
-    #         return args
-
-    #     ret = _rec_find_parameters(self.final_args.items(), None)
-
-    #     return ret
-
-    def get_parameters_bck(self):
-        def _add_param(value, value_type, static, embeddings, embedding_operation, placeholder):
-            ret = {
-                "type": value_type,
-                "value": value,
-                "is_static": static,
-                "is_embedded": not (embedding_operation is None),
-                "embeddings": embeddings,
-                "embedding_operation": embedding_operation,
-                "has_embeddings": not (embeddings is None) and len(embeddings) > 0,
-                "placeholder": placeholder
-            }
-            return ret
-
-        def _rec_find_parameters(obj_key_value, embedding_operation):
-            args = {}
-            for param_name, value in obj_key_value:
-                embeddings = {}
-                placeholder = None
-                if isinstance(value, ValuePlaceholder):
-                    placeholder = value
-                    value = None
-                    static = False
-                else:
-                    value_type = self.get_storable_type(value)
-                    static = True
-                    iterator = None
-                    if type(value) is dict:
-                        iterator = value.items()
-                        new_embedding_operation = "__setitem__"
-                    elif type(value) in [list, tuple]:
-                        iterator = enumerate(value)
-                        new_embedding_operation = "__setitem__"
-                    
-                    if not iterator is None:
-                        embeddings = _rec_find_parameters(iterator, new_embedding_operation)
-                        
-                    if len(embeddings) > 0:
-                        value = None
-
-                args[param_name] = _add_param(value, value_type, static, embeddings, embedding_operation, placeholder)
-
-            return args
-        
-        ret = _rec_find_parameters(self.final_args.items(), None)
-
+    @classmethod
+    def develop(cls, dct_params:dict):
+        ret = {}
+        for key, trav in dct_params.items():
+            ret[key] = gp.GraphParameter.build_from_traversal(trav)
+            # ic(key, ret[key])
+            # ic(ret[key].make())
+            ret[key] = ret[key].make()
         return ret
-
-    # def get_placeholder_parameters(self):
-    #     args = {}
-    #     for param_name, value in self.final_args.items():
-    #         if isinstance(value, ValuePlaceholder):
-    #             args[param_name] = value
-
-    #     return args
-
-    # def get_static_parameters(self):
-    #     args = {}
-    #     for param_name, value in self.final_args.items():
-    #         if not isinstance(value, ValuePlaceholder):
-    #             args[param_name] = value
-    #     return args
-
-    # def get_embedded_placeholder_parameters(self):
-    #     args = {}
-    #     for param_name, value in self.final_args.items():
-    #         if type(value) is dict:
-    #             iterator = value.items()
-    #         elif type(value) is list:
-    #             iterator = enumerate(value)
-    #         emb_args = self.find_placeholders_in_key_value_iterrator(iterator)
-    #         if len(emb_args) > 0:
-    #             args[param_name] = {
-    #                 "placeholders": emb_args,
-    #                 "emebedding_function": "__setitem__"
-    #             }
-
-    #     return args
 
 class Job:
     """docstring for Job"""
@@ -292,7 +191,7 @@ class Job:
         start_date,
         completion_date,
         status,
-        mycellium,
+        mycelium,
         return_placeholder
     ):
         self.task=task
@@ -303,11 +202,11 @@ class Job:
         self.start_date=start_date
         self.completion_date=completion_date
         self.status=status
-        self.mycellium = mycellium
+        self.mycelium = mycelium
         self.return_placeholder=return_placeholder
 
     def commit(self):
-        self.mycellium.push_job(self)
+        self.mycelium.push_job(self)
 
 class Task:
     """docstring for Task"""
@@ -357,7 +256,7 @@ class Task:
                 start_date = None,
                 completion_date = None,
                 status = custom_types.STATUS["PENDING"],
-                mycellium = self.machine_elf.mycellium,
+                mycelium = self.machine_elf.mycelium,
                 return_placeholder=return_placeholder
             )
             
@@ -367,8 +266,20 @@ class Task:
 
         return _wrapped
 
-    def run(self, *args, **kwargs):
-        return self.function(*args, **kwargs)
+    # def run(self, *args, **kwargs):
+    #     return self.function(*args, **kwargs)
+
+    def run(self, job_id, *args, **kwargs):
+        fct_ret = self.function(*args, **kwargs)
+        
+        ret = {}
+        for name, value_ret in fct_ret.items():
+            ret[name] = {
+                "result_id": ValuePlaceholder.get_result_id(job_id, name),
+                "value": value_ret
+            }
+
+        return ret
 
     def __call__(self, *args, **kwargs):
         return self.wrap( *args, **kwargs )()
@@ -382,9 +293,9 @@ class Task:
 class MachineElf:
     """docstring for MachineElf"""
 
-    def __init__(self, uid, mycellium):
+    def __init__(self, uid, mycelium):
         self.uid = ut.legalize_key(uid)
-        self.mycellium = mycellium
+        self.mycelium = mycelium
         self.tasks = {}
 
         self.source_code = None
@@ -409,51 +320,61 @@ class MachineElf:
                 setattr(self, name, task)
 
     def register(self, store_source):
-        self.mycellium.register_machine_elf(self, store_source)
+        self.mycelium.register_machine_elf(self, store_source)
 
     def get_jobs(self):
-        return self.mycellium.get_jobs(self.uid)
+        return self.mycelium.get_jobs(self.uid)
 
-    def is_job_ready(self, parameters:dict, embedded_params:dict):
-        import custom_types
-        params_ready = not (custom_types.EmptyParameter in parameters.values() )
+    # def is_job_ready(self, parameters:dict, embedded_params:dict):
+    #     import custom_types
+    #     params_ready = not (custom_types.EmptyParameter in parameters.values() )
         
-        for key, value in embedded_params.items():
-            if value is custom_types.EmptyParameter:
-                return False
+    #     for key, value in embedded_params.items():
+    #         if value is custom_types.EmptyParameter:
+    #             return False
         
-        return params_ready
+    #     return params_ready
 
     def start_jobs(self, store_failures=True, raise_exceptions=True):
-        jobs = self.mycellium.get_received_jobs(self.uid)
+        jobs = self.mycelium.get_received_jobs(self.uid)
         for job in jobs:
-            params = self.mycellium.get_job_parameters(job["id"], embedded=False)
-            params.update( self.mycellium.get_job_static_parameters(job["id"]) )
-            embedded_params = self.mycellium.get_job_parameters(job["id"], embedded=True)
-            
-            for emb_value in embedded_params.values():
-                value = emb_value["value"]
-                emb = emb_value["embedding"]
-                parent_obj = params[ emb["parent_parameter_name"] ]
-                insert_fct = getattr(parent_obj, emb["embedding_function"])
-                insert_fct( int(emb["self_name"]), value)
+            params = self.mycelium.get_job_parameters(job["id"])
+            params = TaskParameters.develop(params)
 
-            if job["status"]!= custom_types.STATUS["DONE"] and self.is_job_ready(params, embedded_params):
+            if job["status"] == custom_types.STATUS["PENDING"] :
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
+
+    # def start_jobs(self, store_failures=True, raise_exceptions=True):
+    #     jobs = self.mycelium.get_received_jobs(self.uid)
+    #     for job in jobs:
+    #         params = self.mycelium.get_job_parameters(job["id"], embedded=False)
+    #         params.update( self.mycelium.get_job_static_parameters(job["id"]) )
+    #         embedded_params = self.mycelium.get_job_parameters(job["id"], embedded=True)
+            
+    #         for emb_value in embedded_params.values():
+    #             value = emb_value["value"]
+    #             emb = emb_value["embedding"]
+    #             parent_obj = params[ emb["parent_parameter_name"] ]
+    #             insert_fct = getattr(parent_obj, emb["embedding_function"])
+    #             insert_fct( int(emb["self_name"]), value)
+
+    #         if job["status"]!= custom_types.STATUS["DONE"] and self.is_job_ready(params, embedded_params):
+    #             self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):
         import sys
         try:
             task = getattr(self, task_name)
-            self.mycellium.start_job(job_id)
-            ret = task.run(**parameters)
-            self.mycellium.store_results(job_id, ret)
-            self.mycellium.update_job_status(job_id, custom_types.STATUS["DONE"])
-            self.mycellium.complete_job(job_id)
+            self.mycelium.start_job(job_id)
+            ret = task.run(job_id, **parameters)
+            ic(ret)
+            self.mycelium.store_results(job_id, ret)
+            # self.mycelium.update_job_status(job_id, custom_types.STATUS["DONE"])
+            self.mycelium.complete_job(job_id)
         except Exception as exp:
             if store_failures:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                self.mycellium.register_job_failure(exc_type, exc_value, exc_traceback, job_id)
+                self.mycelium.register_job_failure(exc_type, exc_value, exc_traceback, job_id)
             
             if raise_exceptions:
                 raise exp
