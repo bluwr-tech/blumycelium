@@ -329,8 +329,15 @@ class Mycellium:
 
     def _save_parameters(self, job, job_doc, params, now):
         def _get_param_doc(name, node):
-            param_doc = self.db["Parameters"]
-
+            param_doc = self.db["Parameters"].createDocument()
+            dct = {
+                "_key": node["uid"],
+                "name": name
+            }
+            dct.update(node)
+            param_doc.set(dct)
+            return param_doc
+            
         for name, value in params.items():
             pass
 
