@@ -53,7 +53,7 @@ def init_myc():
 
     ret = sender.task_send( "Tralala"  )
     printer.task_print_it( [ ret["value"], [ ret["value"], [ret["value"]]] ] )
-    printer2.task_print_it( [ ret["value"], [ ret["value"], [ret["value"], "TRA"]] ] )
+    printer2.task_print_it( [ ret["value"].upper(), [ ret["value"]*2, [ret["value"], "TRA"]] ] )
 
     sender.start_jobs(store_failures=True, raise_exceptions=True)
     printer.start_jobs(store_failures=True, raise_exceptions=True)

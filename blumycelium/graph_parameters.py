@@ -470,6 +470,66 @@ class Value(object):
     def __repr__(self):
         return "%s: %s" % (self.__class__.__name__, repr(self.parameter))
 
+    def __mul__(self, value):
+        self._validate_type("__mul__")
+
+        code = "{self_param} * {value}"
+        value_param = GraphParameter()
+        value_param.set_value(value)
+        new_param = GraphParameter()
+        new_param.set_code_block(init_code=None, return_statement=code, self_param=self.parameter, value=value_param)
+        return new_param
+
+    def __add__(self, value):
+        self._validate_type("__add__")
+
+        code = "{self_param} + {value}"
+        value_param = GraphParameter()
+        value_param.set_value(value)
+        new_param = GraphParameter()
+        new_param.set_code_block(init_code=None, return_statement=code, self_param=self.parameter, value=value_param)
+        return new_param
+
+    def __sub__(self, value):
+        self._validate_type("__sub__")
+
+        code = "{self_param} - {value}"
+        value_param = GraphParameter()
+        value_param.set_value(value)
+        new_param = GraphParameter()
+        new_param.set_code_block(init_code=None, return_statement=code, self_param=self.parameter, value=value_param)
+        return new_param
+
+    def __div__(self, value):
+        self._validate_type("__div__")
+
+        code = "{self_param} / {value}"
+        value_param = GraphParameter()
+        value_param.set_value(value)
+        new_param = GraphParameter()
+        new_param.set_code_block(init_code=None, return_statement=code, self_param=self.parameter, value=value_param)
+        return new_param
+
+    def __contain__(self, value):
+        self._validate_type("__contain__")
+
+        code = "{self_param} in {value}"
+        value_param = GraphParameter()
+        value_param.set_value(value)
+        new_param = GraphParameter()
+        new_param.set_code_block(init_code=None, return_statement=code, self_param=self.parameter, value=value_param)
+        return new_param
+
+    def __equals__(self, value):
+        self._validate_type("__equals__")
+
+        code = "{self_param} == {value}"
+        value_param = GraphParameter()
+        value_param.set_value(value)
+        new_param = GraphParameter()
+        new_param.set_code_block(init_code=None, return_statement=code, self_param=self.parameter, value=value_param)
+        return new_param
+
 # def unravel_list(lst):
 #     last_list_param = GraphParameter()
 #     last_list_param.set_value([])
