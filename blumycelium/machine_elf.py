@@ -122,11 +122,8 @@ class TaskParameters:
         accepted_types = [dict, list, tuple, int, float, bool]
 
         parameters = self.signature.parameters
-        placeholders = []
         for param, value in self.final_args.items():
-            if isinstance(value, ValuePlaceholder):
-                placeholders.append(value)
-            else:
+            if not isinstance(value, ValuePlaceholder):
                 param_clas = None
                 if not parameters[param].annotation is _empty :
                     param_clas = parameters[param].annotation
@@ -139,26 +136,37 @@ class TaskParameters:
                 if param_clas and (not param_clas in accepted_types ) :
                     raise Exception("Param '{param}' has the wrong type {type} expected one of the following: {exp})".format(param=param, type=type(value), exp=accepted_types))
 
-        return placeholders
+    # def get_storable_type(self, obj):
+    #     """
+    #     get a type storable by the mycellum for obj
+    #         [list, tuple] -> array
+    #         dict -> obj
+    #         [str, float, int] -> primitive
+    #         None -> null
+    #     """
+    #     if type(obj) in [list, tuple]:
+    #         return "array"
+    #     elif type(obj) is dict:
+    #         return "object"
+    #     elif type(obj) in [str, float, int]:
+    #         return "primitive"
+    #     elif type(obj) in type(None):
+    #         return "null"
+    #     else:
+    #         raise Exception("Unknown type; %s must be in %s" % (type(obj), [list, tuple, dict, str, float, int]))
 
-    def get_storable_type(self, obj):
-        """
-        get a type storable by the mycellum for obj
-            [list, tuple] -> array
-            dict -> obj
-            [str, float, int] -> primitive
-            None -> null
-        """
-        if type(obj) in [list, tuple]:
-            return "array"
-        elif type(obj) is dict:
-            return "object"
-        elif type(obj) in [str, float, int]:
-            return "primitive"
-        elif type(obj) in type(None):
-            return "null"
-        else:
-            raise Exception("Unknown type; %s must be in %s" % (type(obj), [list, tuple, dict, str, float, int]))
+    def get_job_dependencies(self):
+        def _rec(deps, iterator):
+            for arg in iterator:
+                if isinstance(arg, ValuePlaceholder):
+                    deps.append(arg.run_job_id)
+                elif type(arg) in [list, tuple, set]:
+                    _rec(deps, arg)
+                elif type(arg) is dict:
+                    _rec(deps, arg.values())
+        dependencies = []
+        _rec(dependencies, self.final_args.values())
+        return dependencies
 
     def get_parameter_dict(self):
         params = {}
@@ -191,7 +199,6 @@ class Job:
         run_job_id,
         worker_elf,
         parameters,
-        # submit_date,
         start_date,
         completion_date,
         status,
@@ -203,14 +210,13 @@ class Job:
         self.run_job_id=run_job_id
         self.worker_elf=worker_elf
         self.parameters=parameters
-        # self.submit_date=submit_date
         self.start_date=start_date
         self.completion_date=completion_date
         self.status=status
         self.mycelium = mycelium
         self.return_placeholder=return_placeholder
         self.dependencies = dependencies
-    
+
     def commit(self):
         self.mycelium.push_job(self)
 
@@ -248,21 +254,18 @@ class Task:
             parameters.set_parameters(*args, **kwargs)
             placeholders = parameters.validate()
             
-            # now = ut.gettime()
-            
             return_placeholder = TaskReturnPlaceHolder(worker_elf=self.machine_elf, task_function=self.function, run_job_id=run_job_id)
             return_placeholder.make_placeholder()
 
-            dependencies = None
-            if len(placeholders) > 0:
-                dependencies = [phold.run_job_id for phold in placeholders]
+            dependencies = parameters.get_job_dependencies()
+            # if len(placeholders) > 0:
+                # dependencies = [phold.run_job_id for phold in placeholders]
 
             job = Job(
                 task = self,
                 run_job_id = run_job_id,
                 worker_elf = self.machine_elf,
                 parameters = parameters,
-                # submit_date = now,
                 start_date = None,
                 completion_date = None,
                 status = custom_types.STATUS["PENDING"],
@@ -272,7 +275,6 @@ class Task:
             )
             
             job_id = job.commit()
-
 
             return return_placeholder
 
