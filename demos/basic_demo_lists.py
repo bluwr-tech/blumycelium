@@ -41,6 +41,9 @@ def init_myc():
     printer = PrinterElf_demo3("The Elf Printer", mycelium) 
     printer.register(store_source=True)
 
+    printer2 = PrinterElf_demo3("The Elf Printer2", mycelium) 
+    printer2.register(store_source=True)
+
     sender = SenderElf_demo3("The Elf Sender", mycelium)
     sender.register(store_source=True)
     
@@ -50,10 +53,11 @@ def init_myc():
 
     ret = sender.task_send( "Tralala"  )
     printer.task_print_it( [ ret["value"], [ ret["value"], [ret["value"]]] ] )
+    printer2.task_print_it( [ ret["value"], [ ret["value"], [ret["value"], "TRA"]] ] )
 
     sender.start_jobs(store_failures=True, raise_exceptions=True)
-    print("===> print")
     printer.start_jobs(store_failures=True, raise_exceptions=True)
+    printer2.start_jobs(store_failures=True, raise_exceptions=True)
 
 if __name__ == '__main__':
     init_myc()

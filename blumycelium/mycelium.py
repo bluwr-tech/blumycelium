@@ -65,7 +65,7 @@ class Mycelium:
     
     def drop_jobs(self):
         """delete all information related to jobs"""
-        for collection in ["Jobs", "Failures", "Parameters", "JobFailures", "JobParameters", "Results"]:
+        for collection in ["Jobs", "Failures", "Parameters", "JobFailures", "JobParameters", "Results", "JobToJob"]:
             self.db[collection].truncate() 
 
     def _init_collections(self, db, purge=False) :
@@ -181,7 +181,6 @@ class Mycelium:
 
         graph = self.db.graphs["JobParameters_graph"]
         for name, traversal in params.items():
-            # print(traversal)
             param_doc = _get_param_doc(traversal, now)
             data = {"creation_date": now, "name": name}
             graph.link("JobParameters", job_doc, param_doc, data)
@@ -194,6 +193,11 @@ class Mycelium:
         params = job.parameters.get_parameter_dict()
         self._save_parameters(job_doc, params, now)
         
+        graph = self.db.graphs["Jobs_graph"]
+        if job.dependencies:
+            for dep in job.dependencies:
+                graph.link("JobToJob", "Jobs/" + dep, job_doc, {"creation_date": now})
+
     def get_job_parameters(self, job_id):
         aql = """
         FOR jparam IN JobParameters

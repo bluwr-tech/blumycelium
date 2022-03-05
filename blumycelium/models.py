@@ -3,7 +3,7 @@ import pyArango.validation as VAL
 import pyArango.graph as GR
 
 
-COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Failures", "JobFailures", "Parameters", "JobParameters", "Results"]
+COLLECTIONS = ["Jobs", "MachineElves", "MachineElvesRevisions", "Failures", "JobFailures", "Parameters", "JobParameters", "Results", "JobToJob"]
 GRAPHS = ["Jobs_graph", "JobFailures_graph", "JobParameters_graph"]
 
 class Jobs(Collection) :
@@ -111,6 +111,17 @@ class JobParameters(Edges) :
         "allow_foreign_fields": False
     }
 
+class JobToJob(Edges) :
+    _fields = {
+        "creation_date": Field(validators=[VAL.NotNull()]),
+    }
+
+    _validation = {
+        "on_save": True,
+        "on_set": False,
+        "allow_foreign_fields": False
+    }
+
 class JobParameters_graph(GR.Graph):
     _edgeDefinitions = (
         GR.EdgeDefinition("JobParameters", fromCollections = ["Jobs"], toCollections = ["Parameters"]),
@@ -128,11 +139,11 @@ class JobFailures(Edges) :
         "allow_foreign_fields": False
     }
 
-# class Jobs_graph(GR.Graph):
-#     _edgeDefinitions = (
-#         GR.EdgeDefinition("Parameters", fromCollections = ["Jobs"], toCollections = ["Jobs"]),
-#     ) 
-#     _orphanedCollections = []
+class Jobs_graph(GR.Graph):
+    _edgeDefinitions = (
+        GR.EdgeDefinition("JobToJob", fromCollections = ["Jobs"], toCollections = ["Jobs"]),
+    ) 
+    _orphanedCollections = []
 
 class JobFailures_graph(GR.Graph):
     _edgeDefinitions = (

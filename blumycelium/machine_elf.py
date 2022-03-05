@@ -61,12 +61,10 @@ class TaskReturnPlaceHolder:
             raise Exception("Placeholder has no parameter: '%s'" % name)
 
         return self.parameters[name].result_id
-        # return ValuePlaceholder.get_result_id(self.run_job_id, name)
-
+       
     def __getitem__(self, key):
         if self.is_none:
             return None
-        # ic(key, type(self.parameters[key]), self.parameters[key])
         return self.parameters[key]
 
     def __str__(self):
@@ -118,13 +116,17 @@ class TaskParameters:
         return placeholders
 
     def validate(self):
+        """returns placeholders"""
         from inspect import _empty
 
         accepted_types = [dict, list, tuple, int, float, bool]
 
         parameters = self.signature.parameters
+        placeholders = []
         for param, value in self.final_args.items():
-            if not isinstance(value, ValuePlaceholder):
+            if isinstance(value, ValuePlaceholder):
+                placeholders.append(value)
+            else:
                 param_clas = None
                 if not parameters[param].annotation is _empty :
                     param_clas = parameters[param].annotation
@@ -137,7 +139,7 @@ class TaskParameters:
                 if param_clas and (not param_clas in accepted_types ) :
                     raise Exception("Param '{param}' has the wrong type {type} expected one of the following: {exp})".format(param=param, type=type(value), exp=accepted_types))
 
-        return True
+        return placeholders
 
     def get_storable_type(self, obj):
         """
@@ -161,14 +163,11 @@ class TaskParameters:
     def get_parameter_dict(self):
         params = {}
         for name, arg in self.final_args.items():
-            # ic(name, arg)
             if type(arg) in [dict, list, tuple, set]:
                 param = gp.unravel(arg)
                 val = ValuePlaceholder(self.run_job_id, name, worker_elf=self.worker_elf)
                 val.parameter = param
             elif not isinstance(arg, ValuePlaceholder):
-                # print("=================================")
-                # ic(arg)
                 val = ValuePlaceholder(self.run_job_id, name, worker_elf=self.worker_elf)
                 val.set_value(arg)
             else:
@@ -181,7 +180,6 @@ class TaskParameters:
         ret = {}
         for key, trav in dct_params.items():
             ret[key] = gp.GraphParameter.build_from_traversal(trav, pull_origin_function=mycelium.get_result)
-            # ret[key].set_pull_origin_function(mycelium.get_result)
             ret[key] = ret[key].make()
         return ret
 
@@ -193,24 +191,26 @@ class Job:
         run_job_id,
         worker_elf,
         parameters,
-        submit_date,
+        # submit_date,
         start_date,
         completion_date,
         status,
         mycelium,
-        return_placeholder
+        return_placeholder,
+        dependencies
     ):
         self.task=task
         self.run_job_id=run_job_id
         self.worker_elf=worker_elf
         self.parameters=parameters
-        self.submit_date=submit_date
+        # self.submit_date=submit_date
         self.start_date=start_date
         self.completion_date=completion_date
         self.status=status
         self.mycelium = mycelium
         self.return_placeholder=return_placeholder
-
+        self.dependencies = dependencies
+    
     def commit(self):
         self.mycelium.push_job(self)
 
@@ -246,27 +246,33 @@ class Task:
         def _wrapped():
             parameters = TaskParameters(self.function, run_job_id=run_job_id, worker_elf=self.machine_elf)
             parameters.set_parameters(*args, **kwargs)
-            parameters.validate()
-
-            now = ut.gettime()
+            placeholders = parameters.validate()
+            
+            # now = ut.gettime()
             
             return_placeholder = TaskReturnPlaceHolder(worker_elf=self.machine_elf, task_function=self.function, run_job_id=run_job_id)
             return_placeholder.make_placeholder()
+
+            dependencies = None
+            if len(placeholders) > 0:
+                dependencies = [phold.run_job_id for phold in placeholders]
 
             job = Job(
                 task = self,
                 run_job_id = run_job_id,
                 worker_elf = self.machine_elf,
                 parameters = parameters,
-                submit_date = now,
+                # submit_date = now,
                 start_date = None,
                 completion_date = None,
                 status = custom_types.STATUS["PENDING"],
                 mycelium = self.machine_elf.mycelium,
-                return_placeholder=return_placeholder
+                return_placeholder=return_placeholder,
+                dependencies = dependencies
             )
             
             job_id = job.commit()
+
 
             return return_placeholder
 
