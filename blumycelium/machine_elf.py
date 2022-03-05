@@ -339,13 +339,16 @@ class MachineElf:
     def get_jobs(self):
         return self.mycelium.get_jobs(self.uid)
 
+    def is_job_ready(self, job_id):
+        return self.mycelium.is_job_ready(is_job_ready)
+
     def start_jobs(self, store_failures=True, raise_exceptions=True):
         jobs = self.mycelium.get_received_jobs(self.uid)
         for job in jobs:
             params = self.mycelium.get_job_parameters(job["id"])
             params = TaskParameters.develop(self.mycelium, params)
 
-            if job["status"] == custom_types.STATUS["PENDING"] :
+            if self.mycelium.is_job_ready(job["id"]) :
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):

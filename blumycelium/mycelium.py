@@ -236,7 +236,7 @@ class Mycelium:
             str_status_filter = ""
 
         aql = """
-            FOR job in Jobs
+            FOR job IN Jobs
                 FILTER job.machine_elf.id == @uid
                 {str_status_filter}
                 SORT job.creation_date DESC
@@ -325,8 +325,6 @@ class Mycelium:
         
         now = ut.gettime()
 
-        # job_doc = self.get_job(job_id)
-
         for name, value in results.items():
             result_key = value["result_id"]
             try:
@@ -347,3 +345,25 @@ class Mycelium:
     def get_result(self, result_id):
         result_doc = self.db["Results"][result_id]
         return result_doc.getStore()["value"]
+
+    def get_job_status(self, job_id):
+        job_doc = self.db["Jobs"][job_id]
+        return job_doc.getStore()["status"]
+
+    def get_dependencies_status(self, job_id):
+        aql = """
+            FOR jj IN JobToJob
+                FILTER jj._to == @id
+                FOR job IN Jobs
+                    FILTER jj._from == job._id
+                    RETURN {
+                        "job_id": job._key,
+                        "status": job.status
+                    }
+        """
+        
+        bind_vars = {"id": "Jobs/"+ job_id}
+        res_q = self.db.AQLQuery(aql, bindVars=bind_vars, batchSize=100, rawResults=True)
+        ret = [res for res in res_q]
+        return ret
+
