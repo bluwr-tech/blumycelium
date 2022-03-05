@@ -66,17 +66,23 @@ class GraphParameter:
         
         self.computed_value = None
         
-        self.mirroring = None
+        self.origin = None
+        self.pull_origin_function = None
 
-    def set_origin(self, uid):
-        self.mirroring = uid
+    def set_origin(self, uid, pull_origin_function=None):
+        self.origin = uid
+        self.pull_origin_function = pull_origin_function
+        # ic(self, self.origin, self.pull_origin_function)
+
+    def set_pull_origin_function(self, fct):
+        self.pull_origin_function = fct
 
     def _dict_representation(self):
         ret = {
             "uid": self.uid,
-            "value": value,
+            "value": self.value,
             "code_block": self.code_block,
-            "mirroring": self.mirroring
+            "origin": self.origin
         }
         
         return ret
@@ -126,7 +132,7 @@ class GraphParameter:
         
         if not self.value is None:
             self.computed_value = self.value
-        
+               
         if visited_nodes is None:
             visited_nodes = set()
         
@@ -137,8 +143,12 @@ class GraphParameter:
         _run_deps(visited_nodes)
 
         if self.value is None:
-            self.computed_value = self.code_block.run(**self.dependency_values)
-    
+            if not self.code_block is None:
+                self.computed_value = self.code_block.run(**self.dependency_values)
+            elif (not self.pull_origin_function is None ) and (not self.origin is None):
+                self.computed_value = self.pull_origin_function(self.origin)
+            else:
+                raise Exception("Unable to retrieve value. No defined value, code_block or origin function")
         return self.computed_value
 
     def traverse(self, visited_nodes=None, is_root=True, root_uid=None, to_dict=True):
@@ -171,13 +181,16 @@ class GraphParameter:
         return tree
 
     @classmethod
-    def build_from_traversal(cls, trav:dict):
+    def build_from_traversal(cls, trav:dict, pull_origin_function=None):
         def _build_node(dct_node):
             node = GraphParameter(uid=dct_node["uid"])
             node.value = dct_node["value"]
             if not dct_node["code_block"] is None:
                 code_block = CodeBlock(init_code=dct_node["code_block"]["init_code"], return_statement=dct_node["code_block"]["return_statement"])
                 node.code_block = code_block
+            if not dct_node["origin"] is None:
+                node.set_origin(dct_node["origin"])
+                node.set_pull_origin_function(pull_origin_function)
             return node
 
         def _get_node(dct, all_nodes_dct):
@@ -245,12 +258,12 @@ class GraphParameter:
         return tree
 
     def set_value(self, value):
-        if not (self.code_block is None and self.mirroring is None) :
+        if not (self.code_block is None and self.origin is None) :
             raise Exception("Can either have a code block, a value or an origin")
         self.value = value
 
     def set_code_block(self, init_code, return_statement, **dependencies):
-        if not (self.value is None and self.mirroring is None) :
+        if not (self.value is None and self.origin is None) :
             raise Exception("Can either have a code block, a value or an origin")
 
         string_kwargs = {}
@@ -276,7 +289,7 @@ class GraphParameter:
                     deps.append(dep.uid)
         else:
             deps = None
-        return "*-GraphParameter '%s' value:'%s' code_block:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, deps)
+        return "*-GraphParameter '%s' value:'%s' code_block:'%s' origin:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, self.origin, deps)
 
     def __repr__(self):
         deps = 0
@@ -284,7 +297,7 @@ class GraphParameter:
             for batch in self.dependencies:
                 for dep in batch.values():
                     deps += 1 
-        return "*-GraphParameter '%s' value:'%s' code_block:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, deps)
+        return "*-GraphParameter '%s' value:'%s' code_block:'%s' origin:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, self.origin, deps)
 
 class Value(object):
     

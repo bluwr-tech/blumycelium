@@ -324,7 +324,7 @@ class Mycelium:
         # job_doc = self.get_job(job_id)
 
         for name, value in results.items():
-            # result_key = self.get_result_id(job_id, name)
+            result_key = value["result_id"]
             try:
                 result_doc = self.db["Results"][result_key]
             except a_exc.DocumentNotFoundError:
@@ -332,9 +332,14 @@ class Mycelium:
         
             result_doc.set(
                 {
-                    "_key": result_key,
-                    "value": value,
+                    "_key": value["result_id"],
+                    "name": name,
+                    "value": value["value"],
                     "creation_date": now,
                 }
             )
             result_doc.save()
+
+    def get_result(self, result_id):
+        result_doc = self.db["Results"][result_id]
+        return result_doc.getStore()["value"]

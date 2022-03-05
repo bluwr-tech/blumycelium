@@ -6,13 +6,15 @@ from icecream import ic
 
 class ValuePlaceholder(gp.Value):
 
-    def _init(self, run_job_id, name, *args, **kwargs):
+    def _init(self, run_job_id, name, worker_elf, *args, **kwargs):
         super(ValuePlaceholder, self)._init(*args, **kwargs)
         self.run_job_id = run_job_id
         self.name = name
         self.result_id = self.get_result_id(self.run_job_id, self.name)
+        self.worker_elf = worker_elf
 
-        self.parameter.set_origin(self.result_id)
+    def set_origin(self, result_id):
+        self.parameter.set_origin(self.result_id, self.worker_elf.mycelium.get_result)
 
     @classmethod
     def get_result_id(cls, job_id, name):
@@ -45,11 +47,15 @@ class TaskReturnPlaceHolder:
         if not self.is_none:
             if type(ret_annotation) is dict:
                 for name, value in ret_annotation.items():
-                    self.parameters[name] = ValuePlaceholder(self.run_job_id, name, as_type=value)
+                    value_place = ValuePlaceholder(self.run_job_id, name, worker_elf=self.worker_elf, as_type=value)
+                    value_place.set_origin(value_place.result_id)
+                    self.parameters[name] = value_place
             else:
                 for name in ret_annotation:
-                    self.parameters[name] = ValuePlaceholder(self.run_job_id, name)
-            
+                    value_place = ValuePlaceholder(self.run_job_id, name, worker_elf=self.worker_elf)
+                    value_place.set_origin(value_place.result_id)
+                    self.parameters[name] = value_place
+
     def get_result_id(self, name):
         if name not in self.parameters:
             raise Exception("Placeholder has no parameter: '%s'" % name)
@@ -74,10 +80,11 @@ class TaskReturnPlaceHolder:
 
 class TaskParameters:
 
-    def __init__(self, fct, run_job_id):
+    def __init__(self, fct, run_job_id, worker_elf):
         from inspect import signature
 
         self.run_job_id = run_job_id
+        self.worker_elf = worker_elf
         self.signature = signature(fct)
         self.final_args = {}
 
@@ -157,12 +164,12 @@ class TaskParameters:
             # ic(name, arg)
             if type(arg) in [dict, list, tuple, set]:
                 param = gp.unravel(arg)
-                val = ValuePlaceholder(self.run_job_id, name)
+                val = ValuePlaceholder(self.run_job_id, name, worker_elf=self.worker_elf)
                 val.parameter = param
             elif not isinstance(arg, ValuePlaceholder):
                 # print("=================================")
                 # ic(arg)
-                val = ValuePlaceholder(self.run_job_id, name)
+                val = ValuePlaceholder(self.run_job_id, name, worker_elf=self.worker_elf)
                 val.set_value(arg)
             else:
                 val = arg
@@ -170,12 +177,11 @@ class TaskParameters:
         return params
 
     @classmethod
-    def develop(cls, dct_params:dict):
+    def develop(cls, mycelium, dct_params:dict):
         ret = {}
         for key, trav in dct_params.items():
-            ret[key] = gp.GraphParameter.build_from_traversal(trav)
-            # ic(key, ret[key])
-            # ic(ret[key].make())
+            ret[key] = gp.GraphParameter.build_from_traversal(trav, pull_origin_function=mycelium.get_result)
+            # ret[key].set_pull_origin_function(mycelium.get_result)
             ret[key] = ret[key].make()
         return ret
 
@@ -238,13 +244,13 @@ class Task:
         run_job_id = ut.getuid()
 
         def _wrapped():
-            parameters = TaskParameters(self.function, run_job_id=run_job_id)
+            parameters = TaskParameters(self.function, run_job_id=run_job_id, worker_elf=self.machine_elf)
             parameters.set_parameters(*args, **kwargs)
             parameters.validate()
 
             now = ut.gettime()
             
-            return_placeholder = TaskReturnPlaceHolder(worker_elf=self.machine_elf.uid, task_function=self.function, run_job_id=run_job_id)
+            return_placeholder = TaskReturnPlaceHolder(worker_elf=self.machine_elf, task_function=self.function, run_job_id=run_job_id)
             return_placeholder.make_placeholder()
 
             job = Job(
@@ -266,12 +272,12 @@ class Task:
 
         return _wrapped
 
-    # def run(self, *args, **kwargs):
-    #     return self.function(*args, **kwargs)
-
     def run(self, job_id, *args, **kwargs):
         fct_ret = self.function(*args, **kwargs)
         
+        if fct_ret is None:
+            return None
+
         ret = {}
         for name, value_ret in fct_ret.items():
             ret[name] = {
@@ -325,41 +331,14 @@ class MachineElf:
     def get_jobs(self):
         return self.mycelium.get_jobs(self.uid)
 
-    # def is_job_ready(self, parameters:dict, embedded_params:dict):
-    #     import custom_types
-    #     params_ready = not (custom_types.EmptyParameter in parameters.values() )
-        
-    #     for key, value in embedded_params.items():
-    #         if value is custom_types.EmptyParameter:
-    #             return False
-        
-    #     return params_ready
-
     def start_jobs(self, store_failures=True, raise_exceptions=True):
         jobs = self.mycelium.get_received_jobs(self.uid)
         for job in jobs:
             params = self.mycelium.get_job_parameters(job["id"])
-            params = TaskParameters.develop(params)
+            params = TaskParameters.develop(self.mycelium, params)
 
             if job["status"] == custom_types.STATUS["PENDING"] :
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
-
-    # def start_jobs(self, store_failures=True, raise_exceptions=True):
-    #     jobs = self.mycelium.get_received_jobs(self.uid)
-    #     for job in jobs:
-    #         params = self.mycelium.get_job_parameters(job["id"], embedded=False)
-    #         params.update( self.mycelium.get_job_static_parameters(job["id"]) )
-    #         embedded_params = self.mycelium.get_job_parameters(job["id"], embedded=True)
-            
-    #         for emb_value in embedded_params.values():
-    #             value = emb_value["value"]
-    #             emb = emb_value["embedding"]
-    #             parent_obj = params[ emb["parent_parameter_name"] ]
-    #             insert_fct = getattr(parent_obj, emb["embedding_function"])
-    #             insert_fct( int(emb["self_name"]), value)
-
-    #         if job["status"]!= custom_types.STATUS["DONE"] and self.is_job_ready(params, embedded_params):
-    #             self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):
         import sys
@@ -367,9 +346,7 @@ class MachineElf:
             task = getattr(self, task_name)
             self.mycelium.start_job(job_id)
             ret = task.run(job_id, **parameters)
-            ic(ret)
             self.mycelium.store_results(job_id, ret)
-            # self.mycelium.update_job_status(job_id, custom_types.STATUS["DONE"])
             self.mycelium.complete_job(job_id)
         except Exception as exp:
             if store_failures:

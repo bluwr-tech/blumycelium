@@ -45,14 +45,11 @@ def init_myc():
     sender.register(store_source=True)
     
     msgs = ("a message sent on: %s" % time.ctime(), "a message sent on: %s" % time.ctime(), [ "mop", "kop", [ "hop", "clop"] ] )
-
     ret = sender.task_send( msgs )
     printer.task_print_it(ret["value"])
 
-    # ret = sender.task_send( "Tralala"  )
-    # ic(ret)
-
-    # printer.task_print_it( [ "hoplala", ret["value"], ret["value"], ret["value"] ] )
+    ret = sender.task_send( "Tralala"  )
+    printer.task_print_it( [ ret["value"], [ ret["value"], [ret["value"]]] ] )
 
     sender.start_jobs(store_failures=True, raise_exceptions=True)
     print("===> print")
