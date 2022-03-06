@@ -9,11 +9,13 @@ class ExecutionError(Exception):
         self.message = msg
 
 class CodeBlock:
+    """a code block of python code to run"""
     def __init__(self, init_code=None, return_statement=None):
         self.init_code = init_code
         self.return_statement = return_statement
 
     def format(self, **string_kwargs):
+        """replace the name of variables by their myc_back_variables references"""
         import re
         def _sub_var_names(code):
             ret = re.sub("(var_[^\W]+)", r"myc_back_variables['\1']", code)
@@ -27,6 +29,7 @@ class CodeBlock:
             self.return_statement =_sub_var_names(self.return_statement)
 
     def run(self, **myc_back_variables):
+        """run the code block"""
         if not self.init_code is None:
             try:
                 exec(self.init_code)
@@ -40,6 +43,7 @@ class CodeBlock:
                 raise ExecutionError(self.return_statement)
     
     def to_dict(self):
+        """return a dictionary version of the code block"""
         return {
             "init_code": self.init_code,
             "return_statement": self.return_statement
@@ -53,7 +57,7 @@ class CodeBlock:
         return str_val
 
 class GraphParameter:
-
+    """A graph of Parameters"""
     def __init__(self, uid=None):
         if uid is None:
             uid = ut.get_random_variable_name()
@@ -70,14 +74,17 @@ class GraphParameter:
         self.pull_origin_function = None
 
     def set_origin(self, uid, pull_origin_function=None):
+        """set the origin (address) of the parameter and function to retreive the value from the origin"""
         self.origin = uid
         self.pull_origin_function = pull_origin_function
         # ic(self, self.origin, self.pull_origin_function)
 
     def set_pull_origin_function(self, fct):
+        """set the function to pull jvalue form the origin"""
         self.pull_origin_function = fct
 
     def _dict_representation(self):
+        """return a dcitionnary representation of the paramater"""
         ret = {
             "uid": self.uid,
             "value": self.value,
@@ -88,6 +95,7 @@ class GraphParameter:
         return ret
 
     def to_dict(self, reccursive=False, visited_nodes=None, copy_values=True):
+        """return a dict representation of the parameter recursively if asked to"""
         import copy
 
         if visited_nodes is None:
@@ -112,6 +120,7 @@ class GraphParameter:
         return ret
 
     def add_dependencies(self, *deps):
+        """add dependencies (other GraphParaemters) needed to compute the value"""
         if self.dependencies is None:
             self.dependencies = []
 
@@ -122,6 +131,7 @@ class GraphParameter:
                 self.dependency_values[duid] = None
 
     def make(self, visited_nodes=None, is_root=False):
+        """compute the value of the paraneter and return it"""
         def _run_deps(visited):
             if self.dependencies:
                 for batch in self.dependencies:
@@ -152,6 +162,7 @@ class GraphParameter:
         return self.computed_value
 
     def traverse(self, visited_nodes=None, is_root=True, root_uid=None, to_dict=True):
+        """traverse the graph dependency tree and return a dictionary representing it"""
         def _add_tree(node, is_root, root_uid, visited, as_dict):
             nnn = node
             if as_dict:
@@ -182,6 +193,7 @@ class GraphParameter:
 
     @classmethod
     def build_from_traversal(cls, trav:dict, pull_origin_function=None):
+        """build a parameter from a traversal dictionary"""
         def _build_node(dct_node):
             node = GraphParameter(uid=dct_node["uid"])
             node.value = dct_node["value"]
@@ -221,6 +233,7 @@ class GraphParameter:
         return root
 
     def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block"], print_it=True):
+        """a pretty print of the graph representation with dependencies"""
         from rich.tree import Tree
         from rich import print
 
@@ -258,11 +271,13 @@ class GraphParameter:
         return tree
 
     def set_value(self, value):
+        """set the static value of the parameter"""
         if not (self.code_block is None and self.origin is None) :
             raise Exception("Can either have a code block, a value or an origin")
         self.value = value
 
     def set_code_block(self, init_code, return_statement, **dependencies):
+        """set the code block of the parameter"""
         if not (self.value is None and self.origin is None) :
             raise Exception("Can either have a code block, a value or an origin")
 
@@ -300,40 +315,46 @@ class GraphParameter:
         return "*-GraphParameter '%s' value:'%s' code_block:'%s' origin:'%s' dependencies:'%s' -*" % (self.uid, self.value, self.code_block, self.origin, deps)
 
 class Value(object):
-    
+    """A wrapper for a graph parameter"""
     def _init(self, as_type=None, parent=None):
         super(Value, self).__init__()
         self.parameter = GraphParameter()
         self.as_type = as_type
         self.parent = parent
-        self.closed_init = False
+        # self.closed_init = False
         self.dependencies = []
         self.made_value = None
 
-    def close_init(self):
-        self.closed_init = True
+    # def close_init(self):
+        # self.closed_init = True
 
     def __init__(self, *args, **kwargs):
         self._init(*args, **kwargs)
         self.close_init()
 
     def set_value(self, value):
+        """set the static value"""
         self.as_type = type(value)
         return self.parameter.set_value(value)
 
     def set_code_block(self, *args, **kwargs):
+        """set the code block to run"""
         return self.parameter.set_code_block(*args, **kwargs)
 
     def traverse(self, *args, **kwargs):
+        """return a dictionary representing the value and it's dependencies"""
         return self.parameter.traverse(*args, **kwargs)
 
     def to_dict(self, *args, **kwargs):
+        """return a dictionary representing the value"""
         return self.parameter.to_dict( *args, **kwargs)
 
     def pp_traverse(self, *args, **kwargs):
+        """pretty print the value and it's dependencies"""
         return self.parameter.pp_traverse(*args, **kwargs)
 
     def _get_parameter(self, param):
+        """return a GraphParameter"""
         if isinstance(param, Value):
             # self.parent.dependencies.append(param)
             self.parent.parameter.add_dependencies(param.parameter)
@@ -350,6 +371,7 @@ class Value(object):
         return new_param
 
     def _validate_type(self, key):
+        """is as_type is defined validate that the object specified in 'as_type' has an attribute named 'key'"""
         as_type = object.__getattribute__(self, "as_type")
         if not as_type is None:
             getattr(as_type, key) #will raise an exception if the attribute is non-existant
@@ -458,8 +480,7 @@ class Value(object):
         return self
 
     def make(self, force=False):
-        # for dep in self.dependencies:
-        #     dep.make()
+        """compute a return the value represented by the Value object"""
         if self.made_value is None or force :
             self.made_value = self.parameter.make(is_root=True)
         return self.made_value

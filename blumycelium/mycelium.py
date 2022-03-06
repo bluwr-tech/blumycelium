@@ -11,10 +11,15 @@ ic.configureOutput(includeContext=True)
 import logging
 logger = logging.getLogger("BLUMYCELIUM")
 
-class Mycelium:
-    """docstring for Mycelium"""
+class ArangoMycelium:
+    """docstring for ArangoMycelium. A mycelium over ArangoDB"""
 
     def __init__(self, connection, name):
+        """
+        connection: pyArango connection object.
+        name: Unique name for the mycelium
+        """
+
         self.connection = connection
         self.name = name
         self.db_name = "BLUMYC_" + name
@@ -30,6 +35,9 @@ class Mycelium:
             self.db = self.connection[self.db_name]
 
     def _init_db(self) :
+        """
+        Create the mycelium database
+        """
         from pyArango.theExceptions import CreationError
 
         print("Creating database", self.db_name)
@@ -44,6 +52,10 @@ class Mycelium:
                 raise e
 
     def init(self, init_db=False, users_to_create=None) :
+        """
+        init_db: initialise the database
+        users_to_create: list of dicts {username, password}
+        """
         if init_db:
             self.db = self._init_db()
 
@@ -68,7 +80,8 @@ class Mycelium:
         for collection in ["Jobs", "Failures", "Parameters", "JobFailures", "JobParameters", "Results", "JobToJob"]:
             self.db[collection].truncate() 
 
-    def _init_collections(self, db, purge=False) :
+    def _init_collections(self, db) :
+        """initialize all collections"""
         for collection in self.collections :
             if collection.lower() not in ("collection", "edges", "field") :
                 logger.info("Creating collection", collection)
@@ -78,6 +91,8 @@ class Mycelium:
                     logger.info("Collection Creation error: =>", exp)
 
     def _init_graphs(self, db) :
+        """initialize all graphs"""
+
         for graph in self.graphs :
             # ic(graph)
             if graph.lower() != "graph":
@@ -88,6 +103,8 @@ class Mycelium:
                     logger.info("Graph Creation error (%s): =>" %graph, exp)
     
     def _init_user(self, connection, dbName, username, password) :
+        """initialize all users"""
+
         logger.info("creating user: %s" % username)
         
         user = connection.users.createUser(username, password)
@@ -103,9 +120,11 @@ class Mycelium:
         u.setPermissions(dbName, True)
 
     def _init_indexes(self, *args, **kwargs):
+        """initialize all indexes"""
         logger.info("No indexes defined")
 
     def register_machine_elf(self, machine_elf, store_source):
+        """register and elf in the mycellium"""
         now = ut.gettime()
         first_register = False
         try:
@@ -137,12 +156,11 @@ class Mycelium:
         elf_doc.save()
 
     def get_job(self, job_id):
+        """get a job"""
         return self.db["Jobs"][job_id]
     
-    # def get_result_id(self, job_id, name):
-    #     return ut.legalize_key(job_id + name)
-
     def _save_job(self, job, now_date):
+        """save job to the mycelium"""
         job_key = ut.legalize_key(job.run_job_id)
         job_doc = self.db["Jobs"].createDocument()
 
@@ -171,6 +189,7 @@ class Mycelium:
         return job_doc
 
     def _save_parameters(self, job_doc, params, now):
+        """save a parameters"""
         # from rich import print
         def _get_param_doc(node, date):
             doc = self.db["Parameters"].createDocument()
@@ -186,6 +205,7 @@ class Mycelium:
             graph.link("JobParameters", job_doc, param_doc, data)
 
     def push_job(self, job):
+        """push a job to the mycelium"""
         # from rich import print
         now = ut.gettime()
         job_doc = self._save_job(job, now)
@@ -199,6 +219,7 @@ class Mycelium:
                 graph.link("JobToJob", "Jobs/" + dep, job_doc, {"creation_date": now})
 
     def get_job_parameters(self, job_id):
+        """return the parameters for a job"""
         aql = """
         FOR jparam IN JobParameters
             FILTER jparam._from == @id
@@ -218,7 +239,7 @@ class Mycelium:
         return ret
 
     def get_received_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):
-        
+        """return all jobs for an elf"""
         bind_vars = {"uid": elf_uid}
         
         if all_jobs:
@@ -252,6 +273,7 @@ class Mycelium:
         return ret
 
     def is_job_ready(self, job_id):
+        """return True if the job is ready to run"""
         job_doc = self.get_job(job_id)
         if job_doc["status"] not in [custom_types.STATUS["PENDING"], custom_types.STATUS["READY"]]:
             return False
@@ -265,23 +287,27 @@ class Mycelium:
         return count == ready
 
     def update_job_status(self, job_id, status):
+        """update the status of a job"""
         job_doc = self.get_job(job_id)
         job_doc["status"] = status
         job_doc.save()
 
     def start_job(self, job_id):
+        """mark a job as running"""
         job_doc = self.get_job(job_id)
         job_doc["status"] = custom_types.STATUS["RUNING"]
         job_doc["start_date"] = ut.gettime()
         job_doc.save()
 
     def complete_job(self, job_id):
+        """mark a job as successful"""
         job_doc = self.get_job(job_id)
         job_doc["status"] = custom_types.STATUS["DONE"]
         job_doc["end_date"] = ut.gettime()
         job_doc.save()
 
     def register_job_failure(self, exc_type, exc_value, exc_traceback, job_id):
+        """register a job failure"""
         import traceback
         import hashlib
 
@@ -317,6 +343,7 @@ class Mycelium:
         job_doc.save()
 
     def store_results(self, job_id, results:dict):
+        """store the results of a job"""
         if results is None:
             return
         
@@ -343,10 +370,12 @@ class Mycelium:
             result_doc.save()
 
     def get_result(self, result_id):
+        """return the result of a job"""
         result_doc = self.db["Results"][result_id]
         return result_doc.getStore()["value"]
 
     def get_job_status(self, job_id):
+        """return the status of a job"""
         job_doc = self.db["Jobs"][job_id]
         return job_doc.getStore()["status"]
 

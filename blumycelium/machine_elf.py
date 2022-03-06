@@ -5,7 +5,7 @@ from . import graph_parameters as gp
 from icecream import ic
 
 class ValuePlaceholder(gp.Value):
-
+    """A placeholder for a value return by a task"""
     def _init(self, run_job_id, name, worker_elf, *args, **kwargs):
         super(ValuePlaceholder, self)._init(*args, **kwargs)
         self.run_job_id = run_job_id
@@ -14,6 +14,7 @@ class ValuePlaceholder(gp.Value):
         self.worker_elf = worker_elf
 
     def set_origin(self, result_id):
+        """set the result id represented by the placeholder"""
         self.parameter.set_origin(self.result_id, self.worker_elf.mycelium.get_result)
 
     @classmethod
@@ -21,7 +22,7 @@ class ValuePlaceholder(gp.Value):
         return ut.legalize_key(job_id + name)
 
 class TaskReturnPlaceHolder:
-    """docstring for TaskReturnPlaceHolder"""
+    """A place for the return of a task. Works as a dict, where each value is a key"""
     def __init__(self, worker_elf, task_function, run_job_id):
         self.task_function = task_function
         self.worker_elf = worker_elf
@@ -30,6 +31,7 @@ class TaskReturnPlaceHolder:
         self.is_none = False
         
     def make_placeholder(self):
+        """make and validate the placeholder"""
         from inspect import signature, _empty
 
         sig = signature(self.task_function)
@@ -57,6 +59,7 @@ class TaskReturnPlaceHolder:
                     self.parameters[name] = value_place
 
     def get_result_id(self, name):
+        """return the result_id for value in the placeholder"""
         if name not in self.parameters:
             raise Exception("Placeholder has no parameter: '%s'" % name)
 
@@ -77,7 +80,7 @@ class TaskReturnPlaceHolder:
         return str(self)
 
 class TaskParameters:
-
+    """Parameters of a task"""
     def __init__(self, fct, run_job_id, worker_elf):
         from inspect import signature
 
@@ -156,6 +159,7 @@ class TaskParameters:
     #         raise Exception("Unknown type; %s must be in %s" % (type(obj), [list, tuple, dict, str, float, int]))
 
     def get_job_dependencies(self):
+        """return the dependencies of a job (jobs that must run before) based on the parameters received"""
         def _rec(deps, iterator):
             for arg in iterator:
                 if isinstance(arg, ValuePlaceholder):
@@ -169,6 +173,7 @@ class TaskParameters:
         return dependencies
 
     def get_parameter_dict(self):
+        """return a dictionary of parameters"""
         params = {}
         for name, arg in self.final_args.items():
             if type(arg) in [dict, list, tuple, set]:
@@ -185,6 +190,7 @@ class TaskParameters:
 
     @classmethod
     def develop(cls, mycelium, dct_params:dict):
+        """compute the value of parameters"""
         ret = {}
         for key, trav in dct_params.items():
             ret[key] = gp.GraphParameter.build_from_traversal(trav, pull_origin_function=mycelium.get_result)
@@ -192,7 +198,7 @@ class TaskParameters:
         return ret
 
 class Job:
-    """docstring for Job"""
+    """a Job for an elf"""
     def __init__(
         self,
         task,
@@ -218,10 +224,11 @@ class Job:
         self.dependencies = dependencies
 
     def commit(self):
+        """save the job to the mycelium"""
         self.mycelium.push_job(self)
 
 class Task:
-    """docstring for Task"""
+    """Represent a task for an elf"""
     def __init__(self, machine_elf, function, name):
         self.machine_elf = machine_elf
         self.function = function
@@ -237,6 +244,7 @@ class Task:
         self.inspect_function()
 
     def inspect_function(self):
+        """inspect the function of a task"""
         import hashlib
 
         self.source_code = ut.inpsect_none_if_exception_or_empty(self.function, "getsource")
@@ -245,6 +253,7 @@ class Task:
         self.signature = ut.inpsect_none_if_exception_or_empty(self.function, "signature")
 
     def wrap(self, *args, **kwargs):
+        """wrap the function inside a new function that creates a Job"""
         args = args
         kwargs = kwargs
         run_job_id = ut.getuid()
@@ -281,6 +290,7 @@ class Task:
         return _wrapped
 
     def run(self, job_id, *args, **kwargs):
+        """run the task"""
         fct_ret = self.function(*args, **kwargs)
         
         if fct_ret is None:
@@ -305,7 +315,7 @@ class Task:
         return str(self)
 
 class MachineElf:
-    """docstring for MachineElf"""
+    """An elf that runs tasks"""
 
     def __init__(self, uid, mycelium):
         self.uid = ut.legalize_key(uid)
@@ -320,11 +330,13 @@ class MachineElf:
         self.find_tasks()
 
     def inspect_self(self): 
+        """inspect the elf to get the source code etc..."""
         self.source_code = ut.inpsect_none_if_exception_or_empty(self.__class__, "getsource")
         self.revision = ut.get_hash_key(self.source_code+self.uid, prefix=self.__class__.__name__ )
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.__class__, "cleandoc")
 
     def find_tasks(self):
+        """find all function whose name starts by 'task_' """
         import inspect
 
         for name, member in inspect.getmembers(self):
@@ -334,15 +346,18 @@ class MachineElf:
                 setattr(self, name, task)
 
     def register(self, store_source):
+        """register the elf to the mycelium"""
         self.mycelium.register_machine_elf(self, store_source)
 
     def get_jobs(self):
+        """retuen the list of jobs for an elf"""
         return self.mycelium.get_jobs(self.uid)
 
     def is_job_ready(self, job_id):
         return self.mycelium.is_job_ready(is_job_ready)
 
     def start_jobs(self, store_failures=True, raise_exceptions=True):
+        """start a job for an elf"""
         jobs = self.mycelium.get_received_jobs(self.uid)
         for job in jobs:
             params = self.mycelium.get_job_parameters(job["id"])
@@ -352,6 +367,7 @@ class MachineElf:
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):
+        """run a task for an elf"""
         import sys
         try:
             task = getattr(self, task_name)
