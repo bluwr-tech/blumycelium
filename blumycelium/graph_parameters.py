@@ -158,7 +158,7 @@ class GraphParameter:
             elif (not self.pull_origin_function is None ) and (not self.origin is None):
                 self.computed_value = self.pull_origin_function(self.origin)
             else:
-                raise Exception("Unable to retrieve value. No defined value, code_block or origin function")
+                raise ValueDerivationError("Unable to retrieve value. No defined value, code_block or origin function")
         return self.computed_value
 
     def traverse(self, visited_nodes=None, is_root=True, root_uid=None, to_dict=True):
@@ -273,19 +273,19 @@ class GraphParameter:
     def set_value(self, value):
         """set the static value of the parameter"""
         if not (self.code_block is None and self.origin is None) :
-            raise Exception("Can either have a code block, a value or an origin")
+            raise MultipleDerivationError("Can either have a code block, a value or an origin")
         self.value = value
 
     def set_code_block(self, init_code, return_statement, **dependencies):
         """set the code block of the parameter"""
         if not (self.value is None and self.origin is None) :
-            raise Exception("Can either have a code block, a value or an origin")
+            raise MultipleDerivationError("Can either have a code block, a value or an origin")
 
         string_kwargs = {}
         for hr_name, dep in dependencies.items():
             self.dependency_values[dep.uid] = None
             if not isinstance(dep, GraphParameter):
-                raise Exception("All depenedencies must be GraphParameters, got: '%s'" % type(dep))
+                raise DependencyTypeError("All depenedencies must be GraphParameters, got: '%s'" % type(dep))
             string_kwargs[hr_name] = dep.uid 
 
         if self.dependencies is None:
@@ -551,72 +551,6 @@ class Value(object):
         new_param.set_code_block(init_code=None, return_statement=code, self_param=self.parameter, value=value_param)
         return new_param
 
-# def unravel_list(lst):
-#     last_list_param = GraphParameter()
-#     last_list_param.set_value([])
-
-#     params = [last_list_param]
-#     for value in lst:
-#         val_param = GraphParameter()
-#         val_param.set_value(value)
-
-#         new_list_param = GraphParameter()
-        
-#         init_code="""
-#         def add(lst, value):
-#             lst.append(value)
-#             return lst""".strip()
-#         return_statement = "add({list_var}, {value_var})"
-        
-#         new_list_param.set_code_block(
-#             init_code=init_code,
-#             return_statement=return_statement,
-#             list_var=last_list_param,
-#             value_var=val_param
-#             )
-        
-#         last_list_param = new_list_param
-#         params.append(val_param)
-#         params.append(last_list_param)
-#     return params
-
-# def unravel_dict(dct):
-#     last_list_param = GraphParameter()
-#     last_list_param.set_value({})
-
-#     params = [last_list_param]
-#     for key, value in dct.items():
-#         val_param = GraphParameter()
-#         val_param.set_value(value)
-
-#         new_list_param = GraphParameter()
-        
-#         init_code="""
-#         def add(dct, key, value):
-#             dct[key]=value
-#             return dct""".strip()
-#         return_statement = "add({list_var}, %s, {value_var})" % key
-        
-#         new_list_param.set_code_block(
-#             init_code=init_code,
-#             return_statement=return_statement,
-#             list_var=last_list_param,
-#             value_var=val_param
-#             )
-        
-#         last_list_param = new_list_param
-#         params.append(val_param)
-#         params.append(last_list_param)
-#     return params
-
-# def test_unravels():
-#     lst = [1, 2, 3, 4, 5, 10]
-#     res = unravel_list(lst)
-#     print(res[-1].make())
-
-#     res = unravel_dict(dct)
-#     print(res[-1].make())
-
 def unravel_list(lst):
     param = Value()
     param.set_value([])
@@ -645,107 +579,7 @@ def unravel(obj):
     elif type(obj) is dict:
         return unravel_dict(obj)
     else:
-        raise Exception("Wrong type: '%s', except list or dict" % type(obj))
-
-def test_subslist():
-    lst = [1, 2, 3, 4, 5, 10]
-    param = GraphParameter()
-    param.set_value(lst)
-
-    sub = param[1:-1]
-    ic(sub)
-    ic(sub.make())
-
-def test_getitem():
-    dct = {1: 1, 2: 2, 3: 3}
-
-    param = Value()
-    param.set_value(dct)
-
-    sub = param[1]
-    ic(sub)
-    ic(sub.make())
-
-def test_setitem():
-    dct = {1: 1, 2: 2, 3: 3}
-    param = Value()
-    param.set_value(dct)
-
-    param[1]=100
-    ic(param)
-    ic(param.make())
-
-def test_arbitrary():
-    lst = [1, 2, 3, 4, 5]
-    param = Value()
-    param.set_value(lst)
-
-    param.extend(lst)
-    
-    param.append(60)
-    param.append(61)
-    param.pop()
-    ic(param.make())
-
-def test_easy_unravel():
-    from rich import print
-
-    lst = [1, 2, 3, 4, 5]
-    param = Value()
-    param.set_value([])
-
-    for v in lst:
-        param.append(v)
-        
-    ic(param.make())
-
-def test_nested_unravel_traversal():
-    from rich import print
-
-    lst = [1, 2, 3, 4, 5]
-    param = Value()
-    param.set_value([])
-
-    for v in lst:
-        param.append(v)
-
-    val = Value()
-    val.set_value([1])
-    val.append(100)
-
-    val2 = Value()
-    val2.set_value([2])
-    val2.append(200)
-
-    val.append(val2)
-    # val.pp_traverse(representation_attributes=None)
-    param.append(val)
-        
-    param.pp_traverse(representation_attributes=None)
-    print(param.to_dict(reccursive=True))
-    ic(param.make())
-
-
-def test_rebuild_from_traversal():
-    from rich import print
-
-    lst = [1, 2, 3, 4, 5]
-    param = Value()
-    param.set_value([])
-
-    for v in lst:
-        param.append(v)
-        
-    param.pp_traverse(representation_attributes=["value", "code_block", "uid", "python_id"])
-    print("=====")
-    trav = param.traverse()
-    # print(trav)
-
-    param2 = GraphParameter.build_from_traversal(trav)
-    param2.pp_traverse(representation_attributes=["value", "code_block", "uid", "python_id"])
-
-    ic(param.make())
-    ic(param2.make())
+        raise TypeError("Wrong type: '%s', except list or dict" % type(obj))
 
 if __name__ == '__main__':
     test_rebuild_from_traversal()

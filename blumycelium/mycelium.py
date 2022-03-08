@@ -1,9 +1,10 @@
 from . import utils as ut
 from . import custom_types
 from . import models as mod
+from .the_exceptions import *
+
 
 import pyArango.theExceptions as a_exc
-
 
 from icecream import ic
 ic.configureOutput(includeContext=True)
@@ -60,7 +61,7 @@ class ArangoMycelium:
             self.db = self._init_db()
 
         if self.db is None:
-            raise Exception("Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True")
+            raise DatabaseNotFoundError("Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True")
 
         logger.info("Initializing %s..." % self.db_name)    
         logger.info("-- init collections")
@@ -348,7 +349,7 @@ class ArangoMycelium:
             return
         
         if not type(results) is dict:
-            raise  Exception("Results must be None or a dictionary")
+            raise  ResultTypeError("Results must be None or a dictionary")
         
         now = ut.gettime()
 

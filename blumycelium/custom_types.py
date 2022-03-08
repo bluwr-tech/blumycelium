@@ -8,7 +8,3 @@ STATUS = {
     "UPSTREAM_FAILED": "upstream_failed",
     "EXPIRED": "expired",
 }
-
-class EmptyParameter:
-	"""Represents an empty parameter"""
-	pass
