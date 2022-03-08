@@ -22,8 +22,6 @@ class SenderElf_demo3(melf.MachineElf):
         }
 
 def init_myc():
-    users_to_create=[ {"username": "mycelium", "password": "mycelium"}]
-
     connection = ADB.Connection(
         arangoURL = "http://127.0.0.1:8529",
         username = "root",

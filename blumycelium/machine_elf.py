@@ -258,7 +258,7 @@ class Task:
         """wrap the function inside a new function that creates a Job"""
         args = args
         kwargs = kwargs
-        run_job_id = ut.getuid()
+        run_job_id = ut.legalize_key( self.name + ut.getuid() )
 
         def _wrapped():
             parameters = TaskParameters(self.function, run_job_id=run_job_id, worker_elf=self.machine_elf)
