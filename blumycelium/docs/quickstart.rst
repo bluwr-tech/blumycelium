@@ -93,7 +93,6 @@ Run the simple example below
         init_myc()
 
 
-
 Where to go from there
 ----------------------
 
