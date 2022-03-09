@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>blumycelium.machine_elf &mdash; Blumycellium  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Blumycellium
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mycelium.html">Mycelium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../graph_parameters.html">Graph Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Blumycellium</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>blumycelium.machine_elf</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for blumycelium.machine_elf</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">ut</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">custom_types</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">graph_parameters</span> <span class="k">as</span> <span class="n">gp</span>
+
+<span class="kn">from</span> <span class="nn">.the_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">icecream</span> <span class="kn">import</span> <span class="n">ic</span>
+
+<div class="viewcode-block" id="ValuePlaceholder"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.ValuePlaceholder">[docs]</a><span class="k">class</span> <span class="nc">ValuePlaceholder</span><span class="p">(</span><span class="n">gp</span><span class="o">.</span><span class="n">Value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A placeholder for a value return by a task&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_job_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">worker_elf</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ValuePlaceholder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span> <span class="o">=</span> <span class="n">run_job_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_result_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span> <span class="o">=</span> <span class="n">worker_elf</span>
+
+<div class="viewcode-block" id="ValuePlaceholder.set_origin"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.ValuePlaceholder.set_origin">[docs]</a>    <span class="k">def</span> <span class="nf">set_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set the result id represented by the placeholder&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">set_origin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_result</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_result_id</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ut</span><span class="o">.</span><span class="n">legalize_key</span><span class="p">(</span><span class="n">job_id</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TaskReturnPlaceHolder"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskReturnPlaceHolder">[docs]</a><span class="k">class</span> <span class="nc">TaskReturnPlaceHolder</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A place for the return of a task. Works as a dict, where each value is a key&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker_elf</span><span class="p">,</span> <span class="n">task_function</span><span class="p">,</span> <span class="n">run_job_id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_function</span> <span class="o">=</span> <span class="n">task_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span> <span class="o">=</span> <span class="n">worker_elf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span> <span class="o">=</span> <span class="n">run_job_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_none</span> <span class="o">=</span> <span class="kc">False</span>
+        
+<div class="viewcode-block" id="TaskReturnPlaceHolder.make_placeholder"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskReturnPlaceHolder.make_placeholder">[docs]</a>    <span class="k">def</span> <span class="nf">make_placeholder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;make and validate the placeholder&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">signature</span><span class="p">,</span> <span class="n">_empty</span>
+
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task_function</span><span class="p">)</span>
+        <span class="n">ret_annotation</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_none</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">ret_annotation</span> <span class="ow">is</span> <span class="n">_empty</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EmptyAnnotationError</span><span class="p">(</span><span class="s2">&quot;Task return annotation cannot be empty, expecting None, dict, tuple or list of parameter keys. Got: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">ret_annotation</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">ret_annotation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_none</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">ret_annotation</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EmptyAnnotationError</span><span class="p">(</span><span class="s2">&quot;Task return annotation cannot be empty, expecting None, dict, tuple or list of parameter keys. Got: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">ret_annotation</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_none</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">ret_annotation</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ret_annotation</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">value_place</span> <span class="o">=</span> <span class="n">ValuePlaceholder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">worker_elf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span><span class="p">,</span> <span class="n">as_type</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">value_place</span><span class="o">.</span><span class="n">set_origin</span><span class="p">(</span><span class="n">value_place</span><span class="o">.</span><span class="n">result_id</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_place</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ret_annotation</span><span class="p">:</span>
+                    <span class="n">value_place</span> <span class="o">=</span> <span class="n">ValuePlaceholder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">worker_elf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span><span class="p">)</span>
+                    <span class="n">value_place</span><span class="o">.</span><span class="n">set_origin</span><span class="p">(</span><span class="n">value_place</span><span class="o">.</span><span class="n">result_id</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_place</span></div>
+
+<div class="viewcode-block" id="TaskReturnPlaceHolder.get_result_id"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskReturnPlaceHolder.get_result_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_result_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the result_id for value in the placeholder&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PlaceHolerKeyError</span><span class="p">(</span><span class="s2">&quot;Placeholder has no parameter: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">result_id</span></div>
+       
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_none</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_none</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;*-</span><span class="si">%s</span><span class="s2">: None-*&quot;</span><span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">return</span> <span class="s2">&quot;*-</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">-*&quot;</span> <span class="o">%</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TaskParameters"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskParameters">[docs]</a><span class="k">class</span> <span class="nc">TaskParameters</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Parameters of a task&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fct</span><span class="p">,</span> <span class="n">run_job_id</span><span class="p">,</span> <span class="n">worker_elf</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">signature</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span> <span class="o">=</span> <span class="n">run_job_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span> <span class="o">=</span> <span class="n">worker_elf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span><span class="n">fct</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">_empty</span>
+
+        <span class="n">ret_annotation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span><span class="o">.</span><span class="n">return_annotation</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">for</span> <span class="n">pid</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">pid</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">pid</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">RedundantParameterError</span><span class="p">(</span><span class="s2">&quot;Got 2 values for parameter &#39;</span><span class="si">{param}</span><span class="s2">&#39;, ( </span><span class="si">{val1}</span><span class="s2"> &amp; </span><span class="si">{val2}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="p">[</span><span class="n">param</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">param</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_empty</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">RedundantParameterError</span><span class="p">(</span><span class="s2">&quot;Mandatory parameter &#39;</span><span class="si">{param}</span><span class="s2">&#39; missing)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
+                
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span>
+    
+<div class="viewcode-block" id="TaskParameters.find_placeholders_in_key_value_iterrator"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskParameters.find_placeholders_in_key_value_iterrator">[docs]</a>    <span class="k">def</span> <span class="nf">find_placeholders_in_key_value_iterrator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;find placeholders in dicts lists etc...&quot;&quot;&quot;</span>
+        <span class="n">placeholders</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ValuePlaceholder</span><span class="p">):</span>
+                <span class="n">placeholders</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">placeholders</span></div>
+
+<div class="viewcode-block" id="TaskParameters.validate"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskParameters.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns placeholders&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">inspect</span> <span class="kn">import</span> <span class="n">_empty</span>
+
+        <span class="n">accepted_types</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ValuePlaceholder</span><span class="p">):</span>
+                <span class="n">param_clas</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">annotation</span> <span class="ow">is</span> <span class="n">_empty</span> <span class="p">:</span>
+                    <span class="n">param_clas</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">annotation</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_empty</span> <span class="p">:</span>
+                    <span class="n">param_clas</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">param_clas</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span> <span class="ow">and</span> <span class="n">param_clas</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">param_clas</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ParameterTypeError</span><span class="p">(</span><span class="s2">&quot;Param &#39;</span><span class="si">{param}</span><span class="s2">&#39; has the wrong type </span><span class="si">{type}</span><span class="s2"> expected </span><span class="si">{exp}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">exp</span><span class="o">=</span><span class="n">param_clas</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="n">param_clas</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">param_clas</span> <span class="ow">in</span> <span class="n">accepted_types</span> <span class="p">)</span> <span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ParameterTypeError</span><span class="p">(</span><span class="s2">&quot;Param &#39;</span><span class="si">{param}</span><span class="s2">&#39; has the wrong type </span><span class="si">{type}</span><span class="s2"> expected one of the following: </span><span class="si">{exp}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">exp</span><span class="o">=</span><span class="n">accepted_types</span><span class="p">))</span></div>
+
+    <span class="c1"># def get_storable_type(self, obj):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     get a type storable by the mycellum for obj</span>
+    <span class="c1">#         [list, tuple] -&gt; array</span>
+    <span class="c1">#         dict -&gt; obj</span>
+    <span class="c1">#         [str, float, int] -&gt; primitive</span>
+    <span class="c1">#         None -&gt; null</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if type(obj) in [list, tuple]:</span>
+    <span class="c1">#         return &quot;array&quot;</span>
+    <span class="c1">#     elif type(obj) is dict:</span>
+    <span class="c1">#         return &quot;object&quot;</span>
+    <span class="c1">#     elif type(obj) in [str, float, int]:</span>
+    <span class="c1">#         return &quot;primitive&quot;</span>
+    <span class="c1">#     elif type(obj) in type(None):</span>
+    <span class="c1">#         return &quot;null&quot;</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         raise Exception(&quot;Unknown type; %s must be in %s&quot; % (type(obj), [list, tuple, dict, str, float, int]))</span>
+
+<div class="viewcode-block" id="TaskParameters.get_job_dependencies"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskParameters.get_job_dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">get_job_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the dependencies of a job (jobs that must run before) based on the parameters received&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">_rec</span><span class="p">(</span><span class="n">deps</span><span class="p">,</span> <span class="n">iterator</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ValuePlaceholder</span><span class="p">):</span>
+                    <span class="n">deps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">run_job_id</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">]:</span>
+                    <span class="n">_rec</span><span class="p">(</span><span class="n">deps</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+                    <span class="n">_rec</span><span class="p">(</span><span class="n">deps</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">_rec</span><span class="p">(</span><span class="n">dependencies</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">dependencies</span></div>
+
+<div class="viewcode-block" id="TaskParameters.get_parameter_dict"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskParameters.get_parameter_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameter_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a dictionary of parameters&quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_args</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">]:</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">unravel</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">ValuePlaceholder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">worker_elf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span><span class="p">)</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="n">param</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">ValuePlaceholder</span><span class="p">):</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">ValuePlaceholder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">worker_elf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span><span class="p">)</span>
+                <span class="n">val</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">arg</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">traverse</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="TaskParameters.develop"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.TaskParameters.develop">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">develop</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mycelium</span><span class="p">,</span> <span class="n">dct_params</span><span class="p">:</span><span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;compute the value of parameters&quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">trav</span> <span class="ow">in</span> <span class="n">dct_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">GraphParameter</span><span class="o">.</span><span class="n">build_from_traversal</span><span class="p">(</span><span class="n">trav</span><span class="p">,</span> <span class="n">pull_origin_function</span><span class="o">=</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_result</span><span class="p">)</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">make</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ret</span></div></div>
+
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;a Job for an elf&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">,</span>
+        <span class="n">run_job_id</span><span class="p">,</span>
+        <span class="n">worker_elf</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">,</span>
+        <span class="n">completion_date</span><span class="p">,</span>
+        <span class="n">status</span><span class="p">,</span>
+        <span class="n">mycelium</span><span class="p">,</span>
+        <span class="n">return_placeholder</span><span class="p">,</span>
+        <span class="n">dependencies</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">=</span><span class="n">task</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_job_id</span><span class="o">=</span><span class="n">run_job_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_elf</span><span class="o">=</span><span class="n">worker_elf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">completion_date</span><span class="o">=</span><span class="n">completion_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">=</span><span class="n">status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span> <span class="o">=</span> <span class="n">mycelium</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_placeholder</span><span class="o">=</span><span class="n">return_placeholder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="n">dependencies</span>
+
+<div class="viewcode-block" id="Job.commit"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.Job.commit">[docs]</a>    <span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;save the job to the mycelium&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">push_job</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Represent a task for an elf&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">machine_elf</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">machine_elf</span> <span class="o">=</span> <span class="n">machine_elf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="c1"># self.parameters = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_placeholder</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revision</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">documentation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">inspect_function</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Task.inspect_function"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.Task.inspect_function">[docs]</a>    <span class="k">def</span> <span class="nf">inspect_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;inspect the function of a task&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">hashlib</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_code</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">inpsect_none_if_exception_or_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="s2">&quot;getsource&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revision</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">legalize_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">get_hash_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_code</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">documentation</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">inpsect_none_if_exception_or_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="s2">&quot;cleandoc&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">inpsect_none_if_exception_or_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="s2">&quot;signature&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Task.wrap"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.Task.wrap">[docs]</a>    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;wrap the function inside a new function that creates a Job&quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">run_job_id</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">legalize_key</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">getuid</span><span class="p">()</span> <span class="p">)</span>
+        <span class="c1"># run_job_id = ut.getuid()</span>
+
+        <span class="k">def</span> <span class="nf">_wrapped</span><span class="p">():</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">TaskParameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">run_job_id</span><span class="o">=</span><span class="n">run_job_id</span><span class="p">,</span> <span class="n">worker_elf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">machine_elf</span><span class="p">)</span>
+            <span class="n">parameters</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">placeholders</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            
+            <span class="n">return_placeholder</span> <span class="o">=</span> <span class="n">TaskReturnPlaceHolder</span><span class="p">(</span><span class="n">worker_elf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">machine_elf</span><span class="p">,</span> <span class="n">task_function</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">run_job_id</span><span class="o">=</span><span class="n">run_job_id</span><span class="p">)</span>
+            <span class="n">return_placeholder</span><span class="o">.</span><span class="n">make_placeholder</span><span class="p">()</span>
+
+            <span class="n">dependencies</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get_job_dependencies</span><span class="p">()</span>
+            <span class="c1"># if len(placeholders) &gt; 0:</span>
+                <span class="c1"># dependencies = [phold.run_job_id for phold in placeholders]</span>
+
+            <span class="n">job</span> <span class="o">=</span> <span class="n">Job</span><span class="p">(</span>
+                <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="p">,</span>
+                <span class="n">run_job_id</span> <span class="o">=</span> <span class="n">run_job_id</span><span class="p">,</span>
+                <span class="n">worker_elf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">machine_elf</span><span class="p">,</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">,</span>
+                <span class="n">start_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">completion_date</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">],</span>
+                <span class="n">mycelium</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">machine_elf</span><span class="o">.</span><span class="n">mycelium</span><span class="p">,</span>
+                <span class="n">return_placeholder</span><span class="o">=</span><span class="n">return_placeholder</span><span class="p">,</span>
+                <span class="n">dependencies</span> <span class="o">=</span> <span class="n">dependencies</span>
+            <span class="p">)</span>
+            
+            <span class="n">job_id</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">return_placeholder</span>
+
+        <span class="k">return</span> <span class="n">_wrapped</span></div>
+
+<div class="viewcode-block" id="Task.run"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.Task.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;run the task&quot;&quot;&quot;</span>
+        <span class="n">fct_ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">fct_ret</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value_ret</span> <span class="ow">in</span> <span class="n">fct_ret</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;result_id&quot;</span><span class="p">:</span> <span class="n">ValuePlaceholder</span><span class="o">.</span><span class="n">get_result_id</span><span class="p">(</span><span class="n">job_id</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value_ret</span>
+            <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">)()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;*-Task &#39;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&#39;: </span><span class="si">%s</span><span class="s2"> -*&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">machine_elf</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MachineElf"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf">[docs]</a><span class="k">class</span> <span class="nc">MachineElf</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An elf that runs tasks&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">mycelium</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">legalize_key</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span> <span class="o">=</span> <span class="n">mycelium</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_code</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revision</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">documentation</span><span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">inspect_self</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">find_tasks</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MachineElf.inspect_self"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf.inspect_self">[docs]</a>    <span class="k">def</span> <span class="nf">inspect_self</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;inspect the elf to get the source code etc...&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_code</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">inpsect_none_if_exception_or_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s2">&quot;getsource&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revision</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">get_hash_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source_code</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">documentation</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">inpsect_none_if_exception_or_empty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s2">&quot;cleandoc&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MachineElf.find_tasks"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf.find_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">find_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;find all function whose name starts by `task_` &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">inspect</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;task_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">member</span><span class="p">):</span>
+                <span class="n">task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">member</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">task</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MachineElf.register"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf.register">[docs]</a>    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_source</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;register the elf to the mycelium&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">register_machine_elf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_source</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MachineElf.get_jobs"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf.get_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">get_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;retuen the list of jobs for an elf&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_jobs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">is_job_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">is_job_ready</span><span class="p">(</span><span class="n">is_job_ready</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MachineElf.start_jobs"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf.start_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">start_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_failures</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">raise_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;start a job for an elf&quot;&quot;&quot;</span>
+        <span class="n">jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_received_jobs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">jobs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">is_job_ready</span><span class="p">(</span><span class="n">job</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span> <span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_job_parameters</span><span class="p">(</span><span class="n">job</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">TaskParameters</span><span class="o">.</span><span class="n">develop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_task</span><span class="p">(</span><span class="n">job</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">,</span> <span class="n">store_failures</span><span class="o">=</span><span class="n">store_failures</span><span class="p">,</span> <span class="n">raise_exceptions</span><span class="o">=</span><span class="n">raise_exceptions</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MachineElf.run_task"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf.run_task">[docs]</a>    <span class="k">def</span> <span class="nf">run_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">task_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">store_failures</span><span class="p">:</span><span class="nb">bool</span><span class="p">,</span> <span class="n">raise_exceptions</span><span class="p">:</span><span class="nb">bool</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;run a task for an elf&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">sys</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">start_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">job_id</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">store_results</span><span class="p">(</span><span class="n">job_id</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">complete_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">store_failures</span><span class="p">:</span>
+                <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">register_job_failure</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span><span class="p">,</span> <span class="n">job_id</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">raise_exceptions</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exp</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Bluwr.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

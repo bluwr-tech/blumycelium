@@ -339,7 +339,7 @@ class MachineElf:
         self.documentation = ut.inpsect_none_if_exception_or_empty(self.__class__, "cleandoc")
 
     def find_tasks(self):
-        """find all function whose name starts by 'task_' """
+        """find all function whose name starts by `task_` """
         import inspect
 
         for name, member in inspect.getmembers(self):

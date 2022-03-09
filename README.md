@@ -14,3 +14,7 @@ Myceliums are stored in an ArangoDB instance and can be setup anywhere you'd lik
 Arms-length microservices means that inside a mycelium we all trust each other, there are no credentials
 
  
+Readthedocs documentation
+=========================
+
+This part is a work in progress
