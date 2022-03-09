@@ -3,6 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. image:: logo_full.png
+  :width: 400
+  :alt: Alternative text
+
 BLUMYCELIUM: Async micro-services, 100% in python from Bluwr
 ============================================================
 
