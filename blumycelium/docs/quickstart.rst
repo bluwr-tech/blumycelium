@@ -32,10 +32,12 @@ Run the simple example below
     import blumycelium.mycelium as myc
     import blumycelium.machine_elf as melf
 
-    from icecream import ic
     import time
 
-    ic.configureOutput(includeContext=True)
+    #This a very basic demo to show how BLUMUCELIUM
+    #is basically just python code. An Elf sends a message
+    #to another elf that prints it
+    #NOTICE THAT TASK ARE FUNCTION WITH NAMES STARING WITH 'task_'
 
     class PrinterElf(melf.MachineElf):
         """docstring for Printer"""
@@ -56,7 +58,7 @@ Run the simple example below
             password = "root"
         )
 
-        mycellium = myc.Mycellium(
+        mycellium = myc.ArangoMycelium(
             connection=connection,
             name="mycellium"
         )
@@ -79,6 +81,7 @@ Run the simple example below
 
     if __name__ == '__main__':
         init_myc()
+
 
 
 Where to go from there
