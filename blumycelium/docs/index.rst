@@ -10,18 +10,37 @@ PLEASE NOTE: This documentation is a work in progress
 
 Blumycelium is our tool for arm's-length microservices management and orchestration. It allows for the splitting of a monolithic application into several small parts that run asynchronously in the same environment and can be tested separately. Blumycelium was developed to be fast and easy to learn and does not require more than python knowledge to achieve results that would normally be implemented using more complex DevOps orchestration tools mediated through REST APIs. To achieve this, Blumycellium relies heavily on python introspection capabilities to follow the flow of variable updates and transparently derives execution and orchestration graphs. By allowing services to be separate programs Blumycelium applications can also bypass the python GIL. Blumycelium also remembers the source code of all tasks as well as tracebacks for all exceptions for easy debugging. Blumycelium is implemented using the flexible multimodal ArangoDB database for storing what we call the: Mycelium. The repository of everything needed for variable execution graphs, source codes, orchestrations and failure reporting.
 
+BLUMYCELIUM allows you to write complex microservice orchestration all in python. You can divide a complex application into many smaller parts that can be tested independtly and ran asynchronously. These smaller parts are agents called *Machine Elves* and the *Mycelium* is the database they use to communicate.
 
 **Machine Elf <- Mycelium -> Machine Elf**
 
-BLUMYCELIUM allows you to write complex microservice orchestration all in python. You can divide a complex application into many smaller parts that can be tested independtly and ran asynchronously. These smaller parts are agents called *Machine Elves* and the *Mycelium* is the database they use to communicate.
+Why is BLUMYCELLUM so special?
+------------------------------
 
-Myceliums are stored in an ArangoDB instance and can be setup anywhere you'd like:
-	- Locally
-	- On the cloud
-	- Etc...
+Arm's-length microservices?
+---------------------------
+Arm's-length microservices are microservices that trust each other completely. Only trusted elves should be allowed inside a mycelium. Myceliums are extremely convenient but not secure by default. It's you job to make sure that your myceliums are properly protected.
+
+
+Glossary Mycelium?
+------------------
+
+**Machine Elf**: an indepedent agent that can perform a set of tasks..
+**Task**: a function from a machine elf whose name starts with 'task_'.
+**Job**: a task to run.
+
+**Mycelium**: a datastructure that stores many things related to the application like:
+   - Job orchestration
+   - Variable flows (how to compute values from python instructions)
+   - Elves documentation, source codes and revisions
+   - Tasks source code & documentation
+
+For now the only mycelium implementation available uses the ArangoDB database and thus can be setup anywhere:
+	- locally
+	- on the cloud
+	- In separate container
+   - Inside the same container 
 	
-
-Arms-length microservices means that inside a mycelium we all trust each other, there are no credentials
 
 
 .. toctree::

@@ -9,6 +9,7 @@ import time
 #to another elf that prints it
 #In this slightly more complicated example, we manipulate lists
 #in various ways. Like we would normally do in python
+##NOTICE THAT TASK ARE FUNCTION WITH NAMES STARING WITH 'task_'
 
 class PrinterElf_demo3(melf.MachineElf):
     """docstring for Printer"""

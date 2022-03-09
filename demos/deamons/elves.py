@@ -3,6 +3,8 @@ import blumycelium.machine_elf as melf
 #These elves connect to a fake database which is a json file
 #This works as a design pattern that can be used to have
 #elves work together on the same database
+#NOTICE THAT TASK ARE FUNCTION WITH NAMES STARING WITH 'task_'
+
 def load_json(json_filename, accept_empty=False):
     import json
     import time

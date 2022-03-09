@@ -6,7 +6,8 @@ import time
 
 #This a very basic demo to show how BLUMUCELIUM
 #is basically just python code. An Elf sends a message
-# to another elf that prints it
+#to another elf that prints it
+#NOTICE THAT TASK ARE FUNCTION WITH NAMES STARING WITH 'task_'
 
 class PrinterElf(melf.MachineElf):
     """docstring for Printer"""
