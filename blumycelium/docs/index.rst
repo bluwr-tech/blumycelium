@@ -39,8 +39,8 @@ Glossary Mycelium?
 For now the only mycelium implementation available uses the ArangoDB database and thus can be setup anywhere:
 	- locally
 	- on the cloud
-	- In separate container
-   - Inside the same container 
+	- in a separate container
+   - inside the same container 
 
 
 .. toctree::
