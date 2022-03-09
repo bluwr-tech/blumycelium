@@ -4,8 +4,8 @@
    contain the root `toctree` directive.
 
 .. image:: logo_full.png
-  :width: 400
-  :alt: Alternative text
+  :width: 200
+  :alt: BLUMYCELIUM
 
 BLUMYCELIUM: Async micro-services, 100% in python from Bluwr
 ============================================================
