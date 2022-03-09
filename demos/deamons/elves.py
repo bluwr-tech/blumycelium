@@ -3,12 +3,14 @@ import blumycelium.machine_elf as melf
 
 def load_json(json_filename):
     import json
-
-    try:
-        with open(json_filename) as fi:
-            return json.load(fi)
-    except Exception as exp:
-        print("Unable to load file '%s' because of: '%s'"  % (json_filename, fi) )
+    import time
+    
+    for nb in range(10):
+        try:
+            with open(json_filename) as fi:
+                return json.load(fi)
+        except Exception as exp:
+            print("Unable to load file '%s' because of: '%s'"  % (json_filename, fi) )
     return None
 
 class Animals(melf.MachineElf):

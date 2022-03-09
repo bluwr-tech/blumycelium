@@ -1,52 +1,83 @@
-import blumycelium.machine_elf as melf
+def init_myc():
+    import pyArango.connection as ADB
+    import blumycelium.mycelium as myc
 
-class User(melf.MachineElf):
+    #Connect to the database.
+    #It's not good practice to use root but this is just a demo, don't do it in prod. 
+    connection = ADB.Connection(
+        arangoURL = "http://127.0.0.1:8529",
+        username = "root",
+        password = "root"
+    )
 
-    def set_database(self, url, database_name, username, password):
-        self.connection = ADB.Connection(
-            arangoURL = url,
-            username = username,
-            password = password
-        )
+    #Instanciate the mycelium
+    mycelium = myc.ArangoMycelium(
+        connection=connection,
+        name="animals_demo_mycelium"
+    )
 
-        self.db = self.connection[database_name]
+    #Ensure the mycelium is initialized
+    mycelium.init(init_db=True)
 
-    def task_send_article(self) -> {"title": str, "author": str}:
-        from random import choice, randint
-
-        title_maker = {
-            "adjectives": ["Orange", "Yellow", "Green", "White", "Black", "Gigantic", "Famous", "Enlightened"],
-            "nouns": ["Gorilla", "Giraf", "Hypo", "Gnu", "Parrot"],
-            "verbs": ["ate", "talked", "laughted", "argued with"],
-            "connector": ["about", "with", "over", "at", "to"],
-            "complements": ["a Banana", "an Apple", "an Orange"]
-        }
-
-        title = [ choice(value) for key, value in title_maker ]
-        title = " ".join(title)
-
-        username = "User %d" % randint(0, 3)
-
-        return {
-            "title": title,
-            "author": username
-        }
-
-    def task_view_article(self, article_key) -> None:
-        import time
-        doc = self.db["Articles"][article_key]
-        
-        view = self.db["Views"].createEdge()
-        view.set{
-            "_from": doc["_id,"],
-            "_to": doc["userid"],
-            "date": time.time(),
-        }
-        view.save()
+    #Drop all previous job information from the mycelium
+    mycelium.drop()
+    
+    return mycelium
 
 def main():
-    user = User("A User")
-    user.
+    """
+    The async demo is identical to the sync demo.
+    The only difference being that start jobs a ran
+    separate indiependent scripts
+    """
+   
+    import elves
+    import os
+    import json
+
+    json_database_filename = "my_animals.json"
+    with open(json_database_filename, "w") as fi:
+        json.dump({}, fi)
+
+    mycelium = init_myc()
+
+    #Ensure elves are registered in the mycelium
+    animals = elves.Animals("animals creator", mycelium) 
+    #True will save the source code of the elf in the mycelium
+    #This has no effect on the way things run
+    animals.register(store_source=True)
+
+    store = elves.Storage("animals data store", mycelium) 
+    store.register()
+  
+    #Here we create three instances of Stats. There's no need
+    #to do it here because it is a sync example, however in async
+    #this is what we would do to compute stats in parallel 
+    mean_calc = elves.Stats("calc1", mycelium)
+    mean_calc.register()
+    mean_calc.set_database(json_database_filename)
+    
+    min_calc = elves.Stats("calc2", mycelium)
+    min_calc.register()
+    min_calc.set_database(json_database_filename)
+    
+    max_calc = elves.Stats("calc3", mycelium)
+    max_calc.register()
+    max_calc.set_database(json_database_filename)
+    
+    printer = elves.Formater("report printer", mycelium)
+    printer.register()
+
+    #instanciating the jobs in the mycelium with 
+    for nb in range(1000):
+        mesurement = animals.task_get_animal_data()
+        store.task_save_animal_data(species=mesurement["species"], weight=mesurement["weight"])
+        #print stats every 10 iterations
+        if nb % 10 ==0:
+            mean = mean_calc.task_calculate_means()
+            mins = min_calc.task_calculate_mins()
+            maxs = max_calc.task_calculate_maxs()
+            printer.task_print_stats(means=mean["means"], mins=mins["mins"], maxs=maxs["maxs"])
+
 if __name__ == '__main__':
-    main():
-    pass
+    main()
