@@ -43,6 +43,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../graph_parameters.html">Graph Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 </ul>
 
         </div>
@@ -230,7 +231,7 @@
             <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">pull_origin_function</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">computed_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pull_origin_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unable to retrieve value. No defined value, code_block or origin function&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ValueDerivationError</span><span class="p">(</span><span class="s2">&quot;Unable to retrieve value. No defined value, code_block or origin function&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed_value</span></div>
 
 <div class="viewcode-block" id="GraphParameter.traverse"><a class="viewcode-back" href="../../graph_parameters.html#blumycelium.graph_parameters.GraphParameter.traverse">[docs]</a>    <span class="k">def</span> <span class="nf">traverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visited_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">root_uid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -345,19 +346,19 @@
 <div class="viewcode-block" id="GraphParameter.set_value"><a class="viewcode-back" href="../../graph_parameters.html#blumycelium.graph_parameters.GraphParameter.set_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;set the static value of the parameter&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code_block</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Can either have a code block, a value or an origin&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">MultipleDerivationError</span><span class="p">(</span><span class="s2">&quot;Can either have a code block, a value or an origin&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
 
 <div class="viewcode-block" id="GraphParameter.set_code_block"><a class="viewcode-back" href="../../graph_parameters.html#blumycelium.graph_parameters.GraphParameter.set_code_block">[docs]</a>    <span class="k">def</span> <span class="nf">set_code_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_code</span><span class="p">,</span> <span class="n">return_statement</span><span class="p">,</span> <span class="o">**</span><span class="n">dependencies</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;set the code block of the parameter&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Can either have a code block, a value or an origin&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">MultipleDerivationError</span><span class="p">(</span><span class="s2">&quot;Can either have a code block, a value or an origin&quot;</span><span class="p">)</span>
 
         <span class="n">string_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">hr_name</span><span class="p">,</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">dependencies</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dependency_values</span><span class="p">[</span><span class="n">dep</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dep</span><span class="p">,</span> <span class="n">GraphParameter</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;All depenedencies must be GraphParameters, got: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">dep</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="n">DependencyTypeError</span><span class="p">(</span><span class="s2">&quot;All depenedencies must be GraphParameters, got: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">dep</span><span class="p">))</span>
             <span class="n">string_kwargs</span><span class="p">[</span><span class="n">hr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dep</span><span class="o">.</span><span class="n">uid</span> 
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -402,7 +403,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">close_init</span><span class="p">()</span>
+        <span class="c1"># self.close_init()</span>
 
 <div class="viewcode-block" id="Value.set_value"><a class="viewcode-back" href="../../graph_parameters.html#blumycelium.graph_parameters.Value.set_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;set the static value&quot;&quot;&quot;</span>
@@ -623,72 +624,6 @@
         <span class="n">new_param</span><span class="o">.</span><span class="n">set_code_block</span><span class="p">(</span><span class="n">init_code</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_statement</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">self_param</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value_param</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_param</span></div>
 
-<span class="c1"># def unravel_list(lst):</span>
-<span class="c1">#     last_list_param = GraphParameter()</span>
-<span class="c1">#     last_list_param.set_value([])</span>
-
-<span class="c1">#     params = [last_list_param]</span>
-<span class="c1">#     for value in lst:</span>
-<span class="c1">#         val_param = GraphParameter()</span>
-<span class="c1">#         val_param.set_value(value)</span>
-
-<span class="c1">#         new_list_param = GraphParameter()</span>
-        
-<span class="c1">#         init_code=&quot;&quot;&quot;</span>
-<span class="c1">#         def add(lst, value):</span>
-<span class="c1">#             lst.append(value)</span>
-<span class="c1">#             return lst&quot;&quot;&quot;.strip()</span>
-<span class="c1">#         return_statement = &quot;add({list_var}, {value_var})&quot;</span>
-        
-<span class="c1">#         new_list_param.set_code_block(</span>
-<span class="c1">#             init_code=init_code,</span>
-<span class="c1">#             return_statement=return_statement,</span>
-<span class="c1">#             list_var=last_list_param,</span>
-<span class="c1">#             value_var=val_param</span>
-<span class="c1">#             )</span>
-        
-<span class="c1">#         last_list_param = new_list_param</span>
-<span class="c1">#         params.append(val_param)</span>
-<span class="c1">#         params.append(last_list_param)</span>
-<span class="c1">#     return params</span>
-
-<span class="c1"># def unravel_dict(dct):</span>
-<span class="c1">#     last_list_param = GraphParameter()</span>
-<span class="c1">#     last_list_param.set_value({})</span>
-
-<span class="c1">#     params = [last_list_param]</span>
-<span class="c1">#     for key, value in dct.items():</span>
-<span class="c1">#         val_param = GraphParameter()</span>
-<span class="c1">#         val_param.set_value(value)</span>
-
-<span class="c1">#         new_list_param = GraphParameter()</span>
-        
-<span class="c1">#         init_code=&quot;&quot;&quot;</span>
-<span class="c1">#         def add(dct, key, value):</span>
-<span class="c1">#             dct[key]=value</span>
-<span class="c1">#             return dct&quot;&quot;&quot;.strip()</span>
-<span class="c1">#         return_statement = &quot;add({list_var}, %s, {value_var})&quot; % key</span>
-        
-<span class="c1">#         new_list_param.set_code_block(</span>
-<span class="c1">#             init_code=init_code,</span>
-<span class="c1">#             return_statement=return_statement,</span>
-<span class="c1">#             list_var=last_list_param,</span>
-<span class="c1">#             value_var=val_param</span>
-<span class="c1">#             )</span>
-        
-<span class="c1">#         last_list_param = new_list_param</span>
-<span class="c1">#         params.append(val_param)</span>
-<span class="c1">#         params.append(last_list_param)</span>
-<span class="c1">#     return params</span>
-
-<span class="c1"># def test_unravels():</span>
-<span class="c1">#     lst = [1, 2, 3, 4, 5, 10]</span>
-<span class="c1">#     res = unravel_list(lst)</span>
-<span class="c1">#     print(res[-1].make())</span>
-
-<span class="c1">#     res = unravel_dict(dct)</span>
-<span class="c1">#     print(res[-1].make())</span>
-
 <span class="k">def</span> <span class="nf">unravel_list</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
     <span class="n">param</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
     <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">([])</span>
@@ -717,107 +652,7 @@
     <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">unravel_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Wrong type: &#39;</span><span class="si">%s</span><span class="s2">&#39;, except list or dict&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-
-<span class="k">def</span> <span class="nf">test_subslist</span><span class="p">():</span>
-    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
-    <span class="n">param</span> <span class="o">=</span> <span class="n">GraphParameter</span><span class="p">()</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
-
-    <span class="n">sub</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
-
-<span class="k">def</span> <span class="nf">test_getitem</span><span class="p">():</span>
-    <span class="n">dct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
-
-    <span class="n">param</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
-
-    <span class="n">sub</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
-
-<span class="k">def</span> <span class="nf">test_setitem</span><span class="p">():</span>
-    <span class="n">dct</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
-    <span class="n">param</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
-
-    <span class="n">param</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">100</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
-
-<span class="k">def</span> <span class="nf">test_arbitrary</span><span class="p">():</span>
-    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-    <span class="n">param</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
-
-    <span class="n">param</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
-    
-    <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">61</span><span class="p">)</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
-
-<span class="k">def</span> <span class="nf">test_easy_unravel</span><span class="p">():</span>
-    <span class="kn">from</span> <span class="nn">rich</span> <span class="kn">import</span> <span class="nb">print</span>
-
-    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-    <span class="n">param</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">([])</span>
-
-    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-        <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        
-    <span class="n">ic</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
-
-<span class="k">def</span> <span class="nf">test_nested_unravel_traversal</span><span class="p">():</span>
-    <span class="kn">from</span> <span class="nn">rich</span> <span class="kn">import</span> <span class="nb">print</span>
-
-    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-    <span class="n">param</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">([])</span>
-
-    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-        <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-
-    <span class="n">val</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">val</span><span class="o">.</span><span class="n">set_value</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-
-    <span class="n">val2</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">val2</span><span class="o">.</span><span class="n">set_value</span><span class="p">([</span><span class="mi">2</span><span class="p">])</span>
-    <span class="n">val2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
-
-    <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val2</span><span class="p">)</span>
-    <span class="c1"># val.pp_traverse(representation_attributes=None)</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-        
-    <span class="n">param</span><span class="o">.</span><span class="n">pp_traverse</span><span class="p">(</span><span class="n">representation_attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">reccursive</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
-
-
-<span class="k">def</span> <span class="nf">test_rebuild_from_traversal</span><span class="p">():</span>
-    <span class="kn">from</span> <span class="nn">rich</span> <span class="kn">import</span> <span class="nb">print</span>
-
-    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-    <span class="n">param</span> <span class="o">=</span> <span class="n">Value</span><span class="p">()</span>
-    <span class="n">param</span><span class="o">.</span><span class="n">set_value</span><span class="p">([])</span>
-
-    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-        <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-        
-    <span class="n">param</span><span class="o">.</span><span class="n">pp_traverse</span><span class="p">(</span><span class="n">representation_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;code_block&quot;</span><span class="p">,</span> <span class="s2">&quot;uid&quot;</span><span class="p">,</span> <span class="s2">&quot;python_id&quot;</span><span class="p">])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=====&quot;</span><span class="p">)</span>
-    <span class="n">trav</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">traverse</span><span class="p">()</span>
-    <span class="c1"># print(trav)</span>
-
-    <span class="n">param2</span> <span class="o">=</span> <span class="n">GraphParameter</span><span class="o">.</span><span class="n">build_from_traversal</span><span class="p">(</span><span class="n">trav</span><span class="p">)</span>
-    <span class="n">param2</span><span class="o">.</span><span class="n">pp_traverse</span><span class="p">(</span><span class="n">representation_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;code_block&quot;</span><span class="p">,</span> <span class="s2">&quot;uid&quot;</span><span class="p">,</span> <span class="s2">&quot;python_id&quot;</span><span class="p">])</span>
-
-    <span class="n">ic</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
-    <span class="n">ic</span><span class="p">(</span><span class="n">param2</span><span class="o">.</span><span class="n">make</span><span class="p">())</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Wrong type: &#39;</span><span class="si">%s</span><span class="s2">&#39;, except list or dict&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">test_rebuild_from_traversal</span><span class="p">()</span>

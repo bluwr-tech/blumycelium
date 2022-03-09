@@ -43,6 +43,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../graph_parameters.html">Graph Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 </ul>
 
         </div>
@@ -73,9 +74,10 @@
 <span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">ut</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">custom_types</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">mod</span>
+<span class="kn">from</span> <span class="nn">.the_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+
 
 <span class="kn">import</span> <span class="nn">pyArango.theExceptions</span> <span class="k">as</span> <span class="nn">a_exc</span>
-
 
 <span class="kn">from</span> <span class="nn">icecream</span> <span class="kn">import</span> <span class="n">ic</span>
 <span class="n">ic</span><span class="o">.</span><span class="n">configureOutput</span><span class="p">(</span><span class="n">includeContext</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -132,7 +134,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_db</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">DatabaseNotFoundError</span><span class="p">(</span><span class="s2">&quot;Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True&quot;</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Initializing </span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>    
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-- init collections&quot;</span><span class="p">)</span>
@@ -150,6 +152,11 @@
 <div class="viewcode-block" id="ArangoMycelium.drop_jobs"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.drop_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">drop_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;delete all information related to jobs&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">,</span> <span class="s2">&quot;Failures&quot;</span><span class="p">,</span> <span class="s2">&quot;Parameters&quot;</span><span class="p">,</span> <span class="s2">&quot;JobFailures&quot;</span><span class="p">,</span> <span class="s2">&quot;JobParameters&quot;</span><span class="p">,</span> <span class="s2">&quot;Results&quot;</span><span class="p">,</span> <span class="s2">&quot;JobToJob&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span> </div>
+
+<div class="viewcode-block" id="ArangoMycelium.drop"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.drop">[docs]</a>    <span class="k">def</span> <span class="nf">drop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;delete all documents in the mycelium&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span> </div>
 
     <span class="k">def</span> <span class="nf">_init_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span> <span class="p">:</span>
@@ -313,7 +320,6 @@
 <div class="viewcode-block" id="ArangoMycelium.get_received_jobs"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_received_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">get_received_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elf_uid</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">all_jobs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status_restriction</span><span class="o">=</span><span class="p">[</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;return all jobs for an elf&quot;&quot;&quot;</span>
         <span class="n">bind_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">elf_uid</span><span class="p">}</span>
-        
         <span class="k">if</span> <span class="n">all_jobs</span><span class="p">:</span>
             <span class="n">status_restriction</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         
@@ -341,7 +347,6 @@
         <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">ret_q</span><span class="p">:</span>
             <span class="n">job</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;_key&quot;</span><span class="p">]</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
-        
         <span class="k">return</span> <span class="n">ret</span></div>
 
 <div class="viewcode-block" id="ArangoMycelium.is_job_ready"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.is_job_ready">[docs]</a>    <span class="k">def</span> <span class="nf">is_job_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
@@ -350,11 +355,22 @@
         <span class="k">if</span> <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">],</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;READY&quot;</span><span class="p">]]:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
+        <span class="n">aql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            FOR job IN Jobs</span>
+<span class="s2">                FILTER job._id == @id</span>
+<span class="s2">                FOR jtj in JobToJob</span>
+<span class="s2">                    FILTER jtj._to == job._id</span>
+<span class="s2">                    FOR job2 IN Jobs</span>
+<span class="s2">                        FILTER job2._id == jtj._from</span>
+<span class="s2">                        RETURN job2</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+
         <span class="n">ready</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fetchByExample</span><span class="p">({</span><span class="s2">&quot;_to&quot;</span><span class="p">:</span> <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]},</span> <span class="n">batchSize</span><span class="o">=</span><span class="mi">100</span><span class="p">)):</span>
+        <span class="n">ret_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">AQLQuery</span><span class="p">(</span><span class="n">aql</span><span class="p">,</span> <span class="n">bindVars</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]},</span> <span class="n">batchSize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rawResults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">ret_q</span><span class="p">:</span>
             <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">param</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;READY&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;DONE&quot;</span><span class="p">]:</span>
                 <span class="n">ready</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">count</span> <span class="o">==</span> <span class="n">ready</span></div>
 
@@ -420,7 +436,7 @@
             <span class="k">return</span>
         
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
-            <span class="k">raise</span>  <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Results must be None or a dictionary&quot;</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="n">ResultTypeError</span><span class="p">(</span><span class="s2">&quot;Results must be None or a dictionary&quot;</span><span class="p">)</span>
         
         <span class="n">now</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
 

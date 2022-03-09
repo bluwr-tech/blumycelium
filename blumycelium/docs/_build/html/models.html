@@ -49,6 +49,7 @@
 <li class="toctree-l1"><a class="reference internal" href="graph_parameters.html">Graph Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 </ul>
 
         </div>
@@ -83,62 +84,74 @@
 <span class="target" id="module-blumycelium.models"></span><dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.Failures">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">Failures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#Failures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.Failures" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Schema of a failure in the database</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.JobFailures">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">JobFailures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#JobFailures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.JobFailures" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Edge connecting jobs to failures</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.JobFailures_graph">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">JobFailures_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonInit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#JobFailures_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.JobFailures_graph" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Graph connecting jobs to failures</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.JobParameters">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">JobParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#JobParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.JobParameters" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Schema of a job parameter in the database. a job parameter is an edge that associates a parameter to task argument</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.JobParameters_graph">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">JobParameters_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonInit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#JobParameters_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.JobParameters_graph" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Graph connecting jobs to parameters</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.JobToJob">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">JobToJob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#JobToJob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.JobToJob" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Edge connecting jobs that depend on each other</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.Jobs">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">Jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#Jobs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.Jobs" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Schema of a job in the database</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.Jobs_graph">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">Jobs_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonInit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#Jobs_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.Jobs_graph" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>The job orchestration graph</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.MachineElves">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">MachineElves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#MachineElves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.MachineElves" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Schema of a machine elf in the database</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.MachineElvesRevisions">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">MachineElvesRevisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#MachineElvesRevisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.MachineElvesRevisions" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Schema of a machine elf revision in the database</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.Parameters">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">Parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#Parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.Parameters" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Schema of a parameter in the database. A parameter is a variable passed as an argument to a task</p>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="blumycelium.models.Results">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.models.</span></span><span class="sig-name descname"><span class="pre">Results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jsonData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/models.html#Results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.models.Results" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Schema of a result in the database</p>
+</dd></dl>
 
 </section>
 </section>

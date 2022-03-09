@@ -35,6 +35,7 @@ Arms-length microservices means that inside a mycelium we all trust each other, 
    graph_parameters
    machine_elf
    utils
+   exceptions
 
 Indices and tables
 ==================

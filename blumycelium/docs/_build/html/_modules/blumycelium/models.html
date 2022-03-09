@@ -43,6 +43,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../graph_parameters.html">Graph Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 </ul>
 
         </div>
@@ -79,6 +80,7 @@
 <span class="n">GRAPHS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Jobs_graph&quot;</span><span class="p">,</span> <span class="s2">&quot;JobFailures_graph&quot;</span><span class="p">,</span> <span class="s2">&quot;JobParameters_graph&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Jobs"><a class="viewcode-back" href="../../models.html#blumycelium.models.Jobs">[docs]</a><span class="k">class</span> <span class="nc">Jobs</span><span class="p">(</span><span class="n">Collection</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Schema of a job in the database&quot;&quot;&quot;</span>
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;task&quot;</span> <span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span> <span class="o">=</span> <span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
@@ -106,6 +108,8 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="Failures"><a class="viewcode-back" href="../../models.html#blumycelium.models.Failures">[docs]</a><span class="k">class</span> <span class="nc">Failures</span><span class="p">(</span><span class="n">Collection</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Schema of a failure in the database&quot;&quot;&quot;</span>
+
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span> <span class="o">=</span> <span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
         <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span> <span class="o">=</span> <span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
@@ -120,6 +124,8 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="MachineElves"><a class="viewcode-back" href="../../models.html#blumycelium.models.MachineElves">[docs]</a><span class="k">class</span> <span class="nc">MachineElves</span><span class="p">(</span><span class="n">Collection</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Schema of a machine elf in the database&quot;&quot;&quot;</span>
+
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;documentation&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(),</span>
         <span class="s2">&quot;last_revision&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(),</span>
@@ -137,6 +143,8 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="MachineElvesRevisions"><a class="viewcode-back" href="../../models.html#blumycelium.models.MachineElvesRevisions">[docs]</a><span class="k">class</span> <span class="nc">MachineElvesRevisions</span><span class="p">(</span><span class="n">Collection</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Schema of a machine elf revision in the database&quot;&quot;&quot;</span>
+
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;documentation&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(),</span>
         <span class="s2">&quot;creation_date&quot;</span> <span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span> <span class="o">=</span> <span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
@@ -150,6 +158,8 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../models.html#blumycelium.models.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">(</span><span class="n">Collection</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Schema of a parameter in the database. A parameter is a variable passed as an argument to a task&quot;&quot;&quot;</span>
+
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
     <span class="p">}</span>
@@ -161,6 +171,8 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="Results"><a class="viewcode-back" href="../../models.html#blumycelium.models.Results">[docs]</a><span class="k">class</span> <span class="nc">Results</span><span class="p">(</span><span class="n">Collection</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Schema of a result in the database&quot;&quot;&quot;</span>
+
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
     <span class="p">}</span>
@@ -172,6 +184,8 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="JobParameters"><a class="viewcode-back" href="../../models.html#blumycelium.models.JobParameters">[docs]</a><span class="k">class</span> <span class="nc">JobParameters</span><span class="p">(</span><span class="n">Edges</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Schema of a job parameter in the database. a job parameter is an edge that associates a parameter to task argument&quot;&quot;&quot;</span>
+
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(),</span>
@@ -184,6 +198,7 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="JobToJob"><a class="viewcode-back" href="../../models.html#blumycelium.models.JobToJob">[docs]</a><span class="k">class</span> <span class="nc">JobToJob</span><span class="p">(</span><span class="n">Edges</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Edge connecting jobs that depend on each other&quot;&quot;&quot;</span>
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()]),</span>
     <span class="p">}</span>
@@ -195,12 +210,14 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="JobParameters_graph"><a class="viewcode-back" href="../../models.html#blumycelium.models.JobParameters_graph">[docs]</a><span class="k">class</span> <span class="nc">JobParameters_graph</span><span class="p">(</span><span class="n">GR</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Graph connecting jobs to parameters&quot;&quot;&quot;</span>
     <span class="n">_edgeDefinitions</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">GR</span><span class="o">.</span><span class="n">EdgeDefinition</span><span class="p">(</span><span class="s2">&quot;JobParameters&quot;</span><span class="p">,</span> <span class="n">fromCollections</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">],</span> <span class="n">toCollections</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Parameters&quot;</span><span class="p">]),</span>
     <span class="p">)</span> 
     <span class="n">_orphanedCollections</span> <span class="o">=</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="JobFailures"><a class="viewcode-back" href="../../models.html#blumycelium.models.JobFailures">[docs]</a><span class="k">class</span> <span class="nc">JobFailures</span><span class="p">(</span><span class="n">Edges</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Edge connecting jobs to failures&quot;&quot;&quot;</span>
     <span class="n">_fields</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;creation_date&quot;</span> <span class="p">:</span> <span class="n">Field</span><span class="p">(</span><span class="n">validators</span> <span class="o">=</span> <span class="p">[</span><span class="n">VAL</span><span class="o">.</span><span class="n">NotNull</span><span class="p">()])</span>
     <span class="p">}</span>
@@ -212,12 +229,14 @@
     <span class="p">}</span></div>
 
 <div class="viewcode-block" id="Jobs_graph"><a class="viewcode-back" href="../../models.html#blumycelium.models.Jobs_graph">[docs]</a><span class="k">class</span> <span class="nc">Jobs_graph</span><span class="p">(</span><span class="n">GR</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The job orchestration graph&quot;&quot;&quot;</span>
     <span class="n">_edgeDefinitions</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">GR</span><span class="o">.</span><span class="n">EdgeDefinition</span><span class="p">(</span><span class="s2">&quot;JobToJob&quot;</span><span class="p">,</span> <span class="n">fromCollections</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">],</span> <span class="n">toCollections</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">]),</span>
     <span class="p">)</span> 
     <span class="n">_orphanedCollections</span> <span class="o">=</span> <span class="p">[]</span></div>
 
 <div class="viewcode-block" id="JobFailures_graph"><a class="viewcode-back" href="../../models.html#blumycelium.models.JobFailures_graph">[docs]</a><span class="k">class</span> <span class="nc">JobFailures_graph</span><span class="p">(</span><span class="n">GR</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Graph connecting jobs to failures&quot;&quot;&quot;</span>
     <span class="n">_edgeDefinitions</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">GR</span><span class="o">.</span><span class="n">EdgeDefinition</span><span class="p">(</span><span class="s2">&quot;JobFailures&quot;</span><span class="p">,</span> <span class="n">fromCollections</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">],</span> <span class="n">toCollections</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Failures&quot;</span><span class="p">]),</span>
     <span class="p">)</span> 
