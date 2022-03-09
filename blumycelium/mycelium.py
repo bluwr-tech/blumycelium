@@ -289,15 +289,15 @@ class ArangoMycelium:
                     FILTER jtj._to == job._id
                     FOR job2 IN Jobs
                         FILTER job2._id == jtj._from
-                        RETURN job.status
+                        RETURN job2
         """
 
         ready = 0
         count = 0
         ret_q = self.db.AQLQuery(aql, bindVars={"id": job_doc["_id"]}, batchSize=100, rawResults=True)
-        for status in ret_q:
+        for job in ret_q:
             count += 1
-            if status == custom_types.STATUS["DONE"]:
+            if job["status"] == custom_types.STATUS["DONE"]:
                 ready += 1
         return count == ready
 

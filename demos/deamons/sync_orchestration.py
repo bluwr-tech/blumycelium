@@ -65,18 +65,18 @@ def main():
     printer.register()
 
     #instanciating the jobs in the mycelium with 
-    for nb in range(1):
+    for nb in range(100):
         mesurement = animals.task_get_animal_data()
         store.task_save_animal_data(species=mesurement["species"], weight=mesurement["weight"])
-        mean = mean_calc.task_calculate_means()
-        mins = min_calc.task_calculate_mins()
-        maxs = max_calc.task_calculate_maxs()
-        printer.task_print_stats(means=mean["means"], mins=mins["mins"], maxs=maxs["maxs"])
+    mean = mean_calc.task_calculate_means()
+    mins = min_calc.task_calculate_mins()
+    maxs = max_calc.task_calculate_maxs()
+    printer.task_print_stats(means=mean["means"], mins=mins["mins"], maxs=maxs["maxs"])
 
     #start jobs store_failures will ensure that any exception will be
     #stored in the mycelium. raise_exceptions will cause the excepption
     #to not be bypassed
-    # animals.start_jobs(store_failures=True, raise_exceptions=True)
+    animals.start_jobs(store_failures=True, raise_exceptions=True)
     store.start_jobs(store_failures=True, raise_exceptions=True)
     mean_calc.start_jobs(store_failures=True, raise_exceptions=True)
     min_calc.start_jobs(store_failures=True, raise_exceptions=True)
