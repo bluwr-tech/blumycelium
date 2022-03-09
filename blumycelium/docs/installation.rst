@@ -1,10 +1,10 @@
 Installation
 =============
 
-Unix (MacOS, Linux)
--------------------
+Not available from pypi yet. Once we think it is stable enough we will publish it but for now please install it from github.
 
-The latest stable version is available from pypi::
-	
-	pip install pyGeno
+.. code-block:: bash
+
+	pip install git+https://github.com/bluwr-tech/blumycelium.git
+
 
