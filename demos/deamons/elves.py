@@ -1,17 +1,24 @@
 import blumycelium.machine_elf as melf
 
-
-def load_json(json_filename):
+#These elves connect to a fake database which is a json file
+#This works as a design pattern that can be used to have
+#elves work together on the same database
+def load_json(json_filename, accept_empty=False):
     import json
     import time
     
-    for nb in range(10):
+    tries = 10
+    nb = 0
+    data = {}
+    while nb < tries and len(data) < 1:
         try:
             with open(json_filename) as fi:
-                return json.load(fi)
+                data = json.load(fi)
         except Exception as exp:
             print("Unable to load file '%s' because of: '%s'"  % (json_filename, fi) )
-    return None
+        time.sleep(1)
+        nb += 1
+    return data
 
 class Animals(melf.MachineElf):
     """"""
@@ -23,10 +30,11 @@ class Animals(melf.MachineElf):
         import random
 
         name = random.choice(self.animal_list)
-        
+        weight = random.randint(0, 1000)
+        print(">new animal: %s, weight: %s" % (name, weight) )
         return {
             "species": name,
-            "weight": random.randint(0, 1000)
+            "weight": weight
         }
 
 class Storage(melf.MachineElf):
@@ -40,6 +48,7 @@ class Storage(melf.MachineElf):
 
     def task_save_animal_data(self, species:str, weight:int) -> None:
         import json
+        import shutil
 
         database = self.load_data()
         
@@ -49,9 +58,11 @@ class Storage(melf.MachineElf):
             else:
                 database[species]["weight"].append(weight)
 
-            with open(self.json_filename, "w") as fi:
-                print("Stored a new entry for:" + species)
+            tmp_fn = self.json_filename + ".tmp"
+            with open(tmp_fn , "w") as fi:
                 json.dump(database, fi)
+                print("Stored a new entry for:" + species)
+            shutil.copyfile(tmp_fn, self.json_filename)
 
 class Stats(melf.MachineElf):
     """"""
@@ -72,8 +83,9 @@ class Stats(melf.MachineElf):
         return min(values)
 
     def task_calculate_means(self) -> ["means"]:
+        print(">calculating averages for all animals")
         database = self.load_data()
-        ret = {}
+        ret ={}
         if database:
             for name, values in database.items():
                 ret[name] = self.calc_mean(values["weight"])
@@ -83,6 +95,8 @@ class Stats(melf.MachineElf):
         }
 
     def task_calculate_mins(self) -> ["mins"]:
+        print(">finding min values for all animals")
+        
         database = self.load_data()
         ret = {}
         if database:
@@ -94,8 +108,10 @@ class Stats(melf.MachineElf):
         }
 
     def task_calculate_maxs(self) -> ["maxs"]:
+        print(">finding max values for all animals")
+        
         database = self.load_data()
-        ret = {}
+        ret ={}
         if database:
             for name, values in database.items():
                 ret[name] = self.calc_max(values["weight"])
@@ -108,7 +124,9 @@ class Formater(melf.MachineElf):
     """"""
     
     def task_print_stats(self, means, mins, maxs) -> None:
+        print("====STATS====")
         for name in means:
             mean, min_value, max_value = means[name], mins[name], maxs[name]
             print("Stats for {name}:\n\tAverage: {mean}\n\tMinimum: {min}\n\tMaximum: {max}".format(name=name, mean=mean, min=min_value, max=max_value))
+        print("=============")
 

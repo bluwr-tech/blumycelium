@@ -10,6 +10,7 @@ def run(duration):
     #and must be the same as in orchestration file
     
     elf = Animals("animals creator", mycellium)
+    elf.register()
     elf.set_animals(["dolphin", "dog", "bee", "whale"])
 
     now = time.time()

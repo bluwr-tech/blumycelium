@@ -279,7 +279,7 @@ class ArangoMycelium:
     def is_job_ready(self, job_id):
         """return True if the job is ready to run"""
         job_doc = self.get_job(job_id)
-        if job_doc["status"] not in [custom_types.STATUS["PENDING"], custom_types.STATUS["READY"]]:
+        if job_doc["status"] not in [ custom_types.STATUS["PENDING"], custom_types.STATUS["READY"] ]:
             return False
 
         aql = """
@@ -299,7 +299,9 @@ class ArangoMycelium:
             count += 1
             if job["status"] == custom_types.STATUS["DONE"]:
                 ready += 1
-        return count == ready
+
+        self_ready = count == ready
+        return self_ready
 
     def update_job_status(self, job_id, status):
         """update the status of a job"""

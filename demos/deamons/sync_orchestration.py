@@ -16,12 +16,12 @@ def init_myc():
         name="animals_demo_mycelium"
     )
 
-    #Ensure the mycelium is initialized
-    mycelium.init(init_db=True)
-
     #Drop all previous job information from the mycelium
     mycelium.drop()
     
+    #Ensure the mycelium is initialized
+    mycelium.init(init_db=True)
+
     return mycelium
 
 def main():

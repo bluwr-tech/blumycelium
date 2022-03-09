@@ -2,10 +2,11 @@ import pyArango.connection as ADB
 import blumycelium.mycelium as myc
 import blumycelium.machine_elf as melf
 
-from icecream import ic
 import time
 
-ic.configureOutput(includeContext=True)
+#This a very basic demo to show how BLUMUCELIUM
+#is basically just python code. An Elf sends a message
+# to another elf that prints it
 
 class PrinterElf(melf.MachineElf):
     """docstring for Printer"""

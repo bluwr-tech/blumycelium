@@ -9,6 +9,7 @@ def run(duration):
     #the name identify the elf uniquely
     #and must be the same as in orchestration file    
     elf = Storage("animals data store", mycellium)
+    elf.register()
     elf.set_database("my_animals.json")
     
     now = time.time()

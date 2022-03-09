@@ -3,13 +3,14 @@ from elves import Formater
 
 def run(duration):
     import time
-    
+
     mycellium = init_myc()
 
     #the name identify the elf uniquely
     #and must be the same as in orchestration file
     
     elf = Formater("report printer", mycellium)
+    elf.register()
     
     now = time.time()
     stop_time = now + duration
