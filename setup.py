@@ -42,7 +42,9 @@ package_data = []
 # package_data += get_all_filepaths_including_subdirs(here + '/blumycelium/configuration_json')
 
 requires = [
-    "pyArango>=1.3.5"
+    "pyArango>=1.3.5",
+    "icecream",
+    "rich"
 ]
 
 setup(name='blumycelium',

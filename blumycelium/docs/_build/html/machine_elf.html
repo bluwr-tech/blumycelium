@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Elf &mdash; Blumycellium  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Utils" href="utils.html" />
+    <link rel="prev" title="Graph Parameters" href="graph_parameters.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Blumycellium
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mycelium.html">Mycelium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="graph_parameters.html">Graph Parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Machine Elf</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Machine Elf</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Blumycellium</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Machine Elf</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/machine_elf.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="machine-elf">
+<h1>Machine Elf<a class="headerlink" href="#machine-elf" title="Permalink to this headline"></a></h1>
+<section id="id1">
+<h2>Machine Elf<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h2>
+<span class="target" id="module-blumycelium.machine_elf"></span><dl class="py class">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.Job">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.machine_elf.</span></span><span class="sig-name descname"><span class="pre">Job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_elf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycelium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_placeholder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#Job"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.Job" title="Permalink to this definition"></a></dt>
+<dd><p>a Job for an elf</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.Job.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#Job.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.Job.commit" title="Permalink to this definition"></a></dt>
+<dd><p>save the job to the mycelium</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.MachineElf">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.machine_elf.</span></span><span class="sig-name descname"><span class="pre">MachineElf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mycelium</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#MachineElf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.MachineElf" title="Permalink to this definition"></a></dt>
+<dd><p>An elf that runs tasks</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.MachineElf.find_tasks">
+<span class="sig-name descname"><span class="pre">find_tasks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#MachineElf.find_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.MachineElf.find_tasks" title="Permalink to this definition"></a></dt>
+<dd><p>find all function whose name starts by <cite>task_</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.MachineElf.get_jobs">
+<span class="sig-name descname"><span class="pre">get_jobs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#MachineElf.get_jobs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.MachineElf.get_jobs" title="Permalink to this definition"></a></dt>
+<dd><p>retuen the list of jobs for an elf</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.MachineElf.inspect_self">
+<span class="sig-name descname"><span class="pre">inspect_self</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#MachineElf.inspect_self"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.MachineElf.inspect_self" title="Permalink to this definition"></a></dt>
+<dd><p>inspect the elf to get the source code etc…</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.MachineElf.register">
+<span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#MachineElf.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.MachineElf.register" title="Permalink to this definition"></a></dt>
+<dd><p>register the elf to the mycelium</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.MachineElf.run_task">
+<span class="sig-name descname"><span class="pre">run_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_failures</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_exceptions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#MachineElf.run_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.MachineElf.run_task" title="Permalink to this definition"></a></dt>
+<dd><p>run a task for an elf</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.MachineElf.start_jobs">
+<span class="sig-name descname"><span class="pre">start_jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_failures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_exceptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#MachineElf.start_jobs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.MachineElf.start_jobs" title="Permalink to this definition"></a></dt>
+<dd><p>start a job for an elf</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.Task">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.machine_elf.</span></span><span class="sig-name descname"><span class="pre">Task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">machine_elf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#Task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.Task" title="Permalink to this definition"></a></dt>
+<dd><p>Represent a task for an elf</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.Task.inspect_function">
+<span class="sig-name descname"><span class="pre">inspect_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#Task.inspect_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.Task.inspect_function" title="Permalink to this definition"></a></dt>
+<dd><p>inspect the function of a task</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.Task.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#Task.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.Task.run" title="Permalink to this definition"></a></dt>
+<dd><p>run the task</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.Task.wrap">
+<span class="sig-name descname"><span class="pre">wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#Task.wrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.Task.wrap" title="Permalink to this definition"></a></dt>
+<dd><p>wrap the function inside a new function that creates a Job</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.machine_elf.</span></span><span class="sig-name descname"><span class="pre">TaskParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_elf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskParameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskParameters" title="Permalink to this definition"></a></dt>
+<dd><p>Parameters of a task</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskParameters.develop">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">develop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mycelium</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dct_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskParameters.develop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskParameters.develop" title="Permalink to this definition"></a></dt>
+<dd><p>compute the value of parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskParameters.find_placeholders_in_key_value_iterrator">
+<span class="sig-name descname"><span class="pre">find_placeholders_in_key_value_iterrator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskParameters.find_placeholders_in_key_value_iterrator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskParameters.find_placeholders_in_key_value_iterrator" title="Permalink to this definition"></a></dt>
+<dd><p>find placeholders in dicts lists etc…</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskParameters.get_job_dependencies">
+<span class="sig-name descname"><span class="pre">get_job_dependencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskParameters.get_job_dependencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskParameters.get_job_dependencies" title="Permalink to this definition"></a></dt>
+<dd><p>return the dependencies of a job (jobs that must run before) based on the parameters received</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskParameters.get_parameter_dict">
+<span class="sig-name descname"><span class="pre">get_parameter_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskParameters.get_parameter_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskParameters.get_parameter_dict" title="Permalink to this definition"></a></dt>
+<dd><p>return a dictionary of parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskParameters.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskParameters.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskParameters.validate" title="Permalink to this definition"></a></dt>
+<dd><p>returns placeholders</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskReturnPlaceHolder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.machine_elf.</span></span><span class="sig-name descname"><span class="pre">TaskReturnPlaceHolder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">worker_elf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_job_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskReturnPlaceHolder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskReturnPlaceHolder" title="Permalink to this definition"></a></dt>
+<dd><p>A place for the return of a task. Works as a dict, where each value is a key</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskReturnPlaceHolder.get_result_id">
+<span class="sig-name descname"><span class="pre">get_result_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskReturnPlaceHolder.get_result_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskReturnPlaceHolder.get_result_id" title="Permalink to this definition"></a></dt>
+<dd><p>return the result_id for value in the placeholder</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.TaskReturnPlaceHolder.make_placeholder">
+<span class="sig-name descname"><span class="pre">make_placeholder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#TaskReturnPlaceHolder.make_placeholder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.TaskReturnPlaceHolder.make_placeholder" title="Permalink to this definition"></a></dt>
+<dd><p>make and validate the placeholder</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.ValuePlaceholder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blumycelium.machine_elf.</span></span><span class="sig-name descname"><span class="pre">ValuePlaceholder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#ValuePlaceholder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.ValuePlaceholder" title="Permalink to this definition"></a></dt>
+<dd><p>A placeholder for a value return by a task</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="blumycelium.machine_elf.ValuePlaceholder.set_origin">
+<span class="sig-name descname"><span class="pre">set_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blumycelium/machine_elf.html#ValuePlaceholder.set_origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#blumycelium.machine_elf.ValuePlaceholder.set_origin" title="Permalink to this definition"></a></dt>
+<dd><p>set the result id represented by the placeholder</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="graph_parameters.html" class="btn btn-neutral float-left" title="Graph Parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="Utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Bluwr.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

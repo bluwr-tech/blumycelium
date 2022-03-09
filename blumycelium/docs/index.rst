@@ -30,7 +30,11 @@ Arms-length microservices means that inside a mycelium we all trust each other, 
 
    installation
    quickstart
-
+   mycelium
+   models
+   graph_parameters
+   machine_elf
+   utils
 
 Indices and tables
 ==================
