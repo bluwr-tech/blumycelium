@@ -1,6 +1,6 @@
 import pyArango.connection as ADB
-import mycellium as myc
-import machine_elf as melf
+import blumycelium.mycelium as myc
+import blumycelium.machine_elf as melf
 
 from icecream import ic
 import time
@@ -20,15 +20,13 @@ class SenderElf(melf.MachineElf):
         }
 
 def init_myc():
-    users_to_create=[ {"username": "mycellium", "password": "mycellium"}]
-
     connection = ADB.Connection(
         arangoURL = "http://127.0.0.1:8529",
         username = "root",
         password = "root"
     )
 
-    mycellium = myc.Mycellium(
+    mycellium = myc.ArangoMycelium(
         connection=connection,
         name="mycellium"
     )

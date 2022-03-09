@@ -2,6 +2,8 @@ from . import utils as ut
 from . import custom_types
 from . import graph_parameters as gp
 
+from .the_exceptions import *
+
 from icecream import ic
 
 class ValuePlaceholder(gp.Value):
@@ -39,12 +41,12 @@ class TaskReturnPlaceHolder:
 
         self.is_none = False
         if (ret_annotation is _empty) :
-            raise Exception("Task return annotation cannot be empty, expecting None, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
+            raise EmptyAnnotationError("Task return annotation cannot be empty, expecting None, dict, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
         
         if (ret_annotation is None) :
             self.is_none = True
-        elif (type(ret_annotation) not in [list, tuple]) :
-            raise Exception("Task return annotation cannot be empty, expecting None, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
+        elif (type(ret_annotation) not in [list, tuple, dict]) :
+            raise EmptyAnnotationError("Task return annotation cannot be empty, expecting None, dict, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
 
         if not self.is_none:
             if type(ret_annotation) is dict:
@@ -61,7 +63,7 @@ class TaskReturnPlaceHolder:
     def get_result_id(self, name):
         """return the result_id for value in the placeholder"""
         if name not in self.parameters:
-            raise Exception("Placeholder has no parameter: '%s'" % name)
+            raise PlaceHolerKeyError("Placeholder has no parameter: '%s'" % name)
 
         return self.parameters[name].result_id
        
@@ -101,11 +103,11 @@ class TaskParameters:
                 self.final_args[param] = args[pid]
             elif param in kwargs:
                 if param in self.final_args:
-                    raise Exception("Got 2 values for parameter '{param}', ( {val1} & {val2})".format(param, self.final_args[param], kwargs[param]))
+                    raise RedundantParameterError("Got 2 values for parameter '{param}', ( {val1} & {val2})".format(param, self.final_args[param], kwargs[param]))
                 self.final_args[param] = kwargs[param]
             else:
                 if parameters[param].default is _empty:
-                    raise Exception("Mandatory parameter '{param}' missing)".format(param=param))
+                    raise RedundantParameterError("Mandatory parameter '{param}' missing)".format(param=param))
                 self.final_args[param] = parameters[param].default
                 
         return self.final_args
@@ -134,10 +136,10 @@ class TaskParameters:
                     param_clas = type(parameters[param].default)
 
                 if not (param_clas is type(None)) and param_clas and not isinstance(value, param_clas):
-                    raise Exception("Param '{param}' has the wrong type {type} expected {exp})".format(param=param, type=type(value), exp=param_clas))
+                    raise ParameterTypeError("Param '{param}' has the wrong type {type} expected {exp})".format(param=param, type=type(value), exp=param_clas))
 
                 if param_clas and (not param_clas in accepted_types ) :
-                    raise Exception("Param '{param}' has the wrong type {type} expected one of the following: {exp})".format(param=param, type=type(value), exp=accepted_types))
+                    raise ParameterTypeError("Param '{param}' has the wrong type {type} expected one of the following: {exp})".format(param=param, type=type(value), exp=accepted_types))
 
     # def get_storable_type(self, obj):
     #     """
@@ -256,7 +258,8 @@ class Task:
         """wrap the function inside a new function that creates a Job"""
         args = args
         kwargs = kwargs
-        run_job_id = ut.getuid()
+        run_job_id = ut.legalize_key( self.name + ut.getuid() )
+        # run_job_id = ut.getuid()
 
         def _wrapped():
             parameters = TaskParameters(self.function, run_job_id=run_job_id, worker_elf=self.machine_elf)
@@ -345,7 +348,7 @@ class MachineElf:
                 self.tasks[name] = task
                 setattr(self, name, task)
 
-    def register(self, store_source):
+    def register(self, store_source=False):
         """register the elf to the mycelium"""
         self.mycelium.register_machine_elf(self, store_source)
 
@@ -360,10 +363,9 @@ class MachineElf:
         """start a job for an elf"""
         jobs = self.mycelium.get_received_jobs(self.uid)
         for job in jobs:
-            params = self.mycelium.get_job_parameters(job["id"])
-            params = TaskParameters.develop(self.mycelium, params)
-
             if self.mycelium.is_job_ready(job["id"]) :
+                params = self.mycelium.get_job_parameters(job["id"])
+                params = TaskParameters.develop(self.mycelium, params)
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):

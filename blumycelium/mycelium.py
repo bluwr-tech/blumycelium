@@ -1,9 +1,10 @@
 from . import utils as ut
 from . import custom_types
 from . import models as mod
+from .the_exceptions import *
+
 
 import pyArango.theExceptions as a_exc
-
 
 from icecream import ic
 ic.configureOutput(includeContext=True)
@@ -60,7 +61,7 @@ class ArangoMycelium:
             self.db = self._init_db()
 
         if self.db is None:
-            raise Exception("Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True")
+            raise DatabaseNotFoundError("Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True")
 
         logger.info("Initializing %s..." % self.db_name)    
         logger.info("-- init collections")
@@ -78,6 +79,11 @@ class ArangoMycelium:
     def drop_jobs(self):
         """delete all information related to jobs"""
         for collection in ["Jobs", "Failures", "Parameters", "JobFailures", "JobParameters", "Results", "JobToJob"]:
+            self.db[collection].truncate() 
+
+    def drop(self):
+        """delete all documents in the mycelium"""
+        for collection in self.collections:
             self.db[collection].truncate() 
 
     def _init_collections(self, db) :
@@ -241,7 +247,6 @@ class ArangoMycelium:
     def get_received_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):
         """return all jobs for an elf"""
         bind_vars = {"uid": elf_uid}
-        
         if all_jobs:
             status_restriction = list(custom_types.STATUS.values())
         
@@ -269,7 +274,6 @@ class ArangoMycelium:
         for job in ret_q:
             job["id"] = job["_key"]
             ret.append(job)
-        
         return ret
 
     def is_job_ready(self, job_id):
@@ -278,11 +282,22 @@ class ArangoMycelium:
         if job_doc["status"] not in [custom_types.STATUS["PENDING"], custom_types.STATUS["READY"]]:
             return False
 
+        aql = """
+            FOR job IN Jobs
+                FILTER job._id == @id
+                FOR jtj in JobToJob
+                    FILTER jtj._to == job._id
+                    FOR job2 IN Jobs
+                        FILTER job2._id == jtj._from
+                        RETURN job2
+        """
+
         ready = 0
         count = 0
-        for count, param in enumerate(self.db["Parameters"].fetchByExample({"_to": job_doc["_id"]}, batchSize=100)):
+        ret_q = self.db.AQLQuery(aql, bindVars={"id": job_doc["_id"]}, batchSize=100, rawResults=True)
+        for job in ret_q:
             count += 1
-            if param["status"] is custom_types.STATUS["READY"]:
+            if job["status"] == custom_types.STATUS["DONE"]:
                 ready += 1
         return count == ready
 
@@ -348,7 +363,7 @@ class ArangoMycelium:
             return
         
         if not type(results) is dict:
-            raise  Exception("Results must be None or a dictionary")
+            raise  ResultTypeError("Results must be None or a dictionary")
         
         now = ut.gettime()
 
