@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>blumycelium.mycelium &mdash; Blumycellium  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Blumycellium
+            <img src="../../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mycelium.html">Mycelium</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../graph_parameters.html">Graph Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Blumycellium</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>blumycelium.mycelium</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for blumycelium.mycelium</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">ut</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">custom_types</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">mod</span>
+<span class="kn">from</span> <span class="nn">.the_exceptions</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="kn">import</span> <span class="nn">pyArango.theExceptions</span> <span class="k">as</span> <span class="nn">a_exc</span>
+
+<span class="kn">from</span> <span class="nn">icecream</span> <span class="kn">import</span> <span class="n">ic</span>
+<span class="n">ic</span><span class="o">.</span><span class="n">configureOutput</span><span class="p">(</span><span class="n">includeContext</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;BLUMYCELIUM&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ArangoMycelium"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium">[docs]</a><span class="k">class</span> <span class="nc">ArangoMycelium</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;docstring for ArangoMycelium. A mycelium over ArangoDB&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        connection: pyArango connection object.</span>
+<span class="sd">        name: Unique name for the mycelium</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="s2">&quot;BLUMYC_&quot;</span> <span class="o">+</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">collections</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">COLLECTIONS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">GRAPHS</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">hasDatabase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Warning: Database </span><span class="si">%s</span><span class="s2"> does not exist. To create it run self.init with init_db=True&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_init_db</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the mycelium database</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pyArango.theExceptions</span> <span class="kn">import</span> <span class="n">CreationError</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating database&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
+        <span class="k">try</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">createDatabase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">CreationError</span> <span class="k">as</span> <span class="n">e</span> <span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Database Creation error </span><span class="si">%s</span><span class="s2">: =&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
+
+            <span class="k">try</span> <span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+<div class="viewcode-block" id="ArangoMycelium.init"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">users_to_create</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        init_db: initialise the database</span>
+<span class="sd">        users_to_create: list of dicts {username, password}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">init_db</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_db</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DatabaseNotFoundError</span><span class="p">(</span><span class="s2">&quot;Cannot continue with the initialisation because database does not exist. Try runing init with init_db=True&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Initializing </span><span class="si">%s</span><span class="s2">...&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>    
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-- init collections&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_collections</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-- init graphs&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_graphs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-- init indexes&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_indexes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;-- init users&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">users_to_create</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">users_to_create</span> <span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_user</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">,</span> <span class="n">user</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">],</span> <span class="n">user</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">])</span></div>
+    
+<div class="viewcode-block" id="ArangoMycelium.drop_jobs"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.drop_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">drop_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;delete all information related to jobs&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">,</span> <span class="s2">&quot;Failures&quot;</span><span class="p">,</span> <span class="s2">&quot;Parameters&quot;</span><span class="p">,</span> <span class="s2">&quot;JobFailures&quot;</span><span class="p">,</span> <span class="s2">&quot;JobParameters&quot;</span><span class="p">,</span> <span class="s2">&quot;Results&quot;</span><span class="p">,</span> <span class="s2">&quot;JobToJob&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span> </div>
+
+<div class="viewcode-block" id="ArangoMycelium.drop"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.drop">[docs]</a>    <span class="k">def</span> <span class="nf">drop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;delete all documents in the mycelium&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="n">collection</span><span class="p">]</span><span class="o">.</span><span class="n">truncate</span><span class="p">()</span> </div>
+
+    <span class="k">def</span> <span class="nf">_init_collections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;initialize all collections&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">collection</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;collection&quot;</span><span class="p">,</span> <span class="s2">&quot;edges&quot;</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating collection&quot;</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span>
+                <span class="k">try</span> <span class="p">:</span>
+                    <span class="n">db</span><span class="o">.</span><span class="n">createCollection</span><span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">allowUserKeys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span> <span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Collection Creation error: =&gt;&quot;</span><span class="p">,</span> <span class="n">exp</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_graphs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;initialize all graphs&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">graph</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span> <span class="p">:</span>
+            <span class="c1"># ic(graph)</span>
+            <span class="k">if</span> <span class="n">graph</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;graph&quot;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Creating graph&quot;</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+                <span class="k">try</span> <span class="p">:</span>
+                    <span class="n">db</span><span class="o">.</span><span class="n">createGraph</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span> <span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Graph Creation error (</span><span class="si">%s</span><span class="s2">): =&gt;&quot;</span> <span class="o">%</span><span class="n">graph</span><span class="p">,</span> <span class="n">exp</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_init_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">dbName</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;initialize all users&quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;creating user: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">username</span><span class="p">)</span>
+        
+        <span class="n">user</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">createUser</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="n">user</span><span class="p">[</span><span class="s2">&quot;extra&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Created on: </span><span class="si">%s</span><span class="s2">, by automatic setup&quot;</span> <span class="o">%</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+        <span class="k">try</span> <span class="p">:</span>
+            <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e1</span> <span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Can&#39;t create user: &#39;</span><span class="si">%s</span><span class="s2">&#39; -&gt; &quot;</span> <span class="o">%</span> <span class="n">username</span><span class="p">,</span> <span class="n">e1</span><span class="p">)</span>
+            <span class="k">try</span> <span class="p">:</span>
+                <span class="n">user</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">fetchUser</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e2</span> <span class="p">:</span>
+                <span class="k">raise</span> <span class="n">UserCreationError</span><span class="p">(</span><span class="s2">&quot;Unable to get user: &#39;</span><span class="si">%s</span><span class="s2">&#39; -&gt; &quot;</span> <span class="o">%</span> <span class="n">username</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span>
+        <span class="n">u</span><span class="o">.</span><span class="n">setPermissions</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;initialize all indexes&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No indexes defined&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ArangoMycelium.register_machine_elf"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.register_machine_elf">[docs]</a>    <span class="k">def</span> <span class="nf">register_machine_elf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">machine_elf</span><span class="p">,</span> <span class="n">store_source</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;register and elf in the mycellium&quot;&quot;&quot;</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+        <span class="n">first_register</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">elf_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;MachineElves&quot;</span><span class="p">][</span><span class="n">machine_elf</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;dates&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;dates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;dates&quot;</span><span class="p">]</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;hashes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">machine_elf</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;hashes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;hashes&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">a_exc</span><span class="o">.</span><span class="n">DocumentNotFoundError</span><span class="p">:</span>
+            <span class="n">elf_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;MachineElves&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">createDocument</span><span class="p">()</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">machine_elf</span><span class="o">.</span><span class="n">uid</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">now</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;dates&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]]</span>
+            <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;revisions&quot;</span><span class="p">][</span><span class="s2">&quot;hashes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">machine_elf</span><span class="o">.</span><span class="n">revision</span><span class="p">]</span>
+            <span class="n">first_register</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">revision_key</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">legalize_key</span><span class="p">(</span><span class="n">machine_elf</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">store_source</span> <span class="ow">and</span> <span class="p">(</span><span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;last_revision&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">machine_elf</span><span class="o">.</span><span class="n">revision</span> <span class="ow">or</span> <span class="n">first_register</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;MachineElvesRevisions&quot;</span><span class="p">]):</span>
+            <span class="n">revision_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;MachineElvesRevisions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">createDocument</span><span class="p">()</span>
+            <span class="n">revision_doc</span><span class="p">[</span><span class="s2">&quot;_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">revision_key</span>
+            <span class="n">revision_doc</span><span class="p">[</span><span class="s2">&quot;source_code&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">machine_elf</span><span class="o">.</span><span class="n">source_code</span>
+            <span class="n">revision_doc</span><span class="p">[</span><span class="s2">&quot;creation_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">now</span>
+            <span class="n">revision_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;documentation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">machine_elf</span><span class="o">.</span><span class="n">documentation</span>
+        <span class="n">elf_doc</span><span class="p">[</span><span class="s2">&quot;last_revision&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">machine_elf</span><span class="o">.</span><span class="n">revision</span>
+        
+        <span class="n">elf_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.get_job"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_job">[docs]</a>    <span class="k">def</span> <span class="nf">get_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get a job&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">][</span><span class="n">job_id</span><span class="p">]</span></div>
+    
+    <span class="k">def</span> <span class="nf">_save_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">now_date</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;save job to the mycelium&quot;&quot;&quot;</span>
+        <span class="n">job_key</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">legalize_key</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">run_job_id</span><span class="p">)</span>
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">createDocument</span><span class="p">()</span>
+
+        <span class="n">job_doc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="p">{</span>
+            <span class="s2">&quot;_key&quot;</span><span class="p">:</span> <span class="n">job_key</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span> <span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;signature&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">signature</span><span class="p">),</span>
+                    <span class="s2">&quot;source_code&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">source_code</span><span class="p">,</span>
+                    <span class="s2">&quot;documentation&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">documentation</span><span class="p">,</span>
+                    <span class="s2">&quot;revision&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;machine_elf&quot;</span> <span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">worker_elf</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="s2">&quot;revision&quot;</span><span class="p">:</span> <span class="n">job</span><span class="o">.</span><span class="n">worker_elf</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="c1"># &quot;static_parameters&quot;: job.parameters.get_static_parameters(),</span>
+                <span class="s2">&quot;submit_date&quot;</span> <span class="p">:</span> <span class="n">now_date</span><span class="p">,</span>
+                <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;end_date&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">job_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">job_doc</span>
+
+    <span class="k">def</span> <span class="nf">_save_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_doc</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">now</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;save a parameters&quot;&quot;&quot;</span>
+        <span class="c1"># from rich import print</span>
+        <span class="k">def</span> <span class="nf">_get_param_doc</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">createDocument</span><span class="p">()</span>
+            <span class="n">dct</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">date</span><span class="p">}</span>
+            <span class="n">dct</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">doc</span>
+
+        <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">graphs</span><span class="p">[</span><span class="s2">&quot;JobParameters_graph&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">traversal</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">param_doc</span> <span class="o">=</span> <span class="n">_get_param_doc</span><span class="p">(</span><span class="n">traversal</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">now</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+            <span class="n">graph</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="s2">&quot;JobParameters&quot;</span><span class="p">,</span> <span class="n">job_doc</span><span class="p">,</span> <span class="n">param_doc</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ArangoMycelium.push_job"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.push_job">[docs]</a>    <span class="k">def</span> <span class="nf">push_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;push a job to the mycelium&quot;&quot;&quot;</span>
+        <span class="c1"># from rich import print</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_job</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+        
+        <span class="n">params</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">get_parameter_dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save_parameters</span><span class="p">(</span><span class="n">job_doc</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+        
+        <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">graphs</span><span class="p">[</span><span class="s2">&quot;Jobs_graph&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">dependencies</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">job</span><span class="o">.</span><span class="n">dependencies</span><span class="p">:</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="s2">&quot;JobToJob&quot;</span><span class="p">,</span> <span class="s2">&quot;Jobs/&quot;</span> <span class="o">+</span> <span class="n">dep</span><span class="p">,</span> <span class="n">job_doc</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">now</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.get_job_parameters"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_job_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_job_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the parameters for a job&quot;&quot;&quot;</span>
+        <span class="n">aql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        FOR jparam IN JobParameters</span>
+<span class="s2">            FILTER jparam._from == @id</span>
+<span class="s2">            FOR node IN Parameters</span>
+<span class="s2">                FILTER node._id == jparam._to</span>
+<span class="s2">                RETURN {</span>
+<span class="s2">                    name: jparam.name,</span>
+<span class="s2">                    node: node</span>
+<span class="s2">                }</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">bind_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;Jobs/&quot;</span><span class="o">+</span> <span class="n">job_id</span><span class="p">}</span>
+        <span class="n">res_aql</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">AQLQuery</span><span class="p">(</span><span class="n">aql</span><span class="p">,</span> <span class="n">bindVars</span><span class="o">=</span><span class="n">bind_vars</span><span class="p">,</span> <span class="n">batchSize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rawResults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">res_aql</span><span class="p">:</span>
+            <span class="n">ret</span><span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.get_received_jobs"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_received_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">get_received_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elf_uid</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">all_jobs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status_restriction</span><span class="o">=</span><span class="p">[</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">]]):</span>
+        <span class="sd">&quot;&quot;&quot;return all jobs for an elf&quot;&quot;&quot;</span>
+        <span class="n">bind_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">elf_uid</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">all_jobs</span><span class="p">:</span>
+            <span class="n">status_restriction</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        
+        <span class="n">str_status_filter</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">status</span> <span class="ow">in</span> <span class="n">status_restriction</span><span class="p">:</span>
+            <span class="n">pending</span> <span class="o">=</span> <span class="s2">&quot;job.status == @</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">status</span>
+            <span class="n">str_status_filter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
+            <span class="n">bind_vars</span><span class="p">[</span><span class="n">status</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">str_status_filter</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">str_status_filter</span> <span class="o">=</span> <span class="s2">&quot;FILTER &quot;</span> <span class="o">+</span> <span class="s2">&quot; OR &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_status_filter</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">str_status_filter</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">aql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            FOR job IN Jobs</span>
+<span class="s2">                FILTER job.machine_elf.id == @uid</span>
+<span class="s2">                </span><span class="si">{str_status_filter}</span><span class="s2"></span>
+<span class="s2">                SORT job.creation_date DESC</span>
+<span class="s2">                RETURN job</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">str_status_filter</span><span class="o">=</span><span class="n">str_status_filter</span><span class="p">)</span>
+
+        <span class="n">ret_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">AQLQuery</span><span class="p">(</span><span class="n">aql</span><span class="p">,</span> <span class="n">bindVars</span><span class="o">=</span><span class="n">bind_vars</span><span class="p">,</span> <span class="n">batchSize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rawResults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">ret_q</span><span class="p">:</span>
+            <span class="n">job</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;_key&quot;</span><span class="p">]</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.is_job_ready"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.is_job_ready">[docs]</a>    <span class="k">def</span> <span class="nf">is_job_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return True if the job is ready to run&quot;&quot;&quot;</span>
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">],</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;READY&quot;</span><span class="p">]]:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">aql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            FOR job IN Jobs</span>
+<span class="s2">                FILTER job._id == @id</span>
+<span class="s2">                FOR jtj in JobToJob</span>
+<span class="s2">                    FILTER jtj._to == job._id</span>
+<span class="s2">                    FOR job2 IN Jobs</span>
+<span class="s2">                        FILTER job2._id == jtj._from</span>
+<span class="s2">                        RETURN job2</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+
+        <span class="n">ready</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ret_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">AQLQuery</span><span class="p">(</span><span class="n">aql</span><span class="p">,</span> <span class="n">bindVars</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]},</span> <span class="n">batchSize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rawResults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">ret_q</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">job</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;DONE&quot;</span><span class="p">]:</span>
+                <span class="n">ready</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">count</span> <span class="o">==</span> <span class="n">ready</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.update_job_status"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.update_job_status">[docs]</a>    <span class="k">def</span> <span class="nf">update_job_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;update the status of a job&quot;&quot;&quot;</span>
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+        <span class="n">job_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.start_job"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.start_job">[docs]</a>    <span class="k">def</span> <span class="nf">start_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;mark a job as running&quot;&quot;&quot;</span>
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;RUNING&quot;</span><span class="p">]</span>
+        <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;start_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+        <span class="n">job_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.complete_job"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.complete_job">[docs]</a>    <span class="k">def</span> <span class="nf">complete_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;mark a job as successful&quot;&quot;&quot;</span>
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;DONE&quot;</span><span class="p">]</span>
+        <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+        <span class="n">job_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.register_job_failure"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.register_job_failure">[docs]</a>    <span class="k">def</span> <span class="nf">register_job_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">exc_traceback</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;register a job failure&quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">traceback</span>
+        <span class="kn">import</span> <span class="nn">hashlib</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_tb</span><span class="p">(</span><span class="n">exc_traceback</span><span class="p">)</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_job_status</span><span class="p">(</span><span class="n">job_id</span><span class="p">,</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;FAILED&quot;</span><span class="p">])</span>
+        
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_tb</span><span class="p">(</span><span class="n">exc_traceback</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">()</span>
+        <span class="n">trace_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="n">trace_key</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">legalize_key</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">trace_str</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">failure_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Failures&quot;</span><span class="p">][</span><span class="n">trace_key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">a_exc</span><span class="o">.</span><span class="n">DocumentNotFoundError</span><span class="p">:</span>
+            <span class="n">failure_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Failures&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">createDocument</span><span class="p">()</span>
+            <span class="n">failure_doc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;_key&quot;</span><span class="p">:</span> <span class="n">trace_key</span><span class="p">,</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc_type</span><span class="p">),</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc_value</span><span class="p">),</span>
+                    <span class="s2">&quot;traceback&quot;</span><span class="p">:</span> <span class="n">trace</span><span class="p">,</span>
+                    <span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">now</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="n">failure_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">graphs</span><span class="p">[</span><span class="s2">&quot;JobFailures_graph&quot;</span><span class="p">]</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">link</span><span class="p">(</span><span class="s2">&quot;JobFailures&quot;</span><span class="p">,</span> <span class="n">job_doc</span><span class="p">,</span> <span class="n">failure_doc</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">now</span><span class="p">})</span>
+        <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;FAILED&quot;</span><span class="p">]</span>
+        <span class="n">job_doc</span><span class="p">[</span><span class="s2">&quot;end_date&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+        <span class="n">job_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.store_results"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.store_results">[docs]</a>    <span class="k">def</span> <span class="nf">store_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span><span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;store the results of a job&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="k">raise</span>  <span class="n">ResultTypeError</span><span class="p">(</span><span class="s2">&quot;Results must be None or a dictionary&quot;</span><span class="p">)</span>
+        
+        <span class="n">now</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">gettime</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">result_key</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;result_id&quot;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Results&quot;</span><span class="p">][</span><span class="n">result_key</span><span class="p">]</span>
+            <span class="k">except</span> <span class="n">a_exc</span><span class="o">.</span><span class="n">DocumentNotFoundError</span><span class="p">:</span>
+                <span class="n">result_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">createDocument</span><span class="p">()</span>
+        
+            <span class="n">result_doc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;_key&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;result_id&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;creation_date&quot;</span><span class="p">:</span> <span class="n">now</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="n">result_doc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.get_result"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_result">[docs]</a>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the result of a job&quot;&quot;&quot;</span>
+        <span class="n">result_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Results&quot;</span><span class="p">][</span><span class="n">result_id</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result_doc</span><span class="o">.</span><span class="n">getStore</span><span class="p">()[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ArangoMycelium.get_job_status"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_job_status">[docs]</a>    <span class="k">def</span> <span class="nf">get_job_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the status of a job&quot;&quot;&quot;</span>
+        <span class="n">job_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s2">&quot;Jobs&quot;</span><span class="p">][</span><span class="n">job_id</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">job_doc</span><span class="o">.</span><span class="n">getStore</span><span class="p">()[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">get_dependencies_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="n">aql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            FOR jj IN JobToJob</span>
+<span class="s2">                FILTER jj._to == @id</span>
+<span class="s2">                FOR job IN Jobs</span>
+<span class="s2">                    FILTER jj._from == job._id</span>
+<span class="s2">                    RETURN {</span>
+<span class="s2">                        &quot;job_id&quot;: job._key,</span>
+<span class="s2">                        &quot;status&quot;: job.status</span>
+<span class="s2">                    }</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        
+        <span class="n">bind_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;Jobs/&quot;</span><span class="o">+</span> <span class="n">job_id</span><span class="p">}</span>
+        <span class="n">res_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">AQLQuery</span><span class="p">(</span><span class="n">aql</span><span class="p">,</span> <span class="n">bindVars</span><span class="o">=</span><span class="n">bind_vars</span><span class="p">,</span> <span class="n">batchSize</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rawResults</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">res</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">res_q</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Bluwr.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
