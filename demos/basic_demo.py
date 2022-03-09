@@ -10,12 +10,22 @@ import time
 #NOTICE THAT TASK ARE FUNCTION WITH NAMES STARING WITH 'task_'
 
 class PrinterElf(melf.MachineElf):
-    """docstring for Printer"""
+    """
+    Notice the hint for the return. This is mandatory.
+    Type hints can also be used for arguments to ensure that tasks get
+    arguments of the right type.
+    """
     def task_print_it(self, to_print) -> None:
         print(">>> Machine >>> Elf >>> Printer: '%s'" % to_print)
 
 class SenderElf(melf.MachineElf):
-    """docstring for Printer"""
+    """
+    Notice the hint for the return. This is mandatory.
+    Type hints can also be used for arguments to ensure that tasks get
+    arguments of the right type.
+    Task must return either None or a dict. Here the return is a tuple of keys to a dictioray.
+    A list would also work, as well as a dict of types example: {"value": float}
+    """
     def task_send(self, to_send) -> ("value", ):
         return {
             "value": to_send
