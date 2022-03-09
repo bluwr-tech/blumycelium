@@ -330,7 +330,7 @@ class Value(object):
 
     def __init__(self, *args, **kwargs):
         self._init(*args, **kwargs)
-        self.close_init()
+        # self.close_init()
 
     def set_value(self, value):
         """set the static value"""

@@ -1,45 +1,45 @@
 
-class EmptyParameter:
+class EmptyParameter(Exception):
     """Represents an empty parameter"""
     pass
 
-class EmptyAnnotationError:
+class EmptyAnnotationError(Exception):
     """"""
     pass
 
-class PlaceHolerKeyError:
+class PlaceHolerKeyError(Exception):
     """"""
     pass
 
-class RedundantParameterError:
+class RedundantParameterError(Exception):
     """"""
     pass
 
-class ParameterTypeError:
+class ParameterTypeError(Exception):
     """"""
     pass
 
-class DatabaseNotFoundError:
-    """"""
-    pass
-
-
-class ResultTypeError:
+class DatabaseNotFoundError(Exception):
     """"""
     pass
 
 
-class ValueDerivationError:
+class ResultTypeError(Exception):
     """"""
     pass
 
 
-class MultipleDerivationError:
+class ValueDerivationError(Exception):
     """"""
     pass
 
 
-class DependencyTypeError:
+class MultipleDerivationError(Exception):
+    """"""
+    pass
+
+
+class DependencyTypeError(Exception):
     """"""
     pass
 

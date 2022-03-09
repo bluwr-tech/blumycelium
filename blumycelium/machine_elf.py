@@ -41,12 +41,12 @@ class TaskReturnPlaceHolder:
 
         self.is_none = False
         if (ret_annotation is _empty) :
-            raise EmptyAnnotationError("Task return annotation cannot be empty, expecting None, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
+            raise EmptyAnnotationError("Task return annotation cannot be empty, expecting None, dict, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
         
         if (ret_annotation is None) :
             self.is_none = True
-        elif (type(ret_annotation) not in [list, tuple]) :
-            raise EmptyAnnotationError("Task return annotation cannot be empty, expecting None, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
+        elif (type(ret_annotation) not in [list, tuple, dict]) :
+            raise EmptyAnnotationError("Task return annotation cannot be empty, expecting None, dict, tuple or list of parameter keys. Got: '%s'" % ret_annotation)
 
         if not self.is_none:
             if type(ret_annotation) is dict:
@@ -259,6 +259,7 @@ class Task:
         args = args
         kwargs = kwargs
         run_job_id = ut.legalize_key( self.name + ut.getuid() )
+        # run_job_id = ut.getuid()
 
         def _wrapped():
             parameters = TaskParameters(self.function, run_job_id=run_job_id, worker_elf=self.machine_elf)
@@ -347,7 +348,7 @@ class MachineElf:
                 self.tasks[name] = task
                 setattr(self, name, task)
 
-    def register(self, store_source):
+    def register(self, store_source=False):
         """register the elf to the mycelium"""
         self.mycelium.register_machine_elf(self, store_source)
 
@@ -362,10 +363,9 @@ class MachineElf:
         """start a job for an elf"""
         jobs = self.mycelium.get_received_jobs(self.uid)
         for job in jobs:
-            params = self.mycelium.get_job_parameters(job["id"])
-            params = TaskParameters.develop(self.mycelium, params)
-
             if self.mycelium.is_job_ready(job["id"]) :
+                params = self.mycelium.get_job_parameters(job["id"])
+                params = TaskParameters.develop(self.mycelium, params)
                 self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):

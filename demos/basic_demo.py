@@ -26,7 +26,7 @@ def init_myc():
         password = "root"
     )
 
-    mycellium = myc.Mycellium(
+    mycellium = myc.ArangoMycelium(
         connection=connection,
         name="mycellium"
     )
