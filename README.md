@@ -15,4 +15,3 @@ Readthedocs documentation
 =========================
 
 We provide a full documentation [here](https://blumycelium.readthedocs.io/en/latest/index.html) (work in progress).
-
