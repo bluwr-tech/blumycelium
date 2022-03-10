@@ -14,6 +14,5 @@ BLUMYCELIUM allows you to write complex microservice orchestration all in python
 Readthedocs documentation
 =========================
 
-We provide a full documentation here (work in progress):
+We provide a full documentation [here](https://blumycelium.readthedocs.io/en/latest/index.html) (work in progress).
 
-[here](https://duckduckgo.com)
