@@ -16,4 +16,4 @@ Readthedocs documentation
 
 We provide a full documentation here (work in progress):
 
-[here](https://duckduckgo.com)
+[here](https://blumycelium.readthedocs.io/en/latest/index.html)
