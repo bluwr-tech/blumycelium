@@ -388,7 +388,11 @@ class ArangoMycelium:
 
     def get_result(self, result_id):
         """return the result of a job"""
-        result_doc = self.db["Results"][result_id]
+        try:
+            result_doc = self.db["Results"][result_id]
+        except a_exc.DocumentNotFoundError:
+            raise ResultNotFound("Unable to retrieve result: %s" % result_id)
+
         return result_doc.getStore()["value"]
 
     def get_job_status(self, job_id):

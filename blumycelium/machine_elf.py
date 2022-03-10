@@ -1,8 +1,9 @@
 from . import utils as ut
 from . import custom_types
 from . import graph_parameters as gp
-
 from .the_exceptions import *
+
+from .import *
 
 from icecream import ic
 
@@ -365,8 +366,12 @@ class MachineElf:
         for job in jobs:
             if self.mycelium.is_job_ready(job["id"]) :
                 params = self.mycelium.get_job_parameters(job["id"])
-                params = TaskParameters.develop(self.mycelium, params)
-                self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
+                try:
+                    params = TaskParameters.develop(self.mycelium, params)
+                except ResultNotFound:
+                    print(">>Unable to retrieve result. Will try again later.")
+                else:
+                    self.run_task(job["id"], job["task"]["name"], params, store_failures=store_failures, raise_exceptions=raise_exceptions)
 
     def run_task(self, job_id:str, task_name:str, parameters:dict, store_failures:bool, raise_exceptions:bool):
         """run a task for an elf"""

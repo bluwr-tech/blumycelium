@@ -43,3 +43,8 @@ class DependencyTypeError(Exception):
     """"""
     pass
 
+
+class ResultNotFound(Exception):
+    """"""
+    pass
+
