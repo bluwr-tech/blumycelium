@@ -12,12 +12,19 @@ BLUMYCELIUM: Async micro-services, 100% in python from Bluwr
 
 PLEASE NOTE: This documentation is a work in progress
 
-This tool os provided for free by [bluwr.com](https://bluwr.com). We are building a 100% text based publication platform. A calm space free of any addictive feature.
+This tool os provided for free by bluwr.com_. We are building a 100% text based publication platform. A calm space free of any addictive feature.
 
 Here are a few things that you can do to support us:
- - Register for early access on [bluwr.com](https://bluwr.com)
- - Buy some awesoms merch on our [store](https://store.bluwr.com)
- - Follow us on social media [instagram](https://www.instagram.com/bluwr_official/), [twitter](https://twitter.com/bluwr_official), [linkedin](https://www.linkedin.com/company/bluwr)
+ - Register for early access on bluwr.com_.
+ - Buy some awesoms merch on our store_
+ - Follow us on social media: instagram_, twitter_, linkedin_
+
+.. _bluwr.com: https://bluwr.com
+.. _store: https://store.bluwr.com
+.. _instagram: https://www.instagram.com/bluwr_official/
+.. _twitter: https://twitter.com/bluwr_official
+.. _linkedin: https://www.linkedin.com/company/bluwr
+
 
 BLUMYCELIUM is our tool for arm's-length microservices management and orchestration. It allows for the splitting of a monolithic application into several small parts that run asynchronously in the same environment and can be tested separately. 
 

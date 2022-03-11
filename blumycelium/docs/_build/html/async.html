@@ -76,8 +76,15 @@
              
   <section id="async-demo">
 <h1>Async demo<a class="headerlink" href="#async-demo" title="Permalink to this headline"></a></h1>
-<p>Here are some details about the demo provided in demos/daemons/async_orchestration.pyArango</p>
 <p>(WIP)</p>
+<p>Here are some details about the demo provided in <cite>demos/daemons/</cite>.
+The file async_orchestration.py is basically an asynchronous version of the demo in sync_orchestration.py. It starts 3 types of processes (elves):</p>
+<ul class="simple">
+<li><p><strong>Storage</strong>: that represents an interface to a database that all elves connect to. It can be anything, here, for the sake of simplicity it is just a json file.</p></li>
+<li><p><strong>Animals</strong>: that is an object that will be stored in the database (here the simple json file). It just contains the animal’s species, and weight.</p></li>
+<li><p><strong>Stats</strong>: that will compute some statistics using data stored in the database (again, just a json file here)</p></li>
+</ul>
+<p>This example shows how these elves will run independently and their executions and dependencies will be all handled by bluycelium using Arangodb behind the scenes.</p>
 </section>
 
 
