@@ -394,9 +394,7 @@ class Value(object):
             dct[key]=value
             return dct""".strip()
         return_statement = "add({self_param}, {key}, {value})"
-
-        code = "{self_param}[{key}]={value}"
-        
+       
         key_param = self._get_parameter(key)
         value_param = self._get_parameter(value)
         
@@ -580,6 +578,3 @@ def unravel(obj):
         return unravel_dict(obj)
     else:
         raise TypeError("Wrong type: '%s', except list or dict" % type(obj))
-
-if __name__ == '__main__':
-    test_rebuild_from_traversal()

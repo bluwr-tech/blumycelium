@@ -45,6 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../async.html">Async demo</a></li>
 </ul>
 
         </div>
@@ -468,9 +469,7 @@
 <span class="s2">            dct[key]=value</span>
 <span class="s2">            return dct&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">return_statement</span> <span class="o">=</span> <span class="s2">&quot;add(</span><span class="si">{self_param}</span><span class="s2">, </span><span class="si">{key}</span><span class="s2">, </span><span class="si">{value}</span><span class="s2">)&quot;</span>
-
-        <span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{self_param}</span><span class="s2">[</span><span class="si">{key}</span><span class="s2">]=</span><span class="si">{value}</span><span class="s2">&quot;</span>
-        
+       
         <span class="n">key_param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_parameter</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="n">value_param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_parameter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         
@@ -654,9 +653,6 @@
         <span class="k">return</span> <span class="n">unravel_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Wrong type: &#39;</span><span class="si">%s</span><span class="s2">&#39;, except list or dict&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">test_rebuild_from_traversal</span><span class="p">()</span>
 </pre></div>
 
            </div>

@@ -15,13 +15,13 @@ def init_myc(drop=False):
         connection=connection,
         name="animals_demo_mycelium"
     )
+    
+    #Ensure the mycelium is initialized
+    mycelium.init(init_db=True)
 
     if drop:
         #Drop all previous job information from the mycelium
         mycelium.drop()
-    
-    #Ensure the mycelium is initialized
-    mycelium.init(init_db=True)
 
     return mycelium
 

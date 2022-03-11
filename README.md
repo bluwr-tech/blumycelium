@@ -1,6 +1,14 @@
 BLUMYCELIUM: Async micro-services, 100% in python from Bluwr
 ============================================================
 
+This tool os provided for free by [bluwr.com](https://bluwr.com). We are building a 100% text based publication platform. A calm space free of any addictive feature.
+
+Here are a few things that you can do to support us:
+ - Register for early access on [bluwr.com](https://bluwr.com)
+ - Buy some awesoms merch on our [store](https://store.bluwr.com)
+ - Follow us on social media [instagram](https://www.instagram.com/bluwr_official/), [twitter](https://twitter.com/bluwr_official), [linkedin](https://www.linkedin.com/company/bluwr)
+ 
+
 **Machine Elf <- Mycelium -> Machine Elf**
 
 PLEASE NOTE: This documentation is a work in progress

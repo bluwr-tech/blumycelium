@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async.html">Async demo</a></li>
 </ul>
 
         </div>
@@ -73,21 +74,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="blumycelium-async-micro-services-100-in-python-from-bluwr">
+  <a class="reference internal image-reference" href="_images/logo_full.png"><img alt="BLUMYCELIUM" src="_images/logo_full.png" style="width: 200px;" /></a>
+<section id="blumycelium-async-micro-services-100-in-python-from-bluwr">
 <h1>BLUMYCELIUM: Async micro-services, 100% in python from Bluwr<a class="headerlink" href="#blumycelium-async-micro-services-100-in-python-from-bluwr" title="Permalink to this headline"></a></h1>
 <p>PLEASE NOTE: This documentation is a work in progress</p>
-<p>Blumycelium is our tool for arm’s-length microservices management and orchestration. It allows for the splitting of a monolithic application into several small parts that run asynchronously in the same environment and can be tested separately. Blumycelium was developed to be fast and easy to learn and does not require more than python knowledge to achieve results that would normally be implemented using more complex DevOps orchestration tools mediated through REST APIs. To achieve this, Blumycellium relies heavily on python introspection capabilities to follow the flow of variable updates and transparently derives execution and orchestration graphs. By allowing services to be separate programs Blumycelium applications can also bypass the python GIL. Blumycelium also remembers the source code of all tasks as well as tracebacks for all exceptions for easy debugging. Blumycelium is implemented using the flexible multimodal ArangoDB database for storing what we call the: Mycelium. The repository of everything needed for variable execution graphs, source codes, orchestrations and failure reporting.</p>
-<p><strong>Machine Elf &lt;- Mycelium -&gt; Machine Elf</strong></p>
-<p>BLUMYCELIUM allows you to write complex microservice orchestration all in python. You can divide a complex application into many smaller parts that can be tested independtly and ran asynchronously. These smaller parts are agents called <em>Machine Elves</em> and the <em>Mycelium</em> is the database they use to communicate.</p>
+<p>This tool os provided for free by [bluwr.com](<a class="reference external" href="https://bluwr.com">https://bluwr.com</a>). We are building a 100% text based publication platform. A calm space free of any addictive feature.</p>
 <dl class="simple">
-<dt>Myceliums are stored in an ArangoDB instance and can be setup anywhere you’d like:</dt><dd><ul class="simple">
-<li><p>Locally</p></li>
-<li><p>On the cloud</p></li>
-<li><p>Etc…</p></li>
+<dt>Here are a few things that you can do to support us:</dt><dd><ul class="simple">
+<li><p>Register for early access on [bluwr.com](<a class="reference external" href="https://bluwr.com">https://bluwr.com</a>)</p></li>
+<li><p>Buy some awesoms merch on our [store](<a class="reference external" href="https://store.bluwr.com">https://store.bluwr.com</a>)</p></li>
+<li><p>Follow us on social media [instagram](<a class="reference external" href="https://www.instagram.com/bluwr_official/">https://www.instagram.com/bluwr_official/</a>), [twitter](<a class="reference external" href="https://twitter.com/bluwr_official">https://twitter.com/bluwr_official</a>), [linkedin](<a class="reference external" href="https://www.linkedin.com/company/bluwr">https://www.linkedin.com/company/bluwr</a>)</p></li>
 </ul>
 </dd>
 </dl>
-<p>Arms-length microservices means that inside a mycelium we all trust each other, there are no credentials</p>
+<p>BLUMYCELIUM is our tool for arm’s-length microservices management and orchestration. It allows for the splitting of a monolithic application into several small parts that run asynchronously in the same environment and can be tested separately.</p>
+<p>It was developed to be easy to learn and does not require more than python knowledge to achieve results that would normally be implemented using more complex DevOps orchestration tools mediated through REST APIs. To achieve this, Blumycellium relies heavily on python introspection capabilities to follow the flow of variable updates and transparently derives execution and orchestration graphs. By allowing services to be separate programs BLUMYCELIUM applications can also bypass the python GIL. BLUMYCELIUM also remembers the source code of all tasks as well as tracebacks for all exceptions for easy debugging. BLUMYCELIUM is implemented using the flexible multimodal ArangoDB database for storing what we call the: Mycelium. The repository of everything needed for variable execution graphs, source codes, orchestrations and failure reporting.</p>
+<p>BLUMYCELIUM allows you to write complex microservice orchestration all in python. You can divide a complex application into many smaller parts that can be tested independtly and ran asynchronously. These smaller parts are agents called <em>Machine Elves</em> and the <em>Mycelium</em> is the database they use to communicate.</p>
+<p><strong>Machine Elf &lt;- Mycelium -&gt; Machine Elf</strong></p>
+<section id="arm-s-length-microservices">
+<h2>Arm’s-length microservices?<a class="headerlink" href="#arm-s-length-microservices" title="Permalink to this headline"></a></h2>
+<p>Arm’s-length microservices are microservices that trust each other completely. Only trusted elves should be allowed inside a mycelium. Myceliums are extremely convenient but not secure by default. It’s you job to make sure that your myceliums are properly protected.</p>
+</section>
+<section id="glossary-mycelium">
+<h2>Glossary Mycelium?<a class="headerlink" href="#glossary-mycelium" title="Permalink to this headline"></a></h2>
+<p><strong>Machine Elf</strong>: an indepedent agent that can perform a set of tasks. Elves can be processes or threads of the same application, or completely independant application hosted locally or remotely.
+<strong>Task</strong>: a function from a machine elf whose name starts with <cite>task_</cite>.
+<strong>Job</strong>: a task to run.</p>
+<p><strong>Mycelium</strong>: a datastructure that stores many things related to the application like:
+- Job orchestration
+- Variable flows (how to compute values from python instructions)
+- Elves documentation, source codes and revisions
+- Tasks source code &amp; documentation</p>
+<p>For now the only mycelium implementation available uses the ArangoDB database and thus can be setup anywhere:
+- locally
+- on the cloud
+- in a separate container
+- inside the same container</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -123,8 +145,10 @@
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#module-blumycelium.the_exceptions">Custom Exceptions</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="async.html">Async demo</a></li>
 </ul>
 </div>
+</section>
 </section>
 <section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
