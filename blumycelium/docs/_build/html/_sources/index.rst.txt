@@ -60,6 +60,12 @@ For now the only mycelium implementation available uses the ArangoDB database an
 - inside the same container
 
 
+Feedback
+========
+
+If you have any suggestions about features or feedback about the documentation please open github issues https://github.com/bluwr-tech/blumycelium.
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

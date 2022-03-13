@@ -47,7 +47,12 @@
 <li class="toctree-l1"><a class="reference internal" href="machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Async demo</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Async demo</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#explain-the-files">Explain the files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#make-it-run">Make it run</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -77,14 +82,90 @@
   <section id="async-demo">
 <h1>Async demo<a class="headerlink" href="#async-demo" title="Permalink to this headline"></a></h1>
 <p>(WIP)</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
 <p>Here are some details about the demo provided in <cite>demos/daemons/</cite>.
 The file async_orchestration.py is basically an asynchronous version of the demo in sync_orchestration.py. It starts 3 types of processes (elves):</p>
 <ul class="simple">
-<li><p><strong>Storage</strong>: that represents an interface to a database that all elves connect to. It can be anything, here, for the sake of simplicity it is just a json file.</p></li>
-<li><p><strong>Animals</strong>: that is an object that will be stored in the database (here the simple json file). It just contains the animal’s species, and weight.</p></li>
-<li><p><strong>Stats</strong>: that will compute some statistics using data stored in the database (again, just a json file here)</p></li>
+<li><p><strong>Animals</strong>: this class represents an animal that will be stored in the database (here the simple json file). It just contains the animal’s species, and weight.</p></li>
+<li><p><strong>Storage</strong>: a simple interface to a database that all elves connect to. It can be anything, here, for the sake of simplicity it is just a json file.</p></li>
+<li><p><strong>Stats</strong>: that will compute some statistics using data stored in the database (again, just a json file here). 3 of them will be started. One calculating the average size, one the min and the last one the max size.</p></li>
 </ul>
 <p>This example shows how these elves will run independently and their executions and dependencies will be all handled by bluycelium using Arangodb behind the scenes.</p>
+</section>
+<section id="explain-the-files">
+<h2>Explain the files<a class="headerlink" href="#explain-the-files" title="Permalink to this headline"></a></h2>
+<blockquote>
+<div><ul>
+<li><p><strong>elves.py</strong>: code representing the elves (or processes). Simple classes that inherit from <cite>MachineElf</cite> class and have at least one function starting by <cite>task_</cite> that tells what the elf will do.</p></li>
+<li><dl>
+<dt><strong>async_orchestration.py</strong>: this code is responsible for two things.</dt><dd><ul>
+<li><p>Create the mycelium, which is an Arangodb database storing the processes, their states and dependencies.</p></li>
+<li><p>Tell the elves (processes) what they should do.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">nb</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+  <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sending: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nb</span><span class="p">)</span>
+  <span class="n">mesurement</span> <span class="o">=</span> <span class="n">animals</span><span class="o">.</span><span class="n">task_get_animal_data</span><span class="p">()</span>
+  <span class="n">store</span><span class="o">.</span><span class="n">task_save_animal_data</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">mesurement</span><span class="p">[</span><span class="s2">&quot;species&quot;</span><span class="p">],</span> <span class="n">weight</span><span class="o">=</span><span class="n">mesurement</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">])</span>
+  <span class="c1">#print stats every 10 iterations</span>
+  <span class="k">if</span> <span class="n">nb</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+      <span class="n">mean</span> <span class="o">=</span> <span class="n">mean_calc</span><span class="o">.</span><span class="n">task_calculate_means</span><span class="p">()</span>
+      <span class="n">mins</span> <span class="o">=</span> <span class="n">min_calc</span><span class="o">.</span><span class="n">task_calculate_mins</span><span class="p">()</span>
+      <span class="n">maxs</span> <span class="o">=</span> <span class="n">max_calc</span><span class="o">.</span><span class="n">task_calculate_maxs</span><span class="p">()</span>
+      <span class="n">printer</span><span class="o">.</span><span class="n">task_print_stats</span><span class="p">(</span><span class="n">means</span><span class="o">=</span><span class="n">mean</span><span class="p">[</span><span class="s2">&quot;means&quot;</span><span class="p">],</span> <span class="n">mins</span><span class="o">=</span><span class="n">mins</span><span class="p">[</span><span class="s2">&quot;mins&quot;</span><span class="p">],</span> <span class="n">maxs</span><span class="o">=</span><span class="n">maxs</span><span class="p">[</span><span class="s2">&quot;maxs&quot;</span><span class="p">])</span>
+  <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Important note</strong>: the code above will not be the one that will be executed exactly.
+lumycellium will do some introspection and store the processes and their dependencies in the mycelium
+and execute the code when the elves are actaully started with the <cite>start_job()</cite> function. In the sync_orchestration.py example it is done in the same file, here the purpose is to show you that they can run independently and blumycelium will take care of any dependencies between them.</p>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>*_daemon.py</strong>: these files start the different elves separately. They create an elf class, for example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">elf</span> <span class="o">=</span> <span class="n">Storage</span><span class="p">(</span><span class="s2">&quot;animals data store&quot;</span><span class="p">,</span> <span class="n">mycellium</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The elf is uniquely identified by its name “animals data store” so when creating an elf with this name, blumycelium will know to fetch the one already registered in the mycelium.
+Once the elf is fetched, call the <cite>start_job()</cite> function and blumycelium will check if all the jobs that it depends on are done (if any) and then start executing the tasks.</p>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="make-it-run">
+<h2>Make it run<a class="headerlink" href="#make-it-run" title="Permalink to this headline"></a></h2>
+<ol class="arabic simple">
+<li><p>Create the mycelium and register elves and tell them what to do and how to interact together (orchestration)</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python async_orchestration.py
+</pre></div>
+</div>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Start the elves in any order in separate windows or tabs and watch the magic happen!</p></li>
+</ol>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start the elf generating random animals with species and weight</span>
+python animals_elf_deamon.py
+<span class="c1"># Start the elf storing the animals generated by the animals_elf_deamon.py and store them in the database (json file here)</span>
+python storage_elf_deamon.py
+<span class="c1"># Start the elves doing some calculations with the data</span>
+python stats_elf_deamon.py calc1
+python stats_elf_deamon.py calc2
+python stats_elf_deamon.py calc3
+<span class="c1"># Start the elf generating the report from the stats generated</span>
+python formater_elf_deamon.py
+</pre></div>
+</div>
+</div></blockquote>
+<a class="reference internal image-reference" href="_images/async_demo_terminal.png"><img alt="BLUMYCELIUM" src="_images/async_demo_terminal.png" style="width: 800px;" /></a>
+<ol class="arabic simple" start="3">
+<li><p>You can now connect to the arangodb database and look at the graphs if you are curious about how it works behind the scenes.</p></li>
+<li><p>You should now be ready to build your own elves and orchestrations. If you have any suggestions about features or feedback about the documentation please open github issues <a class="reference external" href="https://github.com/bluwr-tech/blumycelium">https://github.com/bluwr-tech/blumycelium</a></p></li>
+</ol>
+</section>
 </section>
 
 

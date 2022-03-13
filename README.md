@@ -23,3 +23,9 @@ Readthedocs documentation
 =========================
 
 We provide a full documentation [here](https://blumycelium.readthedocs.io/en/latest/index.html) (work in progress).
+
+
+Feedback
+========
+
+If you have any suggestions about features or feedback about the documentation please open github issues.
