@@ -244,7 +244,7 @@ class ArangoMycelium:
 
         return ret
 
-    def get_received_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):
+    def get_jobs(self, elf_uid:str, all_jobs=False, status_restriction=[custom_types.STATUS["PENDING"]]):
         """return all jobs for an elf"""
         bind_vars = {"uid": elf_uid}
         if all_jobs:
