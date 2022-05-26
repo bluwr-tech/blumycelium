@@ -362,7 +362,7 @@ class MachineElf:
 
     def start_jobs(self, store_failures=True, raise_exceptions=True):
         """start a job for an elf"""
-        jobs = self.mycelium.get_received_jobs(self.uid)
+        jobs = self.mycelium.get_jobs(self.uid)
         for job in jobs:
             if self.mycelium.is_job_ready(job["id"]) :
                 params = self.mycelium.get_job_parameters(job["id"])
