@@ -6,7 +6,7 @@ Async demo
 Introduction
 ------------
 
-Here are some details about the demo provided in `demos/daemons/`. 
+Here are some details about the demo provided in the repo: `demos/daemons/`. 
 The file async_orchestration.py is basically an asynchronous version of the demo in sync_orchestration.py. It starts 3 types of processes (elves):
 
 - **Animals**: this class represents an animal that will be stored in the database (here the simple json file). It just contains the animal's species, and weight.
