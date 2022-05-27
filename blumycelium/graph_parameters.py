@@ -568,7 +568,7 @@ def unravel_dict(dct):
             val = unravel_list(val)
         elif type(val) is dict:
             val = unravel_dict(val)
-        param.append(val)
+        param[key] = val
     return param
 
 def unravel(obj):
