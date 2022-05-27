@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python Module Index &mdash; Blumycellium  documentation</title>
+  <title>Limits &mdash; Blumycellium  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,9 +18,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
- 
-
-
+    <link rel="next" title="Mycelium" href="mycelium.html" />
+    <link rel="prev" title="Async demo" href="async.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,12 +39,15 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="code_design.html">Code Design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="async.html">Async demo</a></li>
-<li class="toctree-l1"><a class="reference internal" href="limits.html">Limits</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Limits</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tasks-paramters">Tasks paramters</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="mycelium.html">Mycelium</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graph_parameters.html">Graph Parameters</a></li>
@@ -67,8 +70,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Python Module Index</li>
+      <li>Limits</li>
       <li class="wy-breadcrumbs-aside">
+            <a href="_sources/limits.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -76,59 +80,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-
-   <h1>Python Module Index</h1>
-
-   <div class="modindex-jumpbox">
-   <a href="#cap-b"><strong>b</strong></a>
-   </div>
-
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-b"><td></td><td>
-       <strong>b</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <code class="xref">blumycelium</code></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="graph_parameters.html#module-blumycelium.graph_parameters"><code class="xref">blumycelium.graph_parameters</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="machine_elf.html#module-blumycelium.machine_elf"><code class="xref">blumycelium.machine_elf</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="models.html#module-blumycelium.models"><code class="xref">blumycelium.models</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="mycelium.html#module-blumycelium.mycelium"><code class="xref">blumycelium.mycelium</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="exceptions.html#module-blumycelium.the_exceptions"><code class="xref">blumycelium.the_exceptions</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="utils.html#module-blumycelium.utils"><code class="xref">blumycelium.utils</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+  <section id="limits">
+<h1>Limits<a class="headerlink" href="#limits" title="Permalink to this headline"></a></h1>
+<section id="tasks-paramters">
+<h2>Tasks paramters<a class="headerlink" href="#tasks-paramters" title="Permalink to this headline"></a></h2>
+<p>Elves execute tasks which are simply python function. These functions can take argument which have to be stored in Arangodb for later execution.
+Only a few restrictions apply to task parameters.</p>
+<p>Allowed:</p>
+<ul class="simple">
+<li><p>Numbers (integers, floats etc.)</p></li>
+<li><p>Strings</p></li>
+<li><p>Booleans</p></li>
+<li><p>lists</p></li>
+</ul>
+<p>They can’t be:</p>
+<ul class="simple">
+<li><p>Objects</p></li>
+<li><p>Functions</p></li>
+<li><p>Dictionnaries</p></li>
+</ul>
+<p>For lists for now make sure they are not too big. Starting ~100,000 elements, the way we store them in Arangodb can cause performance issues.
+Check the corresponding issue to see where we are at <a class="reference external" href="https://github.com/bluwr-tech/blumycelium/issues/5">https://github.com/bluwr-tech/blumycelium/issues/5</a>.</p>
+</section>
+</section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="async.html" class="btn btn-neutral float-left" title="Async demo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mycelium.html" class="btn btn-neutral float-right" title="Mycelium" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

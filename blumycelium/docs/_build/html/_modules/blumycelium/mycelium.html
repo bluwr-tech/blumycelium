@@ -39,13 +39,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code_design.html">Code Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../async.html">Async demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../limits.html">Limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mycelium.html">Mycelium</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../graph_parameters.html">Graph Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../async.html">Async demo</a></li>
 </ul>
 
         </div>
@@ -319,7 +321,7 @@
 
         <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="ArangoMycelium.get_received_jobs"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_received_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">get_received_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elf_uid</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">all_jobs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status_restriction</span><span class="o">=</span><span class="p">[</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">]]):</span>
+<div class="viewcode-block" id="ArangoMycelium.get_jobs"><a class="viewcode-back" href="../../mycelium.html#blumycelium.mycelium.ArangoMycelium.get_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">get_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elf_uid</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">all_jobs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">status_restriction</span><span class="o">=</span><span class="p">[</span><span class="n">custom_types</span><span class="o">.</span><span class="n">STATUS</span><span class="p">[</span><span class="s2">&quot;PENDING&quot;</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;return all jobs for an elf&quot;&quot;&quot;</span>
         <span class="n">bind_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;uid&quot;</span><span class="p">:</span> <span class="n">elf_uid</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">all_jobs</span><span class="p">:</span>

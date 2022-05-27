@@ -39,13 +39,15 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code_design.html">Code Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../async.html">Async demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../limits.html">Limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mycelium.html">Mycelium</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../graph_parameters.html">Graph Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../machine_elf.html">Machine Elf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../async.html">Async demo</a></li>
 </ul>
 
         </div>
@@ -433,11 +435,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_jobs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">is_job_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">is_job_ready</span><span class="p">(</span><span class="n">is_job_ready</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">is_job_ready</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MachineElf.start_jobs"><a class="viewcode-back" href="../../machine_elf.html#blumycelium.machine_elf.MachineElf.start_jobs">[docs]</a>    <span class="k">def</span> <span class="nf">start_jobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store_failures</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">raise_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;start a job for an elf&quot;&quot;&quot;</span>
-        <span class="n">jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_received_jobs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+        <span class="n">jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_jobs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">jobs</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">is_job_ready</span><span class="p">(</span><span class="n">job</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span> <span class="p">:</span>
                 <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mycelium</span><span class="o">.</span><span class="n">get_job_parameters</span><span class="p">(</span><span class="n">job</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>

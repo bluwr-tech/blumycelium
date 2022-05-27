@@ -72,13 +72,15 @@ If you have any suggestions about features or feedback about the documentation p
 
    installation
    quickstart
+   code_design
+   async
+   limits
    mycelium
    models
    graph_parameters
    machine_elf
    utils
    exceptions
-   async
 
 Indices and tables
 ==================
