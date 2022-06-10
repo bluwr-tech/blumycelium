@@ -50,7 +50,7 @@ requires = [
 setup(name='blumycelium',
       version=VERSION,
       description='blumycelium',
-      long_description=README + '\n\n' + CHANGES,
+      long_description=README,
       classifiers=[
         "Programming Language :: Python",
      ],
