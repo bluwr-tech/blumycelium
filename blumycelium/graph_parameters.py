@@ -601,5 +601,3 @@ def unravel(obj):
     else:
         raise TypeError("Wrong type: '%s', except list or dict" % type(obj))
 
-if __name__ == '__main__':
-    test_rebuild_from_traversal()
