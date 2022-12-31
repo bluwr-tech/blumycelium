@@ -139,39 +139,7 @@ class ValueTests(unittest.TestCase):
         param.append(val)
         gtruth1.append(gtruth2)
 
-        # param.pp_traverse(representation_attributes=None)
-        # print(param.to_dict(reccursive=True))
         self.assertEqual(param.make(), gtruth1)
 
 if __name__ == '__main__':
     unittest.main()
-
-if False:
-
-    def test_rebuild_from_traversal():
-        from rich import print
-
-        lst = [1, 2, 3, 4, 5]
-        param = Value()
-        param.set_value([])
-
-        for v in lst:
-            param.append(v)
-            
-        param.pp_traverse(representation_attributes=["value", "code_block", "uid", "python_id"])
-        print("=====")
-        trav = param.traverse()
-        # print(trav)
-
-        param2 = GraphParameter.build_from_traversal(trav)
-        param2.pp_traverse(representation_attributes=["value", "code_block", "uid", "python_id"])
-
-        ic(param.make())
-        ic(param2.make())
-
-
-    # test_subslist()
-    # test_getitem()
-    # test_setitem()
-    # test_arbitrary()
-    # test_easy_unravel()   

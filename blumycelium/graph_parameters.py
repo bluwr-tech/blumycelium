@@ -232,8 +232,11 @@ class GraphParameter:
     
         return root
 
-    def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block"], print_it=True):
-        """a pretty print of the graph representation with dependencies"""
+    def pp_traverse(self, full_representation=False, representation_attributes=["value", "code_block", "uid", "python_id"], print_it=True):
+        """
+        a pretty print of the graph representation with dependencies
+        representation_attributes: list of field to print 
+        """
         from rich.tree import Tree
         from rich import print
 
