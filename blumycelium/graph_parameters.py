@@ -404,6 +404,23 @@ class Value(object):
         new_param.set_code_block(init_code=init_code, return_statement=return_statement, self_param=self.parameter, key=key_param, value=value_param)
         self.parameter = new_param
 
+    def __delitem__(self, key):
+        self._validate_type("__delitem__")
+
+        init_code="""
+        def delete_element(dct, key):
+            del dct[key]
+            return dct""".strip()
+        return_statement = "delete_element({self_param}, {key})"
+
+        code = "del {self_param}[{key}]"
+        
+        key_param = self._get_parameter(key)
+        
+        new_param = GraphParameter()
+        new_param.set_code_block(init_code=init_code, return_statement=return_statement, self_param=self.parameter, key=key_param)
+        self.parameter = new_param
+
     # def __setattr__(self, key, value):
     #     # ic(key, value)
     #     try:

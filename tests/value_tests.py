@@ -64,16 +64,54 @@ class ValueTests(unittest.TestCase):
         lst_final = param.make()
         self.assertEqual(lst_final, lst2)
 
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
+    def test_arbitrary_functions_lst(self):
+        """apply an arbitrary set of function to a list parameter"""
+        lst = [1, 2, 3, 4, 5]
+        lst2 = list(lst)
 
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
+        param = Value()
+        param.set_value(lst)
+
+        param.extend(lst)
+        lst2.extend(lst)
+
+        param.append(60)
+        lst2.append(60)
+        param.append(61)
+        lst2.append(61)
+        param.pop()
+        lst2.pop()
+
+        self.assertEqual(lst2, param.make())
+
+    def test_arbitrary_functions_dct(self):
+        """apply an arbitrary set of function to a list parameter"""
+        dct = {1: 1, 2: 2, 3: 3}
+        dct2 = dict(dct)
+
+        param = Value()
+        param.set_value(dct)
+
+        tmp_dct = {"a": "abc"}
+        param.update(tmp_dct)
+        dct2.update(tmp_dct)
+
+        del param[1]
+        del dct2[1]
+        
+        self.assertEqual(dct2, param.make())
+
+    # def test_easy_unravel():
+    #     from rich import print
+
+    #     lst = [1, 2, 3, 4, 5]
+    #     param = Value()
+    #     param.set_value([])
+
+    #     for v in lst:
+    #         param.append(v)
+            
+    #     ic(param.make())
 
 if __name__ == '__main__':
     unittest.main()
@@ -107,29 +145,29 @@ if False:
     #     ic(param)
     #     ic(param.make())
 
-    def test_arbitrary():
-        lst = [1, 2, 3, 4, 5]
-        param = Value()
-        param.set_value(lst)
+    # def test_arbitrary():
+    #     lst = [1, 2, 3, 4, 5]
+    #     param = Value()
+    #     param.set_value(lst)
 
-        param.extend(lst)
+    #     param.extend(lst)
         
-        param.append(60)
-        param.append(61)
-        param.pop()
-        ic(param.make())
+    #     param.append(60)
+    #     param.append(61)
+    #     param.pop()
+    #     ic(param.make())
 
-    def test_easy_unravel():
-        from rich import print
+    # def test_easy_unravel():
+    #     from rich import print
 
-        lst = [1, 2, 3, 4, 5]
-        param = Value()
-        param.set_value([])
+    #     lst = [1, 2, 3, 4, 5]
+    #     param = Value()
+    #     param.set_value([])
 
-        for v in lst:
-            param.append(v)
+    #     for v in lst:
+    #         param.append(v)
             
-        ic(param.make())
+    #     ic(param.make())
 
     def test_nested_unravel_traversal():
         from rich import print
