@@ -1,7 +1,7 @@
 Exceptions
 =================
 
-Custom exceptions thrown by Blumycelium
+Custom exceptions thrown by BLUMYCELIUM
 
 Custom Exceptions
 -----------------

@@ -16,11 +16,11 @@ def init_myc():
         name="animals_demo_mycelium"
     )
 
-    #Drop all previous job information from the mycelium
-    mycelium.drop()
-    
     #Ensure the mycelium is initialized
     mycelium.init(init_db=True)
+
+    #Drop all previous job information from the mycelium
+    mycelium.drop()
 
     return mycelium
 
@@ -29,6 +29,9 @@ def main():
     import os
     import json
 
+    #Elves in this demo will have to connect to an external database (containing metrics about some animals) and compute stats
+    #This database is represented here by a simple json file.
+    #All information about job executions and dependencies are stored in the mycelium (Arangodb)
     json_database_filename = "my_animals.json"
     with open(json_database_filename, "w") as fi:
         json.dump({}, fi)
@@ -36,12 +39,17 @@ def main():
     mycelium = init_myc()
 
     #Ensure elves are registered in the mycelium
-    animals = elves.Animals("animals creator", mycelium) 
+    #This one will simply return random values for some animals
+    animals = elves.Animals(
+        uid="animals creator", 
+        mycelium=mycelium
+    ) 
     #True will save the source code of the elf in the mycelium
     #This has no effect on the way things run
     animals.register(store_source=True)
     animals.set_animals(["dolphin", "dog", "bee", "whale"])
 
+    #This second elf will store the values sent from the first one in the database (simple json file here)
     store = elves.Storage("animals data store", mycelium) 
     store.register()
     store.set_database(json_database_filename)
@@ -65,6 +73,8 @@ def main():
     printer.register()
 
     #instanciating the jobs in the mycelium with 
+    #The following describes how the code should be run but it is not exactly this code that will be executed
+    #The execution DAG will be stored in the mycelium and executed when necessary
     for nb in range(10):
         mesurement = animals.task_get_animal_data()
         store.task_save_animal_data(species=mesurement["species"], weight=mesurement["weight"])

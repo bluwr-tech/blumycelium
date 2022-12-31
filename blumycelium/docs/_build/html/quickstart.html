@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Mycelium" href="mycelium.html" />
+    <link rel="next" title="Code Design" href="code_design.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
 </head>
 
@@ -48,6 +48,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#where-to-go-from-there">Where to go from there</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="code_design.html">Code Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async.html">Async demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="limits.html">Limits</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mycelium.html">Mycelium</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="graph_parameters.html">Graph Parameters</a></li>
@@ -103,18 +106,30 @@
 <span class="kn">import</span> <span class="nn">blumycelium.mycelium</span> <span class="k">as</span> <span class="nn">myc</span>
 <span class="kn">import</span> <span class="nn">blumycelium.machine_elf</span> <span class="k">as</span> <span class="nn">melf</span>
 
-<span class="kn">from</span> <span class="nn">icecream</span> <span class="kn">import</span> <span class="n">ic</span>
 <span class="kn">import</span> <span class="nn">time</span>
 
-<span class="n">ic</span><span class="o">.</span><span class="n">configureOutput</span><span class="p">(</span><span class="n">includeContext</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1">#This a very basic demo to show how BLUMUCELIUM</span>
+<span class="c1">#is basically just python code. An Elf sends a message</span>
+<span class="c1">#to another elf that prints it</span>
+<span class="c1">#NOTICE THAT TASK ARE FUNCTION WITH NAMES STARING WITH &#39;task_&#39;</span>
 
 <span class="k">class</span> <span class="nc">PrinterElf</span><span class="p">(</span><span class="n">melf</span><span class="o">.</span><span class="n">MachineElf</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;docstring for Printer&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Notice the hint for the return. This is mandatory.</span>
+<span class="sd">    Type hints can also be used for arguments to ensure that tasks get</span>
+<span class="sd">    arguments of the right type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">task_print_it</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_print</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&gt;&gt;&gt; Machine &gt;&gt;&gt; Elf &gt;&gt;&gt; Printer: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">to_print</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">SenderElf</span><span class="p">(</span><span class="n">melf</span><span class="o">.</span><span class="n">MachineElf</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;docstring for Printer&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Notice the hint for the return. This is mandatory.</span>
+<span class="sd">    Type hints can also be used for arguments to ensure that tasks get</span>
+<span class="sd">    arguments of the right type.</span>
+<span class="sd">    Task must return either None or a dict. Here the return is a tuple of keys to a dictioray.</span>
+<span class="sd">    A list would also work, as well as a dict of types example: {&quot;value&quot;: float}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">task_send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_send</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">to_send</span>
@@ -127,7 +142,7 @@
         <span class="n">password</span> <span class="o">=</span> <span class="s2">&quot;root&quot;</span>
     <span class="p">)</span>
 
-    <span class="n">mycellium</span> <span class="o">=</span> <span class="n">myc</span><span class="o">.</span><span class="n">Mycellium</span><span class="p">(</span>
+    <span class="n">mycellium</span> <span class="o">=</span> <span class="n">myc</span><span class="o">.</span><span class="n">ArangoMycelium</span><span class="p">(</span>
         <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mycellium&quot;</span>
     <span class="p">)</span>
@@ -164,7 +179,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="mycelium.html" class="btn btn-neutral float-right" title="Mycelium" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="code_design.html" class="btn btn-neutral float-right" title="Code Design" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
