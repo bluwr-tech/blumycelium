@@ -10,6 +10,18 @@ class ValueTests(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_lst_append(self):
+        from rich import print
+
+        lst = [1, 2, 3, 4, 5]
+        param = Value()
+        param.set_value([])
+
+        for v in lst:
+            param.append(v)
+            
+        self.assertEqual(lst, param.make())
+
     def test_subslist(self):
         lst = [1, 2, 3, 4, 5, 10]
         param = Value()
@@ -98,103 +110,43 @@ class ValueTests(unittest.TestCase):
 
         del param[1]
         del dct2[1]
-        
         self.assertEqual(dct2, param.make())
 
-    # def test_easy_unravel():
-    #     from rich import print
-
-    #     lst = [1, 2, 3, 4, 5]
-    #     param = Value()
-    #     param.set_value([])
-
-    #     for v in lst:
-    #         param.append(v)
-            
-    #     ic(param.make())
-
-if __name__ == '__main__':
-    unittest.main()
-
-if False:
-    # def test_subslist():
-    #     lst = [1, 2, 3, 4, 5, 10]
-    #     param = Value()
-    #     param.set_value(lst)
-
-    #     sub = param[1:-1]
-    #     ic(sub)
-    #     ic(sub.make())
-
-    # def test_getitem():
-    #     dct = {1: 1, 2: 2, 3: 3}
-
-    #     param = Value()
-    #     param.set_value(dct)
-
-    #     sub = param[1]
-    #     ic(sub)
-    #     ic(sub.make())
-
-    # def test_setitem():
-    #     dct = {1: 1, 2: 2, 3: 3}
-    #     param = Value()
-    #     param.set_value(dct)
-
-    #     param[1]=100
-    #     ic(param)
-    #     ic(param.make())
-
-    # def test_arbitrary():
-    #     lst = [1, 2, 3, 4, 5]
-    #     param = Value()
-    #     param.set_value(lst)
-
-    #     param.extend(lst)
-        
-    #     param.append(60)
-    #     param.append(61)
-    #     param.pop()
-    #     ic(param.make())
-
-    # def test_easy_unravel():
-    #     from rich import print
-
-    #     lst = [1, 2, 3, 4, 5]
-    #     param = Value()
-    #     param.set_value([])
-
-    #     for v in lst:
-    #         param.append(v)
-            
-    #     ic(param.make())
-
-    def test_nested_unravel_traversal():
-        from rich import print
-
+    def test_nested_lists(self):
         lst = [1, 2, 3, 4, 5]
+        gtruth1 = []
         param = Value()
         param.set_value([])
 
         for v in lst:
             param.append(v)
+            gtruth1.append(v)
 
         val = Value()
         val.set_value([1])
         val.append(100)
+        gtruth2 = [1]
+        gtruth2.append(100)
 
         val2 = Value()
         val2.set_value([2])
         val2.append(200)
+        gtruth3 = [2]
+        gtruth3.append(200)
 
         val.append(val2)
-        # val.pp_traverse(representation_attributes=None)
+        gtruth2.append(gtruth3)
         param.append(val)
-            
-        param.pp_traverse(representation_attributes=None)
-        print(param.to_dict(reccursive=True))
-        ic(param.make())
+        gtruth1.append(gtruth2)
 
+        # param.pp_traverse(representation_attributes=None)
+        # print(param.to_dict(reccursive=True))
+        self.assertEqual(param.make(), gtruth1)
+
+if __name__ == '__main__':
+    unittest.main()
+
+if False:
 
     def test_rebuild_from_traversal():
         from rich import print
